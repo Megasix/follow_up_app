@@ -7,6 +7,7 @@ import 'package:follow_up_app/shared/features/apple.dart';
 import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -22,6 +23,7 @@ class _SignInState extends State<SignIn> {
   final _formKey = GlobalKey<FormState>();
 
   bool loading = false;
+  Alignment childAlignement = Alignment.center;
 
   // text field state
   String email = '';
@@ -29,82 +31,123 @@ class _SignInState extends State<SignIn> {
   String error = '';
 
   @override
+  _SignInState() {
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        setState(() {
+          childAlignement = visible ? Alignment.topCenter : Alignment.center;
+        });
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     //default gap between two elements
-    const sameTypePadding = 5.0;
-    const generalPadding = 10.0;
+    const sameTypePadding = 10.0;
+    const generalPadding = 20.0;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.width;
 
+    return loading
+        ? Loading()
+        : Scaffold(
+            resizeToAvoidBottomInset: false,
+            backgroundColor: Color(0xFFF5F5F5),
+            body: AnimatedContainer(
+              curve: Curves.easeOut,
+              duration: Duration(milliseconds: 400),
+              width: double.infinity,
+              height: double.infinity,
+              padding: EdgeInsets.all(20),
+              alignment: childAlignement,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(height: 100),
 
-    return loading ? Loading() : Scaffold(
-      backgroundColor: Colors.brown[50],
-      body: Container(
-        padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 70.0),
+                    Text('FOLLOW UP'),
 
-              GoogleSignInButton(onPressed: () async{},),
+                    SizedBox(height: 100),
+                    //Email Sign In
+                    // email field
+                    TextFormField(
+                      decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                      validator: (val) => val.isEmpty ? 'Enter an Email' : null,
+                      onChanged: (val) {
+                        setState(() => email = val);
+                      },
+                    ),
+                    SizedBox(height: sameTypePadding),
+                    // password field
+                    TextFormField(
+                      decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                      validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
+                      obscureText: true,
+                      onChanged: (val) {
+                        setState(() => password = val);
+                      },
+                    ),
+                    SizedBox(height: generalPadding),
 
-              SizedBox(height: sameTypePadding,),
+                    SizedBox(
+                      width: screenWidth,
+                      height: 40.0,
+                      child: RaisedButton(
+                          color: Color(0xFFFBAF00),
+                          child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              setState(() => loading = true);
+                              dynamic result = await _authService.signInWithEmailAndPassword(email, password);
+                              if (result == null)
+                                setState(() {
+                                  error = 'There was an error using these credential please retry';
+                                  loading = false;
+                                });
+                            }
+                          }),
+                    ),
 
-              FacebookSignInButton(onPressed: () async{},),
+                    SizedBox(height: generalPadding),
 
-              SizedBox(height: sameTypePadding),
+                    Text('OR SIGN IN WITH'),
 
-              TwitterSignInButton(onPressed: () async{},),
+                    SizedBox(height: generalPadding),
 
-              SizedBox(height: sameTypePadding,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        GoogleSignInButton(onPressed: () async {}),
+                        SizedBox(width: sameTypePadding),
+                        FacebookSignInButton(onPressed: () async {}),
+                        SizedBox(width: sameTypePadding),
+                        TwitterSignInButton(onPressed: () async {}),
+                        SizedBox(width: sameTypePadding),
+                        AppleSignInButton(onPressed: () async {}, darkMode: false),
+                      ],
+                    ),
 
-              AppleSignInButton(onPressed: () async {}, darkMode: false,),
+                    SizedBox(height: generalPadding),
 
-              SizedBox(height: generalPadding,),
+                    FlatButton(
+                      child: Text('CREATE A FREE ACCOUNT'),
+                      onPressed: () {
+                        widget.toggleView();
+                      },
+                    ),
 
-              // email field
-              /*TextFormField(
-                decoration: textInputDecoration.copyWith(hintText: 'Email'),
-                validator: (val) => val.isEmpty ? 'Enter an Email' : null,
-                onChanged: (val) {
-                  setState(() => email = val);
-                },
+                    SizedBox(height: 8.0),
+                    Text(
+                      error,
+                      style: TextStyle(color: Colors.red, fontSize: 14.0),
+                    )
+                  ],
+                ),
               ),
-              SizedBox(height: sameTypePadding),
-              // password field
-              TextFormField(
-                decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                validator: (val) =>
-                    val.length < 4 ? 'Enter at least 5 characters' : null,
-                obscureText: true,
-                onChanged: (val) {
-                  setState(() => password = val);
-                },
-              ),
-              SizedBox(height: sameTypePadding),
-              RaisedButton(
-                  color: Colors.blueGrey,
-                  child: Text('Sign In', style: TextStyle(color: Colors.white)),
-                  onPressed: () async {
-                    if (_formKey.currentState.validate()) {
-                      setState(() => loading = true);
-                      dynamic result = await _authService
-                          .signInWithEmailAndPassword(email, password);
-                      if (result == null)
-                        setState(() {
-                          error = 'There was an error using these credential please retry';
-                          loading = false;
-                        });
-                    }
-                  }),
-              SizedBox(height: 8.0),
-              Text(
-                error,
-                style: TextStyle(color: Colors.red, fontSize: 14.0),
-              )*/
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 }
