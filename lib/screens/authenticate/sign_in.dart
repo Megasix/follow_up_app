@@ -1,8 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/screens/authenticate/register.dart';
+import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/features/apple.dart';
+import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/features/facebook.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -26,38 +30,46 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    //default gap between two elements
+    const sameTypePadding = 5.0;
+    const generalPadding = 10.0;
+
+
     return loading ? Loading() : Scaffold(
-      backgroundColor: Colors.brown[50],
-      appBar: AppBar(
-        backgroundColor: Colors.blueGrey,
-        elevation: 0.0,
-        title: Text('Sign In'),
-        actions: <Widget>[
-          FlatButton.icon(
-            onPressed: () {
-              widget.toggleView();
-            },
-            icon: Icon(Icons.person),
-            label: Text('Register'),
-          ),
-        ],
-      ),
+      backgroundColor: Colors.black12,
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
-              SizedBox(height: 20.0),
+              SizedBox(height: 70.0),
+
+              GoogleSignInButton(onPressed: () async{},),
+
+              SizedBox(height: sameTypePadding,),
+
+              FacebookSignInButton(onPressed: () async{},),
+
+              SizedBox(height: sameTypePadding),
+
+              TwitterSignInButton(onPressed: () async{},),
+
+              SizedBox(height: sameTypePadding,),
+
+              AppleSignInButton(onPressed: () async {}, darkMode: true,),
+
+              SizedBox(height: generalPadding,),
+
               // email field
-              TextFormField(
+              /*TextFormField(
                 decoration: textInputDecoration.copyWith(hintText: 'Email'),
                 validator: (val) => val.isEmpty ? 'Enter an Email' : null,
                 onChanged: (val) {
                   setState(() => email = val);
                 },
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: sameTypePadding),
               // password field
               TextFormField(
                 decoration: textInputDecoration.copyWith(hintText: 'Password'),
@@ -68,7 +80,7 @@ class _SignInState extends State<SignIn> {
                   setState(() => password = val);
                 },
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: sameTypePadding),
               RaisedButton(
                   color: Colors.blueGrey,
                   child: Text('Sign In', style: TextStyle(color: Colors.white)),
@@ -88,7 +100,7 @@ class _SignInState extends State<SignIn> {
               Text(
                 error,
                 style: TextStyle(color: Colors.red, fontSize: 14.0),
-              )
+              )*/
             ],
           ),
         ),
