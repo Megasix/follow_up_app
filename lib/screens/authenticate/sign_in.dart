@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/main.dart';
-import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/shared/features/twitter.dart';
+import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/features/apple.dart';
@@ -76,7 +76,8 @@ class _SignInState extends State<SignIn> {
                     //Email Sign In
                     // email field
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                      decoration:
+                          textInputDecoration.copyWith(hintText: 'Email'),
                       validator: (val) => val.isEmpty ? 'Enter an Email' : null,
                       onChanged: (val) {
                         setState(() => email = val);
@@ -85,8 +86,10 @@ class _SignInState extends State<SignIn> {
                     SizedBox(height: sameTypePadding),
                     // password field
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                      validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
+                      decoration:
+                          textInputDecoration.copyWith(hintText: 'Password'),
+                      validator: (val) =>
+                          val.length < 4 ? 'Enter at least 5 characters' : null,
                       obscureText: true,
                       onChanged: (val) {
                         setState(() => password = val);
@@ -98,14 +101,17 @@ class _SignInState extends State<SignIn> {
                       width: screenWidth,
                       height: 40.0,
                       child: RaisedButton(
-                          child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                          child: Text('Sign In',
+                              style: TextStyle(color: Colors.white)),
                           onPressed: () async {
                             if (_formKey.currentState.validate()) {
                               setState(() => loading = true);
-                              dynamic result = await _authService.signInWithEmailAndPassword(email, password);
+                              dynamic result = await _authService
+                                  .signInWithEmailAndPassword(email, password);
                               if (result == null)
                                 setState(() {
-                                  error = 'There was an error using these credential please retry';
+                                  error =
+                                      'There was an error using these credential please retry';
                                   loading = false;
                                 });
                             }
@@ -127,7 +133,9 @@ class _SignInState extends State<SignIn> {
                         SizedBox(width: sameTypePadding),
                         TwitterSignInButton(onPressed: () async {}),
                         SizedBox(width: sameTypePadding),
-                        AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
+                        AppleSignInButton(
+                            onPressed: () async {},
+                            darkMode: !lightThemeEnabled),
                       ],
                     ),
 
