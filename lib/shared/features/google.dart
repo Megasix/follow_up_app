@@ -4,20 +4,17 @@ import 'package:follow_up_app/shared/button.dart';
 /// A sign in button that matches Google's design guidelines.
 class GoogleSignInButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final bool darkMode;
 
-  /// Creates a new button. Set [darkMode] to `true` to use the dark
-  /// blue background variant with white text
+  /// Creates a new button.
   GoogleSignInButton({
     this.onPressed,
-    this.darkMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizeableButton(
       onPressed: onPressed,
-      buttonColor: darkMode ? Color(0xFF4285F4) : Colors.white,
+      buttonColor: Colors.white,
       children: <Widget>[
         Image(
           image: AssetImage(
