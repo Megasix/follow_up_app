@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/main.dart';
 import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
@@ -46,20 +47,21 @@ class _SignInState extends State<SignIn> {
     //default gap between two elements
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.width;
+
+    bool lightThemeEnabled = getTheme();
 
     return loading
         ? Loading()
         : Scaffold(
             resizeToAvoidBottomInset: false,
-            backgroundColor: Color(0xFFF5F5F5),
             body: AnimatedContainer(
               curve: Curves.easeOut,
               duration: Duration(milliseconds: 400),
               width: double.infinity,
               height: double.infinity,
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(40),
               alignment: childAlignement,
               child: Form(
                 key: _formKey,
@@ -96,7 +98,6 @@ class _SignInState extends State<SignIn> {
                       width: screenWidth,
                       height: 40.0,
                       child: RaisedButton(
-                          color: Color(0xFFFBAF00),
                           child: Text('Sign In', style: TextStyle(color: Colors.white)),
                           onPressed: () async {
                             if (_formKey.currentState.validate()) {
@@ -126,7 +127,7 @@ class _SignInState extends State<SignIn> {
                         SizedBox(width: sameTypePadding),
                         TwitterSignInButton(onPressed: () async {}),
                         SizedBox(width: sameTypePadding),
-                        AppleSignInButton(onPressed: () async {}, darkMode: false),
+                        AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
                       ],
                     ),
 
@@ -143,7 +144,7 @@ class _SignInState extends State<SignIn> {
                     Text(
                       error,
                       style: TextStyle(color: Colors.red, fontSize: 14.0),
-                    )
+                    ),
                   ],
                 ),
               ),
