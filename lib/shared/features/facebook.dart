@@ -2,65 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/shared/button.dart';
 
 /// A sign in button that matches Facebook's design guidelines.
-///
-/// The button text can be overridden, however the default text is recommended
-/// in order to be compliant with the design guidelines and to maximise
-/// conversion.
 class FacebookSignInButton extends StatelessWidget {
-  final String text;
-  final TextStyle textStyle;
   final VoidCallback onPressed;
-  final double borderRadius;
-  final Color splashColor;
-  final bool centered;
 
-  /// Creates a new button. The default button text is 'Continue with Facebook',
-  /// which apparently results in higher conversion. 'Login with Facebook' is
-  /// another suggestion.
+  /// Creates a new button.
   FacebookSignInButton({
     this.onPressed,
-    this.borderRadius = defaultBorderRadius,
-    this.text = 'Continue with Facebook',
-    this.textStyle,
-    this.splashColor,
-    this.centered = false,
-    Key key,
-  })  : assert(text != null),
-        super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return StretchableButton(
-      buttonColor: Color(0xFF1877F2),
-      borderRadius: borderRadius,
-      splashColor: splashColor,
+    return SizeableButton(
       onPressed: onPressed,
-      buttonPadding: 8.0,
-      centered: centered,
+      buttonColor: Color(0xFF1877F2),
       children: <Widget>[
-        // Facebook doesn't provide strict sizes, so this is a good
-        // estimate of their examples within documentation.
-
         Image(
           image: AssetImage(
             "assets/images/flogo-HexRBG-Wht-100.png",
-            package: "ca.qc.followup.follow_up_app",
           ),
-          height: 24.0,
-          width: 24.0,
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 6.0, right: 10.0),
-          child: Text(
-            text,
-            style: textStyle ??
-                TextStyle(
-                  // default to the application font-style
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-          ),
+          height: 25.0,
+          width: 25.0,
         ),
       ],
     );
