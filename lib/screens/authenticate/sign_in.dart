@@ -36,7 +36,7 @@ class _SignInState extends State<SignIn> {
 
 
     return loading ? Loading() : Scaffold(
-      backgroundColor: Colors.black12,
+      backgroundColor: Colors.brown[50],
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
         child: Form(
@@ -57,7 +57,7 @@ class _SignInState extends State<SignIn> {
 
               SizedBox(height: sameTypePadding,),
 
-              AppleSignInButton(onPressed: () async {}, darkMode: true,),
+              AppleSignInButton(onPressed: () async {}, darkMode: false,),
 
               SizedBox(height: generalPadding,),
 
