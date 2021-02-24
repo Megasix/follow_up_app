@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 
 const textInputDecoration = InputDecoration(
-  fillColor: Colors.white,
-  filled: true,
-  enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.white, width: 2.0)),
-  focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blueGrey, width: 2.0)),
+  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blueGrey, width: 2.0)),
+);
+
+final lightThemeConstant = ThemeData(
+  scaffoldBackgroundColor: Color(0xFFF5F5F5),
+  buttonColor: Color(0xFFFBAF00),
+  primaryColor: Color(0xFFFBAF00),
+  brightness: Brightness.light,
+  accentColor: Color(0xFF1A1F23),
+);
+
+final darkThemeConstant = ThemeData(
+  scaffoldBackgroundColor: Color(0xFF1A1F23),
+  buttonColor: Color(0xFFFFAA33),
+  primaryColor: Color(0xFFFFAA33),
+  brightness: Brightness.dark,
+  accentColor: Colors.grey,
 );
