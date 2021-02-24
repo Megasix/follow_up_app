@@ -9,7 +9,7 @@ void main() {
   runApp(MyApp());
 }
 
-bool _lightThemeEnabled = true;
+bool _lightThemeEnabled = false;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

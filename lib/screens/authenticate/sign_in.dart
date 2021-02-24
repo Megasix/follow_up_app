@@ -127,7 +127,17 @@ class _SignInState extends State<SignIn> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        GoogleSignInButton(onPressed: () async {}),
+                        GoogleSignInButton(onPressed: () async {
+                          setState(() => loading = true);
+                          dynamic result =
+                              await _authService.signInWithGoogle();
+                          if (result == null)
+                            setState(() {
+                              error =
+                                  'There was an error using these credential please retry';
+                              loading = false;
+                            });
+                        }),
                         SizedBox(width: sameTypePadding),
                         FacebookSignInButton(onPressed: () async {}),
                         SizedBox(width: sameTypePadding),
