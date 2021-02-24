@@ -6,11 +6,10 @@ class AppleSignInButton extends StatelessWidget {
   final VoidCallback onPressed;
   final bool darkMode;
 
-
   /// Creates a new button. Set [darkMode] to `true` to use the dark black background variant
   AppleSignInButton({
-    this.onPressed,
-    this.darkMode = false,
+    @required this.onPressed,
+    @required this.darkMode,
   });
 
   @override

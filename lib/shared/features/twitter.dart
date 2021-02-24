@@ -6,7 +6,7 @@ class TwitterSignInButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   TwitterSignInButton({
-    this.onPressed,
+    @required this.onPressed,
   });
 
   @override

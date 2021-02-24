@@ -7,7 +7,7 @@ class FacebookSignInButton extends StatelessWidget {
 
   /// Creates a new button.
   FacebookSignInButton({
-    this.onPressed,
+    @required this.onPressed,
   });
 
   @override

@@ -7,7 +7,7 @@ class GoogleSignInButton extends StatelessWidget {
 
   /// Creates a new button.
   GoogleSignInButton({
-    this.onPressed,
+    @required this.onPressed,
   });
 
   @override
