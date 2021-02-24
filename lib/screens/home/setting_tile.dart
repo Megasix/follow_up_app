@@ -15,7 +15,6 @@ class SettingTile extends StatelessWidget {
         leading: CircleAvatar(
           radius: 25.0,
           backgroundColor: Colors.blueGrey[(double.parse(((setting.age) / 100).toStringAsFixed(1)) * 1000).toInt()],
-        backgroundImage: AssetImage('assets/marianne.jpg'),
         ),
         title: Text(setting.name),
         subtitle: Text('Likes ${setting.hobby}'),
