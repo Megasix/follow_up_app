@@ -85,7 +85,8 @@ Future<String> signInWithGoogle() async {
     final name = user.displayName;
     final User currentUser = _auth.currentUser;
     assert(user.uid == currentUser.uid);
-    await DatabaseService(uid: user.uid).updateUserData(name, 16, 'nothing');
+    if (authResult.additionalUserInfo.isNewUser)
+      await DatabaseService(uid: user.uid).updateUserData(name, 16, 'nothing');
     print('signInWithGoogle succeeded: $user');
 
     return '$_userFromFirebaseUser(user);';
