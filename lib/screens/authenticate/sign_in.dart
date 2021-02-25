@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/main.dart';
-import 'package:follow_up_app/screens/home/home.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
@@ -10,7 +8,7 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -50,8 +48,6 @@ class _SignInState extends State<SignIn> {
     const generalPadding = 20.0;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.width;
-
-    bool lightThemeEnabled = getTheme();
 
     return loading
         ? Loading()
@@ -140,7 +136,9 @@ class _SignInState extends State<SignIn> {
                         TwitterSignInButton(onPressed: () {}),
                         SizedBox(width: sameTypePadding),
                         AppleSignInButton(
-                            onPressed: () {}, darkMode: !lightThemeEnabled),
+                          onPressed: () {},
+                          darkMode: Get.theme.brightness == Brightness.dark,
+                        ),
                       ],
                     ),
 
