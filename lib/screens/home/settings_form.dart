@@ -12,7 +12,13 @@ class SettingsForm extends StatefulWidget {
 
 class _SettingsFormState extends State<SettingsForm> {
   final _formKey = GlobalKey<FormState>();
-  final List<String> hobbies = ['sports', 'litterature', 'video games', 'music', 'nothing'];
+  final List<String> hobbies = [
+    'sports',
+    'litterature',
+    'video games',
+    'music',
+    'nothing'
+  ];
 
   //form values
   String _currentName;
@@ -21,7 +27,7 @@ class _SettingsFormState extends State<SettingsForm> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<User>(context);
+    final user = Provider.of<CustomUser>(context);
 
     return StreamBuilder<UserData>(
         stream: DatabaseService(uid: user.uid).userData,
@@ -40,15 +46,18 @@ class _SettingsFormState extends State<SettingsForm> {
                   TextFormField(
                     initialValue: userData.name,
                     decoration: textInputDecoration.copyWith(hintText: 'Name'),
-                    validator: (val) => val.isEmpty ? 'Please enter a name' : null,
+                    validator: (val) =>
+                        val.isEmpty ? 'Please enter a name' : null,
                     onChanged: (val) => setState(() => _currentName = val),
                   ),
                   SizedBox(height: 20.0),
                   DropdownButtonFormField(
-                    decoration: textInputDecoration.copyWith(prefixText: 'Hobby : '),
+                    decoration:
+                        textInputDecoration.copyWith(prefixText: 'Hobby : '),
                     value: _currentHobby ?? userData.hobby,
                     items: hobbies.map((hobby) {
-                      return DropdownMenuItem(value: hobby, child: Text('$hobby'));
+                      return DropdownMenuItem(
+                          value: hobby, child: Text('$hobby'));
                     }).toList(),
                     onChanged: (val) => setState(() => _currentHobby = val),
                   ),
@@ -56,12 +65,17 @@ class _SettingsFormState extends State<SettingsForm> {
                   Slider(
                     value: (_currentAge ?? userData.age).toDouble(),
                     inactiveColor: Colors.brown[50],
-                    activeColor: Colors.blueGrey[(double.parse(((_currentAge ?? 16) / 100).toStringAsFixed(1)) * 1000).toInt()],
+                    activeColor: Colors.blueGrey[(double.parse(
+                                ((_currentAge ?? 16) / 100)
+                                    .toStringAsFixed(1)) *
+                            1000)
+                        .toInt()],
                     min: 16.0,
                     max: 80.0,
                     divisions: 64,
                     label: (_currentAge ?? userData.age).round().toString(),
-                    onChanged: (val) => setState(() => _currentAge = val.round()),
+                    onChanged: (val) =>
+                        setState(() => _currentAge = val.round()),
                   ),
                   SizedBox(height: 20.0),
                   RaisedButton(

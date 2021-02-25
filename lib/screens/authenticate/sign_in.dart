@@ -9,6 +9,7 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -130,7 +131,7 @@ class _SignInState extends State<SignIn> {
                         GoogleSignInButton(onPressed: () async {
                           setState(() => loading = true);
                           dynamic result =
-                              await _authService.signInWithGoogle();
+                              await _authService.signInWithGoogle().then;
                           if (result == null)
                             setState(() {
                               error =
