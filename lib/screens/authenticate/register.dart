@@ -13,7 +13,6 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
 // text field state
@@ -52,7 +51,8 @@ class _RegisterState extends State<Register> {
                     SizedBox(height: 20.0),
                     // email field
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                      decoration:
+                          textInputDecoration.copyWith(hintText: 'Email'),
                       validator: (val) => val.isEmpty ? 'Enter an Email' : null,
                       onChanged: (val) {
                         setState(() => email = val);
@@ -61,8 +61,10 @@ class _RegisterState extends State<Register> {
                     SizedBox(height: 20.0),
                     // password field
                     TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                      validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
+                      decoration:
+                          textInputDecoration.copyWith(hintText: 'Password'),
+                      validator: (val) =>
+                          val.length < 4 ? 'Enter at least 5 characters' : null,
                       obscureText: true,
                       onChanged: (val) {
                         setState(() => password = val);
@@ -71,17 +73,20 @@ class _RegisterState extends State<Register> {
                     SizedBox(height: 20.0),
                     RaisedButton(
                         color: Colors.blueGrey,
-                        child: Text('Register', style: TextStyle(color: Colors.white)),
+                        child: Text('Register',
+                            style: TextStyle(color: Colors.white)),
                         onPressed: () async {
-                          if (_formKey.currentState.validate()) {
+                          /*if (_formKey.currentState.validate()) {
                             setState(() => loading = true);
-                            dynamic result = await _authService.registerWithEmailAndPassword(email, password);
+                            registerWithEmailAndPassword(email, password);
                             if (result == null)
                               setState(() {
-                                error = 'There was an interruption during registration, please retry';
+                                error =
+                                    'There was an interruption during registration, please retry';
                                 loading = false;
                               });
                           }
+                        */
                         }),
                     SizedBox(height: 8.0),
                     Text(

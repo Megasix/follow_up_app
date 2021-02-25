@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/screens/home/home.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
@@ -21,7 +22,6 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
   bool loading = false;
@@ -105,7 +105,7 @@ class _SignInState extends State<SignIn> {
                           child: Text('Sign In',
                               style: TextStyle(color: Colors.white)),
                           onPressed: () async {
-                            if (_formKey.currentState.validate()) {
+                            /*if (_formKey.currentState.validate()) {
                               setState(() => loading = true);
                               dynamic result = await _authService
                                   .signInWithEmailAndPassword(email, password);
@@ -116,6 +116,7 @@ class _SignInState extends State<SignIn> {
                                   loading = false;
                                 });
                             }
+                          */
                           }),
                     ),
 
@@ -128,25 +129,27 @@ class _SignInState extends State<SignIn> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        GoogleSignInButton(onPressed: () async {
-                          setState(() => loading = true);
-                          dynamic result =
-                              await _authService.signInWithGoogle().then;
-                          if (result == null)
-                            setState(() {
-                              error =
-                                  'There was an error using these credential please retry';
-                              loading = false;
-                            });
+                        GoogleSignInButton(onPressed: () {
+                          signInWithGoogle().then((result) {
+                            if (result != null) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    print("login fonctionne");
+                                    return Home();
+                                  },
+                                ),
+                              );
+                            }
+                          });
                         }),
                         SizedBox(width: sameTypePadding),
-                        FacebookSignInButton(onPressed: () async {}),
+                        FacebookSignInButton(onPressed: () {}),
                         SizedBox(width: sameTypePadding),
-                        TwitterSignInButton(onPressed: () async {}),
+                        TwitterSignInButton(onPressed: () {}),
                         SizedBox(width: sameTypePadding),
                         AppleSignInButton(
-                            onPressed: () async {},
-                            darkMode: !lightThemeEnabled),
+                            onPressed: () {}, darkMode: !lightThemeEnabled),
                       ],
                     ),
 

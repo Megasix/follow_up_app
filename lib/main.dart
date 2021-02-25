@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return StreamProvider<CustomUser>.value(
-              value: AuthService().user,
+              value: user,
               child: MaterialApp(
                 theme:
                     _lightThemeEnabled ? lightThemeConstant : darkThemeConstant,
