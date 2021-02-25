@@ -133,7 +133,9 @@ class _SignInState extends State<SignIn> {
                           signInWithGoogle();
                         }),
                         SizedBox(width: sameTypePadding),
-                        FacebookSignInButton(onPressed: () {}),
+                        FacebookSignInButton(onPressed: () {
+                          signInWithFacebook();
+                        }),
                         SizedBox(width: sameTypePadding),
                         TwitterSignInButton(onPressed: () {}),
                         SizedBox(width: sameTypePadding),

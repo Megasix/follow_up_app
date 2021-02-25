@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -92,6 +93,32 @@ Future<String> signInWithGoogle() async {
     return '$_userFromFirebaseUser(user);';
   }
 
+  return null;
+}
+
+Future<String> signInWithFacebook() async {
+  try {
+    final AccessToken accessToken = await FacebookAuth.instance.login();
+    final FacebookAuthCredential credential = FacebookAuthProvider.credential(
+      accessToken.token,
+    );
+
+    final UserCredential authResult =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    final User user = authResult.user;
+    if (user != null) {
+      final name = user.displayName;
+      if (authResult.additionalUserInfo.isNewUser) {
+        await DatabaseService(uid: user.uid)
+            .updateUserData(name, 16, 'nothing');
+      }
+      return '$_userFromFirebaseUser(user);';
+    }
+  } on FacebookAuthException catch (e) {
+    // handle the FacebookAuthException
+  } on FirebaseAuthException catch (e) {
+    // handle the FirebaseAuthException
+  } finally {}
   return null;
 }
 
