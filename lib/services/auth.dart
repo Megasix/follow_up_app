@@ -80,14 +80,15 @@ Future<String> signInWithGoogle() async {
 
   if (user != null) {
     assert(!user.isAnonymous);
+    assert(user.displayName != null);
     assert(await user.getIdToken() != null);
-
+    final name = user.displayName;
     final User currentUser = _auth.currentUser;
     assert(user.uid == currentUser.uid);
-
+    await DatabaseService(uid: user.uid).updateUserData(name, 16, 'nothing');
     print('signInWithGoogle succeeded: $user');
 
-    return '$user';
+    return '$_userFromFirebaseUser(user);';
   }
 
   return null;
@@ -96,7 +97,8 @@ Future<String> signInWithGoogle() async {
 // sign out
 Future signOut() async {
   try {
-    return await _auth.signOut();
+    await _auth.signOut();
+    await googleSignIn.signOut();
   } catch (error) {
     print(error.toString());
     return null;

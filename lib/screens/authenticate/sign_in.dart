@@ -130,18 +130,7 @@ class _SignInState extends State<SignIn> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         GoogleSignInButton(onPressed: () {
-                          signInWithGoogle().then((result) {
-                            if (result != null) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    print("login fonctionne");
-                                    return Home();
-                                  },
-                                ),
-                              );
-                            }
-                          });
+                          signInWithGoogle();
                         }),
                         SizedBox(width: sameTypePadding),
                         FacebookSignInButton(onPressed: () {}),
