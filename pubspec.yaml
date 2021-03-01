@@ -33,6 +33,9 @@ dependencies:
   provider: ^3.1.0
   flutter_spinkit: "^4.0.0"
   keyboard_visibility: ^0.5.6
+  flutter_form_builder: ^4.2.0
+  smooth_page_indicator: ^0.2.0
+  url_launcher: ^5.7.5
 
 dev_dependencies:
   flutter_test:
