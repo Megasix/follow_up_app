@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/main.dart';
-import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/shared/features/twitter.dart';
+import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/features/apple.dart';
