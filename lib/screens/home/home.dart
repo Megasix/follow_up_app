@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final AuthService _authService = AuthService();
+
     void _showSettingsPanel() {
       showModalBottomSheet(
           context: context,
@@ -31,14 +33,11 @@ class Home extends StatelessWidget {
           actions: <Widget>[
             FlatButton.icon(
                 onPressed: () async {
-                  signOut();
+                  _authService.signOut();
                 },
                 icon: Icon(Icons.person),
                 label: Text('Sign Out')),
-            FlatButton.icon(
-                onPressed: () => _showSettingsPanel(),
-                icon: Icon(Icons.settings),
-                label: Text('Settings'))
+            FlatButton.icon(onPressed: () => _showSettingsPanel(), icon: Icon(Icons.settings), label: Text('Settings'))
           ],
         ),
         body: SettingList(),
