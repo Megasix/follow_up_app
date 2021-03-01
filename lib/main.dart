@@ -7,7 +7,7 @@ import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:provider/provider.dart';
 
-bool _lightThemeEnabled = true;
+bool _lightThemeEnabled = false;
 
 // ignore: missing_return
 Future<void> main() {
