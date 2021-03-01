@@ -55,13 +55,14 @@ class _SignInState extends State<SignIn> {
     return loading
         ? Loading()
         : Scaffold(
+            backgroundColor: Theme.of(context).secondaryHeaderColor,
             resizeToAvoidBottomInset: false,
             body: AnimatedContainer(
               curve: Curves.easeOut,
               duration: Duration(milliseconds: 400),
               width: double.infinity,
               height: double.infinity,
-              padding: EdgeInsets.all(40),
+              padding: EdgeInsets.all(0),
               alignment: childAlignement,
               child: Form(
                 key: _formKey,
@@ -69,81 +70,93 @@ class _SignInState extends State<SignIn> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     SizedBox(height: 100),
-
-                    Text('FOLLOW UP'),
-
+                    Text('FOLLOW UP LOGO'),
                     SizedBox(height: 100),
-                    //Email Sign In
-                    // email field
-                    TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Email'),
-                      validator: (val) => val.isEmpty ? 'Enter an Email' : null,
-                      onChanged: (val) {
-                        setState(() => email = val);
-                      },
-                    ),
-                    SizedBox(height: sameTypePadding),
-                    // password field
-                    TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                      validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
-                      obscureText: true,
-                      onChanged: (val) {
-                        setState(() => password = val);
-                      },
-                    ),
-                    SizedBox(height: generalPadding),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(40.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(50.0),
+                            topRight: Radius.circular(50.0),
+                          ),
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            TextFormField(
+                              decoration: textInputDecoration.copyWith(hintText: 'Email'),
+                              validator: (val) => val.isEmpty ? 'Enter an Email' : null,
+                              onChanged: (val) {
+                                setState(() => email = val);
+                              },
+                            ),
+                            SizedBox(height: sameTypePadding),
+                            // password field
+                            TextFormField(
+                              decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                              validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
+                              obscureText: true,
+                              onChanged: (val) {
+                                setState(() => password = val);
+                              },
+                            ),
+                            SizedBox(height: generalPadding),
 
-                    SizedBox(
-                      width: screenWidth,
-                      height: 40.0,
-                      child: RaisedButton(
-                          child: Text('Sign In', style: TextStyle(color: Colors.white)),
-                          onPressed: () async {
-                            if (_formKey.currentState.validate()) {
-                              setState(() => loading = true);
-                              dynamic result = await _authService.signInWithEmailAndPassword(email, password);
-                              if (result == null)
-                                setState(() {
-                                  error = 'There was an error using these credential please retry';
-                                  loading = false;
-                                });
-                            }
-                          }),
-                    ),
+                            SizedBox(
+                              width: screenWidth,
+                              height: 40.0,
+                              child: RaisedButton(
+                                  child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                                  onPressed: () async {
+                                    if (_formKey.currentState.validate()) {
+                                      setState(() => loading = true);
+                                      dynamic result = await _authService.signInWithEmailAndPassword(email, password);
+                                      if (result == null)
+                                        setState(() {
+                                          error = 'There was an error using these credential please retry';
+                                          loading = false;
+                                        });
+                                    }
+                                  }),
+                            ),
 
-                    SizedBox(height: generalPadding),
+                            SizedBox(height: generalPadding),
 
-                    Text('OR SIGN IN WITH'),
+                            Text('OR SIGN IN WITH'),
 
-                    SizedBox(height: generalPadding),
+                            SizedBox(height: generalPadding),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        GoogleSignInButton(onPressed: () async {}),
-                        SizedBox(width: sameTypePadding),
-                        FacebookSignInButton(onPressed: () async {}),
-                        SizedBox(width: sameTypePadding),
-                        TwitterSignInButton(onPressed: () async {}),
-                        SizedBox(width: sameTypePadding),
-                        AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
-                      ],
-                    ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                GoogleSignInButton(onPressed: () async {}),
+                                SizedBox(width: sameTypePadding),
+                                FacebookSignInButton(onPressed: () async {}),
+                                SizedBox(width: sameTypePadding),
+                                TwitterSignInButton(onPressed: () async {}),
+                                SizedBox(width: sameTypePadding),
+                                AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
+                              ],
+                            ),
 
-                    SizedBox(height: generalPadding),
+                            SizedBox(height: generalPadding),
 
-                    FlatButton(
-                      child: Text('CREATE A FREE ACCOUNT'),
-                      onPressed: () {
-                        widget.toggleView();
-                      },
-                    ),
+                            FlatButton(
+                              child: Text('CREATE A FREE ACCOUNT'),
+                              onPressed: () {
+                                widget.toggleView();
+                              },
+                            ),
 
-                    SizedBox(height: 8.0),
-                    Text(
-                      error,
-                      style: TextStyle(color: Colors.red, fontSize: 14.0),
+                            SizedBox(height: 8.0),
+                            Text(
+                              error,
+                              style: TextStyle(color: Colors.red, fontSize: 14.0),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
