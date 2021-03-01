@@ -6,20 +6,21 @@ import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:provider/provider.dart';
-import 'package:get/get.dart';
 
+bool _lightThemeEnabled = true;
+
+// ignore: missing_return
 Future<void> main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _initialization,
+        future: Firebase.initializeApp(),
         builder: (context, snapshot) {
           // Check for errors
           if (snapshot.hasError) {
@@ -27,9 +28,9 @@ class MyApp extends StatelessWidget {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             return StreamProvider<CustomUser>.value(
-              value: user,
-              child: GetMaterialApp(
-                theme: lightThemeConstant,
+              value: AuthService().user,
+              child: MaterialApp(
+                theme: _lightThemeEnabled ? lightThemeConstant : darkThemeConstant,
                 darkTheme: darkThemeConstant,
                 home: Wrapper(),
               ),
@@ -38,4 +39,12 @@ class MyApp extends StatelessWidget {
           return Loading();
         });
   }
+}
+
+bool getTheme() {
+  return _lightThemeEnabled;
+}
+
+void setTheme(bool lightThemeEnabled) {
+  _lightThemeEnabled = lightThemeEnabled;
 }
