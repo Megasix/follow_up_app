@@ -17,7 +17,6 @@ class AppleSignInButton extends StatelessWidget {
     return SizeableButton(
       onPressed: onPressed,
       buttonColor: darkMode ? Colors.black : Colors.white,
-      buttonBorderColor: darkMode ? Colors.white : null,
       children: <Widget>[
         Image(
           image: AssetImage(
