@@ -159,9 +159,13 @@ class _RegisterState extends State<Register> {
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: <Widget>[
-                                              GoogleSignInButton(onPressed: () async {}),
+                                              GoogleSignInButton(onPressed: () async {
+                                                await _authService.signInWithGoogle();
+                                              }),
                                               SizedBox(width: sameTypePadding),
-                                              FacebookSignInButton(onPressed: () async {}),
+                                              FacebookSignInButton(onPressed: () async {
+                                                await _authService.signInWithFacebook();
+                                              }),
                                               SizedBox(width: sameTypePadding),
                                               TwitterSignInButton(onPressed: () async {}),
                                               SizedBox(width: sameTypePadding),
