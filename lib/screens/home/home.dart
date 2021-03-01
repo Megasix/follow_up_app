@@ -7,18 +7,17 @@ import 'package:follow_up_app/services/database.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatelessWidget {
-  final AuthService _authService = AuthService();
-
   @override
   Widget build(BuildContext context) {
-
     void _showSettingsPanel() {
-      showModalBottomSheet(context: context, builder: (context) {
-        return Container(
-          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 60.0),
-          child: SettingsForm(),
-        );
-      });
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 60.0),
+              child: SettingsForm(),
+            );
+          });
     }
 
     return StreamProvider<List<Setting>>.value(
@@ -32,11 +31,14 @@ class Home extends StatelessWidget {
           actions: <Widget>[
             FlatButton.icon(
                 onPressed: () async {
-                  await _authService.signOut();
+                  signOut();
                 },
                 icon: Icon(Icons.person),
                 label: Text('Sign Out')),
-            FlatButton.icon(onPressed: () => _showSettingsPanel(), icon: Icon(Icons.settings), label: Text('Settings'))
+            FlatButton.icon(
+                onPressed: () => _showSettingsPanel(),
+                icon: Icon(Icons.settings),
+                label: Text('Settings'))
           ],
         ),
         body: SettingList(),
