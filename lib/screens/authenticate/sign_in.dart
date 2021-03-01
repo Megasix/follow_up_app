@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
@@ -8,7 +9,6 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:get/get.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -21,6 +21,8 @@ class SignIn extends StatefulWidget {
 
 class _SignInState extends State<SignIn> {
   final _formKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService();
+  final bool lightThemeEnabled = getTheme();
 
   bool loading = false;
   Alignment childAlignement = Alignment.center;
@@ -127,9 +129,13 @@ class _SignInState extends State<SignIn> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                GoogleSignInButton(onPressed: () async {}),
+                                GoogleSignInButton(onPressed: () async {
+                                  await _authService.signInWithGoogle();
+                                }),
                                 SizedBox(width: sameTypePadding),
-                                FacebookSignInButton(onPressed: () async {}),
+                                FacebookSignInButton(onPressed: () async {
+                                  await _authService.signInWithFacebook();
+                                }),
                                 SizedBox(width: sameTypePadding),
                                 TwitterSignInButton(onPressed: () async {}),
                                 SizedBox(width: sameTypePadding),
