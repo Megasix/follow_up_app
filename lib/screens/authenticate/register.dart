@@ -57,7 +57,6 @@ class _RegisterState extends State<Register> {
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.width;
     final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
 
     bool lightThemeEnabled = getTheme();
@@ -118,7 +117,8 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: generalPadding),
                                           FormBuilderDropdown(
-                                            decoration: textInputDecoration.copyWith(hintText: 'country'),
+                                            name: 'Country',
+                                            decoration: textInputDecoration.copyWith(hintText: 'Country'),
                                             allowClear: true,
                                             validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
                                             items: countriesOptions
@@ -130,6 +130,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: sameTypePadding),
                                           FormBuilderDateTimePicker(
+                                            name: 'Date of Birth',
                                             cursorColor: Theme.of(context).buttonColor,
                                             firstDate: DateTime(firstDate),
                                             lastDate: DateTime(lastDate),
@@ -197,6 +198,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: generalPadding),
                                           FormBuilderTextField(
+                                            name: 'First Name',
                                             decoration: textInputDecoration.copyWith(hintText: 'First Name'),
                                             keyboardType: TextInputType.text,
                                             validator: FormBuilderValidators.compose([
@@ -210,6 +212,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: sameTypePadding),
                                           FormBuilderTextField(
+                                            name: 'Last Name',
                                             decoration: textInputDecoration.copyWith(hintText: 'Last Name'),
                                             keyboardType: TextInputType.text,
                                             validator: FormBuilderValidators.compose([
@@ -259,6 +262,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: generalPadding),
                                           FormBuilderTextField(
+                                            name: 'Account Email',
                                             decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
                                             keyboardType: TextInputType.text,
                                             validator: FormBuilderValidators.compose([
@@ -271,6 +275,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: sameTypePadding),
                                           FormBuilderTextField(
+                                            name: 'Phone Number',
                                             decoration: textInputDecoration.copyWith(hintText: '(Optional) Phone Number'),
                                             keyboardType: TextInputType.text,
                                             validator: FormBuilderValidators.compose([
@@ -319,6 +324,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: generalPadding),
                                           FormBuilderCheckbox(
+                                            name: 'Terms and Conditions',
                                             initialValue: false,
                                             title: RichText(
                                               text: TextSpan(
@@ -384,6 +390,7 @@ class _RegisterState extends State<Register> {
                                           ),
                                           SizedBox(height: generalPadding),
                                           FormBuilderTextField(
+                                            name: 'Password',
                                             decoration: textInputDecoration.copyWith(hintText: 'Password'),
                                             obscureText: true,
                                             keyboardType: TextInputType.text,
