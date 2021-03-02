@@ -49,7 +49,6 @@ class _SignInState extends State<SignIn> {
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double screenHeight = MediaQuery.of(context).size.width;
 
     return loading
         ? Loading()
