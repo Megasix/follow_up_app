@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/services/auth.dart';
@@ -53,23 +54,23 @@ class _SignInState extends State<SignIn> {
     return loading
         ? Loading()
         : Scaffold(
-            backgroundColor: Theme.of(context).secondaryHeaderColor,
             resizeToAvoidBottomInset: false,
             body: AnimatedContainer(
-              curve: Curves.easeOut,
               duration: Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              alignment: childAlignement,
+              color: Theme.of(context).secondaryHeaderColor,
               width: double.infinity,
               height: double.infinity,
-              padding: EdgeInsets.all(0),
-              alignment: childAlignement,
-              child: Form(
+              child: FormBuilder(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.always,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     SizedBox(height: 100),
                     Text('FOLLOW UP LOGO'),
-                    SizedBox(height: 100),
+                    SizedBox(height: 125),
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.all(40.0),
@@ -82,19 +83,30 @@ class _SignInState extends State<SignIn> {
                         ),
                         child: Column(
                           children: <Widget>[
-                            TextFormField(
-                              decoration: textInputDecoration.copyWith(hintText: 'Email'),
-                              validator: (val) => val.isEmpty ? 'Enter an Email' : null,
+                            FormBuilderTextField(
+                              name: 'Account Email',
+                              decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
+                              keyboardType: TextInputType.text,
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(context),
+                                FormBuilderValidators.email(context),
+                              ]),
                               onChanged: (val) {
                                 setState(() => email = val);
                               },
                             ),
                             SizedBox(height: sameTypePadding),
                             // password field
-                            TextFormField(
+                            FormBuilderTextField(
+                              name: 'Password',
                               decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                              validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
                               obscureText: true,
+                              keyboardType: TextInputType.text,
+                              validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(context),
+                                FormBuilderValidators.maxLength(context, 20),
+                                FormBuilderValidators.minLength(context, 5),
+                              ]),
                               onChanged: (val) {
                                 setState(() => password = val);
                               },
