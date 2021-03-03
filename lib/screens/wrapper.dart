@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/authenticate/authenticate.dart';
-import 'package:follow_up_app/screens/home/home.dart';
+import 'package:follow_up_app/screens/mainMenu/mainMenu.dart';
 import 'package:provider/provider.dart';
 
 class Wrapper extends StatelessWidget {
@@ -15,6 +15,6 @@ class Wrapper extends StatelessWidget {
     if (user == null)
       return Authenticate();
     else
-      return Home();
+      return MainMenu();
   }
 }
