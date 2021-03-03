@@ -4,44 +4,25 @@ import 'package:follow_up_app/screens/home/setting_list.dart';
 import 'package:follow_up_app/screens/home/settings_form.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:provider/provider.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+
+
   @override
   Widget build(BuildContext context) {
-    final AuthService _authService = AuthService();
-
-    void _showSettingsPanel() {
-      showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Container(
-              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 60.0),
-              child: SettingsForm(),
-            );
-          });
-    }
-
-    return StreamProvider<List<Setting>>.value(
-      value: DatabaseService().usersSettings,
-      child: Scaffold(
-        backgroundColor: Colors.brown[50],
-        appBar: AppBar(
-          title: Text('Home'),
-          backgroundColor: Colors.blueGrey,
-          elevation: 0.0,
-          actions: <Widget>[
-            FlatButton.icon(
-                onPressed: () async {
-                  _authService.signOut();
-                },
-                icon: Icon(Icons.person),
-                label: Text('Sign Out')),
-            FlatButton.icon(onPressed: () => _showSettingsPanel(), icon: Icon(Icons.settings), label: Text('Settings'))
-          ],
-        ),
-        body: SettingList(),
-      ),
-    );
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          color: Theme.of(context).secondaryHeaderColor,
+          width: double.infinity,
+          height: double.infinity,
+        ));
   }
 }
