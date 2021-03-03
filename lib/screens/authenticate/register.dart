@@ -25,7 +25,6 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormBuilderState>();
-  final countriesOptions = ['Canada', 'France'];
   final PageController _pageController = PageController(initialPage: 0);
 
 // text field state
@@ -56,6 +55,7 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
+    final countriesOptions = ['Canada', 'France'];
     final double screenWidth = MediaQuery.of(context).size.width;
     final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
 
@@ -125,6 +125,9 @@ class _RegisterState extends State<Register> {
                                                     child: Text('$country'),
                                                   ))
                                               .toList(),
+                                          onSaved: (val) {
+                                            setState(() => country = val);
+                                          },
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         FormBuilderDateTimePicker(
