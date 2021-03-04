@@ -7,6 +7,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseService _databaseService = DatabaseService();
 
 // create custom user based on FirebaseUser
   CustomUser _userFromFirebaseUser(User user) {
@@ -85,11 +86,18 @@ class AuthService {
       assert(user.displayName != null);
       assert(await user.getIdToken() != null);
       final name = user.displayName;
+      var firstName;
+      var lastName;
       final User currentUser = _auth.currentUser;
       assert(user.uid == currentUser.uid);
-      if (authResult.additionalUserInfo.isNewUser)
-        await DatabaseService(uid: user.uid)
-            .updateUserData(name, 16, 'nothing');
+      if (authResult.additionalUserInfo.isNewUser) {
+        if (name.contains(" ")) {
+          firstName = name.substring(0, name.indexOf(" "));
+          lastName = name.substring(name.indexOf(" "));
+        }
+        _databaseService.dataInitialisation(
+            null, null, firstName, lastName, user.email, user.phoneNumber);
+      }
       print('signInWithGoogle succeeded: $user');
 
       return '$_userFromFirebaseUser(user);';

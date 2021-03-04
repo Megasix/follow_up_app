@@ -72,13 +72,13 @@ class DatabaseService {
       'notification': true,
     });
     usersCollection.doc(email).collection("usersData").doc("profile").set({
-      'birthDate': dateTime.toIso8601String,
+      'birthDate': dateTime,
       'country': country,
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
       'phoneNumber': phoneNumber,
-      'uid': uid
+      'uid': uid,
     });
   }
 }
