@@ -85,7 +85,8 @@ class _SignInState extends State<SignIn> {
                           children: <Widget>[
                             FormBuilderTextField(
                               name: 'Account Email',
-                              decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
+                              decoration: textInputDecoration.copyWith(
+                                  hintText: 'Account Email'),
                               keyboardType: TextInputType.text,
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(context),
@@ -99,7 +100,8 @@ class _SignInState extends State<SignIn> {
                             // password field
                             FormBuilderTextField(
                               name: 'Password',
-                              decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                              decoration: textInputDecoration.copyWith(
+                                  hintText: 'Password'),
                               obscureText: true,
                               keyboardType: TextInputType.text,
                               validator: FormBuilderValidators.compose([
@@ -117,14 +119,18 @@ class _SignInState extends State<SignIn> {
                               width: screenWidth,
                               height: 40.0,
                               child: RaisedButton(
-                                  child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                                  child: Text('Sign In',
+                                      style: TextStyle(color: Colors.white)),
                                   onPressed: () async {
                                     if (_formKey.currentState.validate()) {
                                       setState(() => loading = true);
-                                      dynamic result = await _authService.signInWithEmailAndPassword(email, password);
+                                      dynamic result = await _authService
+                                          .signInWithEmailAndPassword(
+                                              email, password);
                                       if (result == null)
                                         setState(() {
-                                          error = 'There was an error using these credential please retry';
+                                          error =
+                                              'There was an error using these credential please retry';
                                           loading = false;
                                         });
                                     }
@@ -150,7 +156,9 @@ class _SignInState extends State<SignIn> {
                                 SizedBox(width: sameTypePadding),
                                 TwitterSignInButton(onPressed: () async {}),
                                 SizedBox(width: sameTypePadding),
-                                AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
+                                AppleSignInButton(
+                                    onPressed: () async {},
+                                    darkMode: !lightThemeEnabled),
                               ],
                             ),
 
@@ -166,7 +174,8 @@ class _SignInState extends State<SignIn> {
                             SizedBox(height: 8.0),
                             Text(
                               error,
-                              style: TextStyle(color: Colors.red, fontSize: 14.0),
+                              style:
+                                  TextStyle(color: Colors.red, fontSize: 14.0),
                             ),
                           ],
                         ),

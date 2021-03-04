@@ -33,7 +33,8 @@ class AuthService {
 // sign-in with email & password
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       User user = result.user;
       return _userFromFirebaseUser(user);
     } catch (error) {
@@ -45,11 +46,13 @@ class AuthService {
 // register with email & password
   Future registerWithEmailAndPassword(String email, String password) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
       User user = result.user;
 
       //create a new document for the user with the uid
-      await DatabaseService(uid: user.uid).updateUserData('new user', 16, 'nothing');
+      await DatabaseService(uid: user.uid)
+          .updateUserData('new user', 16, 'nothing');
 
       return _userFromFirebaseUser(user);
     } catch (error) {
@@ -65,14 +68,16 @@ class AuthService {
     await Firebase.initializeApp();
 
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final UserCredential authResult = await _auth.signInWithCredential(credential);
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
     final User user = authResult.user;
 
     if (user != null) {
@@ -82,7 +87,9 @@ class AuthService {
       final name = user.displayName;
       final User currentUser = _auth.currentUser;
       assert(user.uid == currentUser.uid);
-      if (authResult.additionalUserInfo.isNewUser) await DatabaseService(uid: user.uid).updateUserData(name, 16, 'nothing');
+      if (authResult.additionalUserInfo.isNewUser)
+        await DatabaseService(uid: user.uid)
+            .updateUserData(name, 16, 'nothing');
       print('signInWithGoogle succeeded: $user');
 
       return '$_userFromFirebaseUser(user);';
@@ -98,12 +105,14 @@ class AuthService {
         accessToken.token,
       );
 
-      final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential authResult =
+          await FirebaseAuth.instance.signInWithCredential(credential);
       final User user = authResult.user;
       if (user != null) {
         final name = user.displayName;
         if (authResult.additionalUserInfo.isNewUser) {
-          await DatabaseService(uid: user.uid).updateUserData(name, 16, 'nothing');
+          await DatabaseService(uid: user.uid)
+              .updateUserData(name, 16, 'nothing');
         }
         return '$_userFromFirebaseUser(user);';
       }

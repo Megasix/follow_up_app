@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/services/auth.dart';
+import 'package:follow_up_app/services/database.dart';
 
 class Home extends StatelessWidget {
+  final AuthService _authService = AuthService();
+  final DatabaseService _databaseService = DatabaseService();
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -13,6 +17,11 @@ class Home extends StatelessWidget {
             topRight: Radius.circular(50.0),
           ),
           color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        child: RaisedButton(
+          onPressed: () {
+            _authService.signOut();
+          },
         ),
       ),
     );

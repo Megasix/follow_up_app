@@ -10,6 +10,8 @@ class DatabaseService {
   //collections references
   final CollectionReference usersSettigsCollection =
       Firestore.instance.collection('usersSettings');
+  final CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
 
   Future updateUserData(String name, int age, String hobby) async {
     return await usersSettigsCollection.document(uid).setData({
@@ -46,8 +48,37 @@ class DatabaseService {
   // get user doc stream
   Stream<UserData> get userData {
     return usersSettigsCollection
-        .document(uid)
+        .doc(uid)
         .snapshots()
         .map(_userDataFromSnapshot);
+  }
+
+  Future dataInitialisation(
+    DateTime dateTime,
+    String country,
+    String firstName,
+    String lastName,
+    String email,
+    String phoneNumber,
+  ) async {
+    usersCollection.doc(email).collection("usersData").doc("display").set({
+      'theme': true,
+    });
+    usersCollection
+        .doc(email)
+        .collection("usersData")
+        .doc("notifications")
+        .set({
+      'notification': true,
+    });
+    usersCollection.doc(email).collection("usersData").doc("profile").set({
+      'birthDate': dateTime.toIso8601String,
+      'country': country,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'uid': uid
+    });
   }
 }
