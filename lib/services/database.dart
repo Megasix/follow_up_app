@@ -8,7 +8,10 @@ class DatabaseService {
   DatabaseService({this.uid});
 
   //collections references
-  final CollectionReference usersSettigsCollection = Firestore.instance.collection('usersSettings');
+  final CollectionReference usersSettigsCollection =
+      Firestore.instance.collection('usersSettings');
+  final CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
 
   Future updateUserData(String name, int age, String hobby) async {
     return await usersSettigsCollection.document(uid).setData({
@@ -21,7 +24,10 @@ class DatabaseService {
   //setting list from snapshot
   List<Setting> _settingListFromSnapshot(QuerySnapshot snapshot) {
     return snapshot.documents.map((doc) {
-      return Setting(name: doc.data['name'] ?? 'new User', age: doc.data['age'] ?? 16, hobby: doc.data['hobby'] ?? 'nothing');
+      return Setting(
+          name: doc.get('name') ?? 'new User',
+          age: doc.get('age') ?? 16,
+          hobby: doc.get('hobby') ?? 'nothing');
     }).toList();
   }
 
@@ -29,10 +35,9 @@ class DatabaseService {
   UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
     return UserData(
         uid: uid,
-        name: snapshot.data['name'],
-        hobby: snapshot.data['hobby'],
-        age: snapshot.data['age']
-    );
+        name: snapshot.get('name'),
+        hobby: snapshot.get('hobby'),
+        age: snapshot.get('age'));
   }
 
   //get usersSettings stream
@@ -42,6 +47,38 @@ class DatabaseService {
 
   // get user doc stream
   Stream<UserData> get userData {
-    return usersSettigsCollection.document(uid).snapshots().map(_userDataFromSnapshot);
+    return usersSettigsCollection
+        .doc(uid)
+        .snapshots()
+        .map(_userDataFromSnapshot);
+  }
+
+  Future dataInitialisation(
+    DateTime dateTime,
+    String country,
+    String firstName,
+    String lastName,
+    String email,
+    String phoneNumber,
+  ) async {
+    usersCollection.doc(email).collection("usersData").doc("display").set({
+      'theme': true,
+    });
+    usersCollection
+        .doc(email)
+        .collection("usersData")
+        .doc("notifications")
+        .set({
+      'notification': true,
+    });
+    usersCollection.doc(email).collection("usersData").doc("profile").set({
+      'birthDate': dateTime.toIso8601String,
+      'country': country,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'phoneNumber': phoneNumber,
+      'uid': uid
+    });
   }
 }

@@ -1,7 +1,7 @@
-class User {
+class CustomUser {
   final String uid;
 
-  User({this.uid});
+  CustomUser({this.uid});
 }
 
 class UserData {
@@ -11,5 +11,4 @@ class UserData {
   final int age;
 
   UserData({this.uid, this.name, this.hobby, this.age});
-
 }
