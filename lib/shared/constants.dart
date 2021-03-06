@@ -5,7 +5,8 @@ const textInputDecoration = InputDecoration(
 );
 
 final lightThemeConstant = ThemeData(
-  scaffoldBackgroundColor: Color(0xFFF5F5F5),
+  backgroundColor: Color(0xFFF5F5F5),
+  scaffoldBackgroundColor: Colors.white,
   buttonColor: Color(0xFFFBAF00),
   secondaryHeaderColor: Color(0xFFFBAF00),
   brightness: Brightness.light,
@@ -13,7 +14,8 @@ final lightThemeConstant = ThemeData(
 );
 
 final darkThemeConstant = ThemeData(
-  scaffoldBackgroundColor: Color(0xFF1A1F23),
+  backgroundColor: Color(0xFF1A1F23),
+  scaffoldBackgroundColor: Colors.grey[800],
   buttonColor: Color(0xFFFFAA33),
   secondaryHeaderColor: Colors.grey[700],
   brightness: Brightness.dark,
