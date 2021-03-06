@@ -9,6 +9,7 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../main.dart';
@@ -28,7 +29,7 @@ class _RegisterState extends State<Register> {
   final PageController _pageController = PageController(initialPage: 0);
 
 // text field state
-  DateTime dateTime;
+  DateTime birthDate;
   String country;
   String firstName;
   String lastName;
@@ -56,7 +57,7 @@ class _RegisterState extends State<Register> {
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
     final countriesOptions = ['Canada', 'France'];
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double contextWidth = MediaQuery.of(context).size.width;
     final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
 
     bool lightThemeEnabled = getTheme();
@@ -77,11 +78,11 @@ class _RegisterState extends State<Register> {
                 autovalidateMode: AutovalidateMode.always,
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 100),
+                    SizedBox(height: 75),
 
                     Text('FOLLOW UP LOGO'),
 
-                    SizedBox(height: 75),
+                    SizedBox(height: 50),
                     // email field
                     Expanded(
                       child: Container(
@@ -91,7 +92,7 @@ class _RegisterState extends State<Register> {
                             topLeft: Radius.circular(50.0),
                             topRight: Radius.circular(50.0),
                           ),
-                          color: Theme.of(context).scaffoldBackgroundColor,
+                          color: Theme.of(context).backgroundColor,
                         ),
                         child: Column(
                           children: [
@@ -140,12 +141,12 @@ class _RegisterState extends State<Register> {
                                           decoration: textInputDecoration.copyWith(hintText: 'Date of Birth'),
                                           validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
                                           onSaved: (val) {
-                                            setState(() => dateTime = val);
+                                            setState(() => birthDate = val);
                                           },
                                         ),
                                         SizedBox(height: 50.0),
                                         SizedBox(
-                                          width: screenWidth,
+                                          width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
@@ -227,7 +228,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: 150.0),
                                         SizedBox(
-                                          width: screenWidth,
+                                          width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
@@ -289,7 +290,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: 110.0),
                                         SizedBox(
-                                          width: screenWidth,
+                                          width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
@@ -331,9 +332,7 @@ class _RegisterState extends State<Register> {
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                  text: 'I have read and agree to the ',
-                                                  style: TextStyle(color: Theme.of(context).accentColor)
-                                                ),
+                                                    text: 'I have read and agree to the ', style: TextStyle(color: Theme.of(context).accentColor)),
                                                 TextSpan(
                                                     text: 'Terms and Conditions',
                                                     style: TextStyle(color: Colors.blue),
@@ -355,7 +354,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: 202.0),
                                         SizedBox(
-                                          width: screenWidth,
+                                          width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
@@ -406,7 +405,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: 225.0),
                                         SizedBox(
-                                          width: screenWidth,
+                                          width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
                                               child: Text('Register', style: TextStyle(color: Colors.white)),
@@ -435,7 +434,7 @@ class _RegisterState extends State<Register> {
                                 ],
                               ),
                             ),
-                            SizedBox(height: sameTypePadding),
+                           SizedBox(height: generalPadding),
                             SmoothPageIndicator(
                               controller: _pageController,
                               count: 5,
