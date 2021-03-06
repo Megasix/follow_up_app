@@ -10,9 +10,9 @@ class Home extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(50.0),
-            topRight: Radius.circular(50.0),
+            topRight: Radius.circular(50.0)
           ),
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: Theme.of(context).backgroundColor,
         ),
       ),
     );
