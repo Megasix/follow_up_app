@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
@@ -14,7 +16,9 @@ class _HomeState extends State<Home> {
   Location _currentPosition;
   String _address, _dateTime;
   bool status;
+  StreamSubscription _locationSubscription;
   final AuthService _authService = AuthService();
+
   @override
   void initState() {
     super.initState();
@@ -45,11 +49,6 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       status = true;
                       print("Start");
-                      _determinePosition().then((location) {
-                        _geocodePosition(location).then((address) {
-                          print(address);
-                        });
-                      });
                     },
                     child: Text("Start"),
                   ),
@@ -115,20 +114,17 @@ class _HomeState extends State<Home> {
         print("refuser");
       }
     }
-    Position coordinate = await Geolocator.getCurrentPosition();
-
-    setState(() {
-      DateTime now = DateTime.now();
-      _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
-      _geocodePosition(coordinate).then((place) {
-        setState(() {
-          _address = place;
+    // ignore: cancel_subscriptions
+    StreamSubscription<Position> positionStream =
+        Geolocator.getPositionStream().listen((Position position) {
+      setState(() {
+        _geocodePosition(position).then((value) {
+          _address = value;
         });
-        print(_address);
+        DateTime now = DateTime.now();
+        _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
       });
     });
-
-    return coordinate;
   }
 
   _geocodePosition(Position coordinate) async {
