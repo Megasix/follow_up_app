@@ -34,6 +34,10 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    _determinePosition().then((value) {
+      _getPolyline(value);
+    });
+
     // ignore: cancel_subscriptions
     _addMarker(LatLng(positioninit.latitude, positioninit.longitude), "origin",
         BitmapDescriptor.defaultMarker);
@@ -90,7 +94,6 @@ class _HomeState extends State<Home> {
                             LatLng(value.latitude, value.longitude),
                             "destination",
                             BitmapDescriptor.defaultMarkerWithHue(90));
-                        _addPolyLine(value);
                       });
                     },
                     child: Text("Stop"),
