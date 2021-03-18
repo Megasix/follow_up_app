@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/home.dart';
+import 'package:follow_up_app/screens/mainMenu/statistics.dart';
 
 class MainMenu extends StatefulWidget {
   @override
@@ -7,16 +8,12 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
-
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
-    Text(
-      'Index 1: Statistics',
-      style: optionStyle,
-    ),
+    Statistics(),
     Text(
       'Index 2: Messages',
       style: optionStyle,

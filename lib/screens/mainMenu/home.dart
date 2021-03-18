@@ -14,22 +14,29 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
+Position positioninit =
+    new Position(latitude: 45.501861, longitude: -73.593889);
+Map<MarkerId, Marker> markers = {};
+PolylinePoints polylinePoints = PolylinePoints();
+Map<PolylineId, Polyline> polylines = {};
+
 class _HomeState extends State<Home> {
+  final Set<Polyline> polyline = {};
   String _address, _dateTime;
   bool status = true;
   final AuthService _authService = AuthService();
-  Map<PolylineId, Polyline> polylines = {};
+  Completer<GoogleMapController> _controller = Completer();
+
+  Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
-  Position positioninit;
-  Completer<GoogleMapController> _controller = Completer();
-  static final CameraPosition _camPos = CameraPosition(
-    target: LatLng(45.5167, -73.65),
-    zoom: 14.4746,
-  );
+
   @override
   void initState() {
     super.initState();
+    // ignore: cancel_subscriptions
+    _addMarker(LatLng(positioninit.latitude, positioninit.longitude), "origin",
+        BitmapDescriptor.defaultMarker);
 
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream().listen((Position position) {
@@ -68,7 +75,9 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       status = true;
                       print("Start");
-                      positioninit = _determinePosition();
+                      _determinePosition().then((value) {
+                        positioninit = value;
+                      });
                     },
                     child: Text("Start"),
                   ),
@@ -77,7 +86,11 @@ class _HomeState extends State<Home> {
                       status = false;
                       print("Stop");
                       _determinePosition().then((value) {
-                        _getPolyline(value);
+                        _addMarker(
+                            LatLng(value.latitude, value.longitude),
+                            "destination",
+                            BitmapDescriptor.defaultMarkerWithHue(90));
+                        _addPolyLine(value);
                       });
                     },
                     child: Text("Stop"),
@@ -103,6 +116,26 @@ class _HomeState extends State<Home> {
                       "Address: $_address",
                     ),
                 ],
+              ),
+            ),
+            SizedBox(
+              height: 400,
+              child: Container(
+                child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                            positioninit.latitude, positioninit.longitude),
+                        zoom: 15),
+                    myLocationEnabled: true,
+                    tiltGesturesEnabled: true,
+                    compassEnabled: true,
+                    scrollGesturesEnabled: true,
+                    zoomGesturesEnabled: true,
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller.complete(controller);
+                    },
+                    polylines: Set<Polyline>.of(polylines.values),
+                    markers: Set<Marker>.of(markers.values)),
               ),
             ),
             RaisedButton(
@@ -150,25 +183,41 @@ class _HomeState extends State<Home> {
     return _currentAddress;
   }
 
-  _addPolyLine() {
-    PolylineId id = PolylineId("poly");
-    Polyline polyline = Polyline(
-        polylineId: id, color: Colors.red, points: polylineCoordinates);
-    polylines[id] = polyline;
-    setState(() {});
+  _addMarker(LatLng position, String id, BitmapDescriptor descriptor) {
+    MarkerId markerId = MarkerId(id);
+    Marker marker =
+        Marker(markerId: markerId, icon: descriptor, position: position);
+    markers[markerId] = marker;
   }
 
-  _getPolyline(Position position) async {
+  void _getPolyline(Position position) async {
+    List<LatLng> polylineCoordinates = [];
+
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        "AIzaSyCE2L8QxWYSXlydQlVCsLpkqt9e8B8N080",
-        PointLatLng(positioninit.latitude, positioninit.longitude),
-        PointLatLng(position.latitude, position.longitude),
-        travelMode: TravelMode.walking);
+      "AIzaSyCE2L8QxWYSXlydQlVCsLpkqt9e8B8N080",
+      PointLatLng(45.6383, -73.7298),
+      PointLatLng(position.latitude, position.longitude),
+      travelMode: TravelMode.driving,
+    );
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
+    } else {
+      print(result.errorMessage);
     }
-    _addPolyLine();
+    _addPolyLine(polylineCoordinates);
+  }
+
+  _addPolyLine(List<LatLng> polylineCoordinates) {
+    PolylineId id = PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.blue,
+      points: polylineCoordinates,
+      width: 8,
+    );
+    polylines[id] = polyline;
+    setState(() {});
   }
 }
