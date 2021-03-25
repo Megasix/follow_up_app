@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:follow_up_app/models/geoData.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Localisation {
-  List<GeoPoint> positions = [];
+  List<positionData> positions = [];
   DatabaseService _databaseService = new DatabaseService();
   checkPermission() async {
     bool serviceEnabled;
@@ -47,8 +48,8 @@ class Localisation {
 
   storePosition(Position position) {
     GeoPoint geoPoint = new GeoPoint(position.latitude, position.longitude);
-    positions.add(geoPoint);
-
+    positions.add(positionData(
+        geoPoint: geoPoint, time: Timestamp.now(), speed: position.speed));
     //_databaseService.storePosition(positions);
   }
 }
