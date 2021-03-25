@@ -10,7 +10,6 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -70,9 +69,15 @@ class _SignInState extends State<SignIn> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    SizedBox(height: 100),
-                    Text('FOLLOW UP LOGO'),
-                    SizedBox(height: 125),
+                    SizedBox(height: 75),
+                    Image(
+                      image: AssetImage(
+                        "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                      ),
+                      height: 200.0,
+                      width: 200.0,
+                    ),
+                    SizedBox(height: 50),
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.all(40.0),

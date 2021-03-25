@@ -9,7 +9,6 @@ import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../main.dart';
@@ -78,9 +77,15 @@ class _RegisterState extends State<Register> {
                 autovalidateMode: AutovalidateMode.always,
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 75),
+                    SizedBox(height: 25),
 
-                    Text('FOLLOW UP LOGO'),
+                    Image(
+                      image: AssetImage(
+                        "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                      ),
+                      height: 150.0,
+                      width: 150.0,
+                    ),
 
                     SizedBox(height: 50),
                     // email field
@@ -445,7 +450,6 @@ class _RegisterState extends State<Register> {
                               ),
                             ),
                             SizedBox(height: 8.0),
-                            Text(error, style: TextStyle(color: Colors.red, fontSize: 14.0)),
                           ],
                         ),
                       ),
