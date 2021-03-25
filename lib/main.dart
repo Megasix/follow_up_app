@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/wrapper.dart';
 import 'package:follow_up_app/services/auth.dart';
@@ -8,7 +9,6 @@ import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'services/locale/app_localizations.dart';
 
 bool _lightThemeEnabled = true;
 
@@ -38,21 +38,16 @@ class MyApp extends StatelessWidget {
                 themeMode: ThemeMode.system,
                 localizationsDelegates: [
                   AppLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                 ],
                 supportedLocales: [
+                  const Locale('en', 'US'),
                   const Locale('en', 'CA'),
+                  const Locale('fr', 'CA'),
                   const Locale('fr', 'FR'),
                 ],
-                localeListResolutionCallback: (locale, supportedLocales) {
-                  for (var supportedLocale in supportedLocales) {
-                    if (supportedLocale.languageCode == locale.languageCode && supportedLocale.countryCode == locale.countryCode) {
-                      return supportedLocale;
-                    }
-                  }
-                  return supportedLocales.first;
-                },
                 home: Wrapper(),
               ),
             );
