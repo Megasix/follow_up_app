@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/services/localisation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:follow_up_app/services/database.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -19,6 +21,8 @@ Position positioninit =
 Map<MarkerId, Marker> markers = {};
 PolylinePoints polylinePoints = PolylinePoints();
 Map<PolylineId, Polyline> polylines = {};
+final Localisation _localisation = Localisation();
+final DatabaseService _database = DatabaseService();
 
 class _HomeState extends State<Home> {
   final Set<Polyline> polyline = {};
@@ -26,7 +30,6 @@ class _HomeState extends State<Home> {
   bool status = true;
   final AuthService _authService = AuthService();
   Completer<GoogleMapController> _controller = Completer();
-
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
@@ -34,25 +37,25 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _determinePosition().then((value) {
+    _localisation.determinePosition().then((value) {
       _getPolyline(value);
     });
-
     // ignore: cancel_subscriptions
-    _addMarker(LatLng(positioninit.latitude, positioninit.longitude), "origin",
-        BitmapDescriptor.defaultMarker);
-
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream().listen((Position position) {
       setState(() {
-        _geocodePosition(position).then((value) {
+        _localisation.geocodePosition(position).then((value) async {
           _address = value;
           print(position.speed);
+          _localisation.storePosition(position);
         });
         DateTime now = DateTime.now();
         _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
       });
     });
+
+    _addMarker(LatLng(positioninit.latitude, positioninit.longitude), "origin",
+        BitmapDescriptor.defaultMarker);
   }
 
   @override
@@ -77,9 +80,10 @@ class _HomeState extends State<Home> {
                 children: [
                   RaisedButton(
                     onPressed: () {
+                      _localisation.checkPermission();
                       status = true;
                       print("Start");
-                      _determinePosition().then((value) {
+                      _localisation.determinePosition().then((value) {
                         positioninit = value;
                       });
                     },
@@ -89,7 +93,7 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       status = false;
                       print("Stop");
-                      _determinePosition().then((value) {
+                      _localisation.determinePosition().then((value) {
                         _addMarker(
                             LatLng(value.latitude, value.longitude),
                             "destination",
@@ -151,41 +155,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print("pas service");
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      print("demande");
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        print("tjr non");
-      }
-
-      if (permission == LocationPermission.denied) {
-        print("refuser");
-      }
-    }
-    Position position = await Geolocator.getCurrentPosition();
-    return position;
-  }
-
-  _geocodePosition(Position coordinate) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-        coordinate.latitude, coordinate.longitude);
-    Placemark place = placemarks[0];
-    String _currentAddress =
-        "${place.street},${place.locality}, ${place.postalCode}, ${place.country}";
-    return _currentAddress;
-  }
-
   _addMarker(LatLng position, String id, BitmapDescriptor descriptor) {
     MarkerId markerId = MarkerId(id);
     Marker marker =
@@ -221,6 +190,5 @@ class _HomeState extends State<Home> {
       width: 8,
     );
     polylines[id] = polyline;
-    setState(() {});
   }
 }

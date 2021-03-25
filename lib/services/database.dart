@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/models/user.dart';
+import 'package:geolocator/geolocator.dart';
 
 class DatabaseService {
   final String uid;
+  UserData _userData = new UserData();
 
   DatabaseService({this.uid});
 
@@ -32,13 +35,11 @@ class DatabaseService {
   }
 
   // userData from snapshot
-  UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-    return UserData(
-        uid: uid,
-        name: snapshot.get('name'),
-        hobby: snapshot.get('hobby'),
-        age: snapshot.get('age'));
-  }
+  UserData _userDataFromSnapshot(DocumentSnapshot snapshot) => UserData(
+      uid: uid,
+      name: snapshot.get('name'),
+      hobby: snapshot.get('hobby'),
+      age: snapshot.get('age'));
 
   //get usersSettings stream
   Stream<List<Setting>> get usersSettings {
@@ -61,6 +62,7 @@ class DatabaseService {
     String email,
     String phoneNumber,
   ) async {
+    Timestamp timestamp = Timestamp.fromDate(dateTime);
     usersCollection.doc(email).collection("usersData").doc("display").set({
       'theme': true,
     });
@@ -72,7 +74,7 @@ class DatabaseService {
       'notification': true,
     });
     usersCollection.doc(email).collection("usersData").doc("profile").set({
-      'birthDate': dateTime,
+      'birthDate': timestamp,
       'country': country,
       'firstName': firstName,
       'lastName': lastName,
@@ -80,5 +82,13 @@ class DatabaseService {
       'phoneNumber': phoneNumber,
       'uid': uid,
     });
+  }
+
+  storePosition(List<GeoPoint> position) {
+    usersCollection
+        .doc("olivier_dery-prevost@hotmail.com")
+        .collection("usersData")
+        .doc("Data")
+        .set({'Localisation': position});
   }
 }

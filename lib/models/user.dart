@@ -9,6 +9,6 @@ class UserData {
   final String name;
   final String hobby;
   final int age;
-
-  UserData({this.uid, this.name, this.hobby, this.age});
+  final String email;
+  UserData({this.uid, this.name, this.hobby, this.age, this.email});
 }

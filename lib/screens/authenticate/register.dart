@@ -135,7 +135,7 @@ class _RegisterState extends State<Register> {
                                                         child: Text('$country'),
                                                       ))
                                               .toList(),
-                                          onSaved: (val) {
+                                          onChanged: (val) {
                                             setState(() => country = val);
                                           },
                                         ),
@@ -156,7 +156,7 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.required(
                                                 context)
                                           ]),
-                                          onSaved: (val) {
+                                          onChanged: (val) {
                                             setState(() => dateTime = val);
                                           },
                                         ),
@@ -501,7 +501,7 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.maxLength(
                                                 context, 20),
                                             FormBuilderValidators.minLength(
-                                                context, 5),
+                                                context, 6),
                                           ]),
                                           onChanged: (val) {
                                             setState(() => password = val);
