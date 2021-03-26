@@ -53,10 +53,17 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    const sameTypePadding = 10.0;
-    const generalPadding = 20.0;
-    final countriesOptions = ['Canada', 'France'];
+    const _referenceHeight = 820.5714285714286;
+    const _referenceWidth = 411.42857142857144;
+    final double contextHeight = MediaQuery.of(context).size.height;
     final double contextWidth = MediaQuery.of(context).size.width;
+    final double contextAspectRatio = MediaQuery.of(context).devicePixelRatio;
+    var sameTypeVerticalPadding = 10.0 * contextHeight / _referenceHeight;
+    var generalVerticalPadding = 20.0 * contextHeight / _referenceHeight;
+    var heightRatio = contextHeight / _referenceHeight;
+    var widthRatio = contextWidth / _referenceWidth;
+
+    final countriesOptions = ['Canada', 'France'];
     final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
 
     bool lightThemeEnabled = getTheme();
@@ -76,22 +83,23 @@ class _RegisterState extends State<Register> {
                 key: _formKey,
                 autovalidateMode: AutovalidateMode.always,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    SizedBox(height: 25),
-
-                    Image(
-                      image: AssetImage(
-                        "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                    Padding(
+                      padding: EdgeInsets.only(top: 40.0*heightRatio, bottom: 30.0*heightRatio, left: 20.0*widthRatio, right: 20.0*widthRatio),
+                      child: AspectRatio(
+                        aspectRatio: contextAspectRatio,
+                        child: Image(
+                          image: AssetImage(
+                            "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                          ),
+                        ),
                       ),
-                      height: 150.0,
-                      width: 150.0,
                     ),
-
-                    SizedBox(height: 50),
                     // email field
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.only(bottom: 40.0),
+                        padding: EdgeInsets.only(bottom: 40.0*heightRatio),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(50.0),
@@ -107,19 +115,19 @@ class _RegisterState extends State<Register> {
                                 //physics: NeverScrollableScrollPhysics(),
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
                                           'Get Started',
                                           textScaleFactor: 2.5,
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         Text(
                                           'Lets verify some information about you to help set up your account.',
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FormBuilderDropdown(
                                           name: 'Country',
                                           decoration: textInputDecoration.copyWith(hintText: 'Country'),
@@ -135,7 +143,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => country = val);
                                           },
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FormBuilderDateTimePicker(
                                           name: 'Date of Birth',
                                           cursorColor: Theme.of(context).buttonColor,
@@ -149,7 +157,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => birthDate = val);
                                           },
                                         ),
-                                        SizedBox(height: 50.0),
+                                        SizedBox(height: 50.0*heightRatio),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -161,26 +169,26 @@ class _RegisterState extends State<Register> {
                                                 }
                                               }),
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         Text('OR SIGN UP WITH'),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             GoogleSignInButton(onPressed: () async {
                                               await _authService.signInWithGoogle();
                                             }),
-                                            SizedBox(width: sameTypePadding),
+                                            SizedBox(width: sameTypeVerticalPadding),
                                             FacebookSignInButton(onPressed: () async {
                                               await _authService.signInWithFacebook();
                                             }),
-                                            SizedBox(width: sameTypePadding),
+                                            SizedBox(width: sameTypeVerticalPadding),
                                             TwitterSignInButton(onPressed: () async {}),
-                                            SizedBox(width: sameTypePadding),
+                                            SizedBox(width: sameTypeVerticalPadding),
                                             AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
                                           ],
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FlatButton(
                                           child: Text('Already have an account ? Login'),
                                           onPressed: () {
@@ -191,19 +199,19 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
                                           "What's Your Name ?",
                                           textScaleFactor: 2.5,
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         Text(
                                           'Your real name may be used later to verify your identity when contacting your driving school.',
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FormBuilderTextField(
                                           name: 'First Name',
                                           decoration: textInputDecoration.copyWith(hintText: 'First Name'),
@@ -217,7 +225,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => firstName = val);
                                           },
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FormBuilderTextField(
                                           name: 'Last Name',
                                           decoration: textInputDecoration.copyWith(hintText: 'Last Name'),
@@ -231,7 +239,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => lastName = val);
                                           },
                                         ),
-                                        SizedBox(height: 150.0),
+                                        Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -243,7 +251,7 @@ class _RegisterState extends State<Register> {
                                                 }
                                               }),
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FlatButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
@@ -254,7 +262,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -262,12 +270,12 @@ class _RegisterState extends State<Register> {
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         Text(
                                           'This is what you will use when you log in to Follow Up app.',
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FormBuilderTextField(
                                           name: 'Account Email',
                                           decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
@@ -280,7 +288,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => email = val);
                                           },
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FormBuilderTextField(
                                           name: 'Phone Number',
                                           decoration: textInputDecoration.copyWith(hintText: '(Optional) Phone Number'),
@@ -293,7 +301,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => phoneNumber = val);
                                           },
                                         ),
-                                        SizedBox(height: 110.0),
+                                        Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -305,7 +313,7 @@ class _RegisterState extends State<Register> {
                                                 }
                                               }),
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FlatButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
@@ -316,7 +324,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -324,12 +332,12 @@ class _RegisterState extends State<Register> {
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         Text(
                                           'Please review the terms below.',
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FormBuilderCheckbox(
                                           name: 'Terms and Conditions',
                                           initialValue: false,
@@ -357,7 +365,7 @@ class _RegisterState extends State<Register> {
                                           validator: FormBuilderValidators.equal(context, true,
                                               errorText: 'You must accept terms and conditions to continue'),
                                         ),
-                                        SizedBox(height: 202.0),
+                                        Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -369,7 +377,7 @@ class _RegisterState extends State<Register> {
                                                 }
                                               }),
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FlatButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
@@ -380,7 +388,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -388,12 +396,12 @@ class _RegisterState extends State<Register> {
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         Text(
                                           'Secure your account and choose a strong password.',
                                           textAlign: TextAlign.center,
                                         ),
-                                        SizedBox(height: generalPadding),
+                                        SizedBox(height: generalVerticalPadding),
                                         FormBuilderTextField(
                                           name: 'Password',
                                           decoration: textInputDecoration.copyWith(hintText: 'Password'),
@@ -408,7 +416,7 @@ class _RegisterState extends State<Register> {
                                             setState(() => password = val);
                                           },
                                         ),
-                                        SizedBox(height: 225.0),
+                                        Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -426,7 +434,7 @@ class _RegisterState extends State<Register> {
                                                 }
                                               }),
                                         ),
-                                        SizedBox(height: sameTypePadding),
+                                        SizedBox(height: sameTypeVerticalPadding),
                                         FlatButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
@@ -439,7 +447,7 @@ class _RegisterState extends State<Register> {
                                 ],
                               ),
                             ),
-                           SizedBox(height: generalPadding),
+                            SizedBox(height: generalVerticalPadding),
                             SmoothPageIndicator(
                               controller: _pageController,
                               count: 5,
@@ -449,7 +457,6 @@ class _RegisterState extends State<Register> {
                                 dotHeight: 10.0,
                               ),
                             ),
-                            SizedBox(height: 8.0),
                           ],
                         ),
                       ),
