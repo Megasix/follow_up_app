@@ -12,3 +12,9 @@ class UserData {
 
   UserData({this.uid, this.name, this.hobby, this.age});
 }
+
+class UserDisplaySetting{
+  final bool theme;
+
+  UserDisplaySetting(this.theme);
+}

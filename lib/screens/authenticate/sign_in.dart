@@ -23,7 +23,6 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
-  final bool lightThemeEnabled = getTheme();
 
   bool loading = false;
   Alignment childAlignement = Alignment.center;
@@ -49,7 +48,9 @@ class _SignInState extends State<SignIn> {
     //default gap between two elements
     const sameTypePadding = 10.0;
     const generalPadding = 20.0;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double contextWidth = MediaQuery.of(context).size.width;
+
+    bool lightThemeEnabled = getTheme();
 
     return loading
         ? Loading()
@@ -68,9 +69,15 @@ class _SignInState extends State<SignIn> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    SizedBox(height: 100),
-                    Text('FOLLOW UP LOGO'),
-                    SizedBox(height: 125),
+                    SizedBox(height: 75),
+                    Image(
+                      image: AssetImage(
+                        "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                      ),
+                      height: 200.0,
+                      width: 200.0,
+                    ),
+                    SizedBox(height: 50),
                     Expanded(
                       child: Container(
                         padding: EdgeInsets.all(40.0),
@@ -79,7 +86,7 @@ class _SignInState extends State<SignIn> {
                             topLeft: Radius.circular(50.0),
                             topRight: Radius.circular(50.0),
                           ),
-                          color: Theme.of(context).scaffoldBackgroundColor,
+                          color: Theme.of(context).backgroundColor,
                         ),
                         child: Column(
                           children: <Widget>[
@@ -114,20 +121,18 @@ class _SignInState extends State<SignIn> {
                             SizedBox(height: generalPadding),
 
                             SizedBox(
-                              width: screenWidth,
+                              width: contextWidth,
                               height: 40.0,
                               child: RaisedButton(
                                   child: Text('Sign In', style: TextStyle(color: Colors.white)),
                                   onPressed: () async {
-                                    if (_formKey.currentState.validate()) {
-                                      setState(() => loading = true);
-                                      dynamic result = await _authService.signInWithEmailAndPassword(email, password);
-                                      if (result == null)
-                                        setState(() {
-                                          error = 'There was an error using these credential please retry';
-                                          loading = false;
-                                        });
-                                    }
+                                    setState(() => loading = true);
+                                    dynamic result = await _authService.signInWithEmailAndPassword(email, password);
+                                    if (result == null)
+                                      setState(() {
+                                        error = 'There was an error using these credential please retry';
+                                        loading = false;
+                                      });
                                   }),
                             ),
 
