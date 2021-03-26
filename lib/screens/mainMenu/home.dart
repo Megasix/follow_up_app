@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:wasm';
 
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/auth.dart';
@@ -10,6 +11,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:motion_sensors/motion_sensors.dart';
+import 'package:vector_math/vector_math_64.dart' hide Colors;
 
 class Home extends StatefulWidget {
   @override
@@ -33,6 +36,7 @@ class _HomeState extends State<Home> {
   Set<Polyline> _polylines = {};
   List<LatLng> polylineCoordinates = [];
   PolylinePoints polylinePoints = PolylinePoints();
+  Vector3 _userAaccelerometer = Vector3.zero();
 
   @override
   void initState() {
@@ -40,13 +44,17 @@ class _HomeState extends State<Home> {
     _localisation.determinePosition().then((value) {
       _getPolyline(value);
     });
+    motionSensors.userAccelerometer.listen((UserAccelerometerEvent event) {
+      setState(() {
+        _userAaccelerometer.setValues(event.x, event.y, event.z);
+      });
+    });
     // ignore: cancel_subscriptions
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream().listen((Position position) {
       setState(() {
         _localisation.geocodePosition(position).then((value) async {
           _address = value;
-          print(position.speed);
           _localisation.storePosition(position);
         });
         DateTime now = DateTime.now();
@@ -122,6 +130,13 @@ class _HomeState extends State<Home> {
                     Text(
                       "Address: $_address",
                     ),
+                  SizedBox(
+                    height: 3,
+                  ),
+                  if (_userAaccelerometer != Vector3.zero())
+                    Text('x: ${(_userAaccelerometer.x).toStringAsFixed(3)}' +
+                        ' y: ${(_userAaccelerometer.y).toStringAsFixed(3)}' +
+                        ' z: ${(_userAaccelerometer.z).toStringAsFixed(3)}'),
                 ],
               ),
             ),

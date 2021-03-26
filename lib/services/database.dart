@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:follow_up_app/models/geoData.dart';
 import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:geolocator/geolocator.dart';
@@ -84,7 +85,7 @@ class DatabaseService {
     });
   }
 
-  storePosition(List<GeoPoint> position) {
+  storePosition(List<positionData> position) {
     usersCollection
         .doc("olivier_dery-prevost@hotmail.com")
         .collection("usersData")
