@@ -92,7 +92,7 @@ class _SignInState extends State<SignIn> {
                           children: <Widget>[
                             FormBuilderTextField(
                               name: 'Account Email',
-                              decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
+                              decoration: textInputDecoration.copyWith(hintText: ' Courriel'),
                               keyboardType: TextInputType.text,
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(context),
@@ -106,7 +106,7 @@ class _SignInState extends State<SignIn> {
                             // password field
                             FormBuilderTextField(
                               name: 'Password',
-                              decoration: textInputDecoration.copyWith(hintText: 'Password'),
+                              decoration: textInputDecoration.copyWith(hintText: 'Mot de Passe'),
                               obscureText: true,
                               keyboardType: TextInputType.text,
                               validator: FormBuilderValidators.compose([
@@ -124,13 +124,13 @@ class _SignInState extends State<SignIn> {
                               width: contextWidth,
                               height: 40.0,
                               child: RaisedButton(
-                                  child: Text('Sign In', style: TextStyle(color: Colors.white)),
+                                  child: Text('Connectez-vous', style: TextStyle(color: Colors.white)),
                                   onPressed: () async {
                                     setState(() => loading = true);
                                     dynamic result = await _authService.signInWithEmailAndPassword(email, password);
                                     if (result == null)
                                       setState(() {
-                                        error = 'There was an error using these credential please retry';
+                                        error = 'Il y a une erreur avec vos informations veuillez réessayer ';
                                         loading = false;
                                       });
                                   }),
@@ -138,7 +138,7 @@ class _SignInState extends State<SignIn> {
 
                             SizedBox(height: generalPadding),
 
-                            Text('OR SIGN IN WITH'),
+                            Text('Ou connectez-vous avec'),
 
                             SizedBox(height: generalPadding),
 
@@ -162,7 +162,7 @@ class _SignInState extends State<SignIn> {
                             SizedBox(height: generalPadding),
 
                             FlatButton(
-                              child: Text('CREATE A FREE ACCOUNT'),
+                              child: Text('Créer un compte gratuitement'),
                               onPressed: () {
                                 widget.toggleView();
                               },
