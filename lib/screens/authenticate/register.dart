@@ -1,7 +1,17 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/features/apple.dart';
+import 'package:follow_up_app/shared/features/facebook.dart';
+import 'package:follow_up_app/shared/features/google.dart';
+import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../main.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;
@@ -14,80 +24,436 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
   final AuthService _authService = AuthService();
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormBuilderState>();
+  final PageController _pageController = PageController(initialPage: 0);
 
 // text field state
+  DateTime birthDate;
+  String country;
+  String firstName;
+  String lastName;
   String email = '';
+  String phoneNumber;
   String password = '';
   String error = '';
 
   bool loading = false;
+  Alignment childAlignement = Alignment.center;
+
+  @override
+  _RegisterState() {
+    KeyboardVisibilityNotification().addNewListener(
+      onChange: (bool visible) {
+        setState(() {
+          childAlignement = visible ? Alignment.topCenter : Alignment.center;
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    const sameTypePadding = 10.0;
+    const generalPadding = 20.0;
+    final countriesOptions = ['Canada', 'France'];
+    final double contextWidth = MediaQuery.of(context).size.width;
+    final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
+
+    bool lightThemeEnabled = getTheme();
+
     return loading
         ? Loading()
         : Scaffold(
-            backgroundColor: Colors.brown[50],
-            appBar: AppBar(
-              backgroundColor: Colors.blueGrey,
-              elevation: 0.0,
-              title: Text('Sign Up to Follow Up'),
-              actions: <Widget>[
-                FlatButton.icon(
-                  onPressed: () {
-                    widget.toggleView();
-                  },
-                  icon: Icon(Icons.person),
-                  label: Text('Sign In'),
-                ),
-              ],
-            ),
-            body: Container(
-              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-              child: Form(
+            resizeToAvoidBottomInset: false,
+            body: AnimatedContainer(
+              duration: Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              alignment: childAlignement,
+              color: Theme.of(context).secondaryHeaderColor,
+              width: double.infinity,
+              height: double.infinity,
+              child: FormBuilder(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.always,
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 20.0),
+                    SizedBox(height: 25),
+
+                    Image(
+                      image: AssetImage(
+                        "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                      ),
+                      height: 150.0,
+                      width: 150.0,
+                    ),
+
+                    SizedBox(height: 50),
                     // email field
-                    TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Email'),
-                      validator: (val) => val.isEmpty ? 'Enter an Email' : null,
-                      onChanged: (val) {
-                        setState(() => email = val);
-                      },
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(bottom: 40.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(50.0),
+                            topRight: Radius.circular(50.0),
+                          ),
+                          color: Theme.of(context).backgroundColor,
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: PageView(
+                                controller: _pageController,
+                                //physics: NeverScrollableScrollPhysics(),
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Commençons!',
+                                          textScaleFactor: 2.5,
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        Text(
+                                          'Allons vérifier quelques informations pour pouvoir initialiser votre compte.',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FormBuilderDropdown(
+                                          name: 'Country',
+                                          decoration: textInputDecoration.copyWith(hintText: 'pays'),
+                                          allowClear: true,
+                                          validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+                                          items: countriesOptions
+                                              .map((country) => DropdownMenuItem(
+                                                    value: country,
+                                                    child: Text('$country'),
+                                                  ))
+                                              .toList(),
+                                          onSaved: (val) {
+                                            setState(() => country = val);
+                                          },
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FormBuilderDateTimePicker(
+                                          name: 'Date of Birth',
+                                          cursorColor: Theme.of(context).buttonColor,
+                                          firstDate: DateTime(firstDate),
+                                          lastDate: DateTime(lastDate),
+                                          initialDate: DateTime(lastDate),
+                                          inputType: InputType.date,
+                                          decoration: textInputDecoration.copyWith(hintText: 'date de naissance'),
+                                          validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+                                          onSaved: (val) {
+                                            setState(() => birthDate = val);
+                                          },
+                                        ),
+                                        SizedBox(height: 50.0),
+                                        SizedBox(
+                                          width: contextWidth,
+                                          height: 40.0,
+                                          child: RaisedButton(
+                                              child: Text('continuer', style: TextStyle(color: Colors.white)),
+                                              onPressed: () async {
+                                                if (_formKey.currentState.validate()) {
+                                                  _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        Text('Ou inscrivez-vous'),
+                                        SizedBox(height: generalPadding),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GoogleSignInButton(onPressed: () async {
+                                              await _authService.signInWithGoogle();
+                                            }),
+                                            SizedBox(width: sameTypePadding),
+                                            FacebookSignInButton(onPressed: () async {
+                                              await _authService.signInWithFacebook();
+                                            }),
+                                            SizedBox(width: sameTypePadding),
+                                            TwitterSignInButton(onPressed: () async {}),
+                                            SizedBox(width: sameTypePadding),
+                                            AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
+                                          ],
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FlatButton(
+                                          child: Text('Avez-vous déja un compte ? Connectez-vous'),
+                                          onPressed: () {
+                                            widget.toggleView();
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          "Quel est votre nom ?",
+                                          textScaleFactor: 2.5,
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        Text(
+                                          'Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite ',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FormBuilderTextField(
+                                          name: 'First Name',
+                                          decoration: textInputDecoration.copyWith(hintText: 'Prénom'),
+                                          keyboardType: TextInputType.text,
+                                          validator: FormBuilderValidators.compose([
+                                            FormBuilderValidators.required(context),
+                                            FormBuilderValidators.maxLength(context, 20),
+                                            FormBuilderValidators.minLength(context, 2),
+                                          ]),
+                                          onChanged: (val) {
+                                            setState(() => firstName = val);
+                                          },
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FormBuilderTextField(
+                                          name: 'Last Name',
+                                          decoration: textInputDecoration.copyWith(hintText: 'Nom de Famille'),
+                                          keyboardType: TextInputType.text,
+                                          validator: FormBuilderValidators.compose([
+                                            FormBuilderValidators.required(context),
+                                            FormBuilderValidators.maxLength(context, 20),
+                                            FormBuilderValidators.minLength(context, 2),
+                                          ]),
+                                          onChanged: (val) {
+                                            setState(() => lastName = val);
+                                          },
+                                        ),
+                                        SizedBox(height: 150.0),
+                                        SizedBox(
+                                          width: contextWidth,
+                                          height: 40.0,
+                                          child: RaisedButton(
+                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              onPressed: () async {
+                                                if (_formKey.currentState.validate()) {
+                                                  _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FlatButton(
+                                          child: Text('Retour'),
+                                          onPressed: () {
+                                            _pageController.animateToPage(0, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Identifier votre compte',
+                                          textAlign: TextAlign.center,
+                                          textScaleFactor: 2.5,
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        Text(
+                                          'Ceci est le compte que vous allez utiliser pour utilisez Follow Up ',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FormBuilderTextField(
+                                          name: 'Account Email',
+                                          decoration: textInputDecoration.copyWith(hintText: 'Courriel'),
+                                          keyboardType: TextInputType.text,
+                                          validator: FormBuilderValidators.compose([
+                                            FormBuilderValidators.required(context),
+                                            FormBuilderValidators.email(context),
+                                          ]),
+                                          onChanged: (val) {
+                                            setState(() => email = val);
+                                          },
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FormBuilderTextField(
+                                          name: 'Phone Number',
+                                          decoration: textInputDecoration.copyWith(hintText: '(Optionel) Numéro de téléphone'),
+                                          keyboardType: TextInputType.text,
+                                          validator: FormBuilderValidators.compose([
+                                            FormBuilderValidators.numeric(context),
+                                            FormBuilderValidators.maxLength(context, 10),
+                                          ]),
+                                          onChanged: (val) {
+                                            setState(() => phoneNumber = val);
+                                          },
+                                        ),
+                                        SizedBox(height: 110.0),
+                                        SizedBox(
+                                          width: contextWidth,
+                                          height: 40.0,
+                                          child: RaisedButton(
+                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              onPressed: () async {
+                                                if (_formKey.currentState.validate()) {
+                                                  _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FlatButton(
+                                          child: Text('Retour'),
+                                          onPressed: () {
+                                            _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Lire les conditions de sécurités',
+                                          textAlign: TextAlign.center,
+                                          textScaleFactor: 2.5,
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        Text(
+                                          'Veuillez lire les conditions de sécurités',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FormBuilderCheckbox(
+                                          name: 'Terms and Conditions',
+                                          initialValue: false,
+                                          title: RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                TextSpan(
+                                                    text: 'Je suis en accord avec les conditions de sécurités ', style: TextStyle(color: Theme.of(context).accentColor)),
+                                                TextSpan(
+                                                    text: 'termes et conditions de sécurités',
+                                                    style: TextStyle(color: Colors.blue),
+                                                    recognizer: TapGestureRecognizer()
+                                                      ..onTap = () async {
+                                                        final url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+                                                        if (await canLaunch(url)) {
+                                                          await launch(
+                                                            url,
+                                                            forceSafariVC: false,
+                                                          );
+                                                        }
+                                                      }),
+                                              ],
+                                            ),
+                                          ),
+                                          validator: FormBuilderValidators.equal(context, true,
+                                              errorText: 'vous devez lire les conditions de sécurités'),
+                                        ),
+                                        SizedBox(height: 202.0),
+                                        SizedBox(
+                                          width: contextWidth,
+                                          height: 40.0,
+                                          child: RaisedButton(
+                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              onPressed: () async {
+                                                if (_formKey.currentState.validate()) {
+                                                  _pageController.animateToPage(4, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FlatButton(
+                                          child: Text('Retour'),
+                                          onPressed: () {
+                                            _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(left: 40.0, top: 40.0, right: 40.0),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Mettre votre mot de passe ',
+                                          textAlign: TextAlign.center,
+                                          textScaleFactor: 2.5,
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        Text(
+                                          'Pour la sécurité maximale veuillez prendre un mot de passe compliquer',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        SizedBox(height: generalPadding),
+                                        FormBuilderTextField(
+                                          name: 'Password',
+                                          decoration: textInputDecoration.copyWith(hintText: 'Mot de Passe'),
+                                          obscureText: true,
+                                          keyboardType: TextInputType.text,
+                                          validator: FormBuilderValidators.compose([
+                                            FormBuilderValidators.required(context),
+                                            FormBuilderValidators.maxLength(context, 20),
+                                            FormBuilderValidators.minLength(context, 5),
+                                          ]),
+                                          onChanged: (val) {
+                                            setState(() => password = val);
+                                          },
+                                        ),
+                                        SizedBox(height: 225.0),
+                                        SizedBox(
+                                          width: contextWidth,
+                                          height: 40.0,
+                                          child: RaisedButton(
+                                              child: Text('Connectez-vous', style: TextStyle(color: Colors.white)),
+                                              onPressed: () async {
+                                                if (_formKey.currentState.validate()) {
+                                                  setState(() => loading = true);
+                                                  dynamic result = await _authService.registerWithEmailAndPassword(email, password);
+                                                  if (result == null)
+                                                    setState(() {
+                                                      error = 'Il y avait une erreur avec vos informations veuillez réessayer';
+                                                      loading = false;
+                                                    });
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(height: sameTypePadding),
+                                        FlatButton(
+                                          child: Text('retour'),
+                                          onPressed: () {
+                                            _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                           SizedBox(height: generalPadding),
+                            SmoothPageIndicator(
+                              controller: _pageController,
+                              count: 5,
+                              effect: ExpandingDotsEffect(
+                                activeDotColor: Theme.of(context).buttonColor,
+                                dotWidth: 10.0,
+                                dotHeight: 10.0,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                          ],
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 20.0),
-                    // password field
-                    TextFormField(
-                      decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                      validator: (val) => val.length < 4 ? 'Enter at least 5 characters' : null,
-                      obscureText: true,
-                      onChanged: (val) {
-                        setState(() => password = val);
-                      },
-                    ),
-                    SizedBox(height: 20.0),
-                    RaisedButton(
-                        color: Colors.blueGrey,
-                        child: Text('Register', style: TextStyle(color: Colors.white)),
-                        onPressed: () async {
-                          if (_formKey.currentState.validate()) {
-                            setState(() => loading = true);
-                            dynamic result = await _authService.registerWithEmailAndPassword(email, password);
-                            if (result == null)
-                              setState(() {
-                                error = 'There was an interruption during registration, please retry';
-                                loading = false;
-                              });
-                          }
-                        }),
-                    SizedBox(height: 8.0),
-                    Text(
-                      error,
-                      style: TextStyle(color: Colors.red, fontSize: 14.0),
-                    )
                   ],
                 ),
               ),
