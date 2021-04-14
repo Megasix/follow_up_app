@@ -43,8 +43,7 @@ dependencies:
   geocoding: ^1.0.5
   google_maps_flutter: ^1.2.0
   flutter_polyline_points: ^0.2.4
-  motion_sensors: ^0.0.5
-  vector_math: ^2.0.8
+  sensors: ^0.4.1+7
 
 dev_dependencies:
   flutter_test:

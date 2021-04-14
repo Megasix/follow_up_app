@@ -7,7 +7,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Localisation {
-  List<positionData> positions = [];
   DatabaseService _databaseService = new DatabaseService();
   checkPermission() async {
     bool serviceEnabled;
@@ -45,12 +44,5 @@ class Localisation {
     String _currentAddress =
         "${place.street},${place.locality}, ${place.postalCode}, ${place.country}";
     return _currentAddress;
-  }
-
-  storePosition(Position position) {
-    GeoPoint geoPoint = new GeoPoint(position.latitude, position.longitude);
-    positions.add(positionData(
-        geoPoint: geoPoint, time: Timestamp.now(), speed: position.speed));
-    //_databaseService.storePosition(positions);
   }
 }

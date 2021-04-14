@@ -85,7 +85,7 @@ class DatabaseService {
     });
   }
 
-  storePosition(List<positionData> position) {
+  storePosition(List<GeoPoint> position) {
     usersCollection
         .doc("olivier_dery-prevost@hotmail.com")
         .collection("usersData")

@@ -1,11 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/home.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics.dart';
+import 'package:follow_up_app/services/localisation.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:sensors/sensors.dart';
 
 class MainMenu extends StatefulWidget {
   @override
   _MainMenuState createState() => _MainMenuState();
 }
+
+final Localisation _localisation = Localisation();
 
 class _MainMenuState extends State<MainMenu> {
   int _selectedIndex = 0;
@@ -24,6 +32,11 @@ class _MainMenuState extends State<MainMenu> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override

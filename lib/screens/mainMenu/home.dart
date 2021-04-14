@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'dart:wasm';
-
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:follow_up_app/services/database.dart';
-import 'package:motion_sensors/motion_sensors.dart';
-import 'package:vector_math/vector_math_64.dart' hide Colors;
+import 'package:sensors/sensors.dart';
+import 'dart:io';
+
+double x;
+double y;
+double z;
+String _address, _dateTime;
 
 class Home extends StatefulWidget {
   @override
@@ -21,49 +21,42 @@ class Home extends StatefulWidget {
 
 Position positioninit =
     new Position(latitude: 45.501861, longitude: -73.593889);
-Map<MarkerId, Marker> markers = {};
-PolylinePoints polylinePoints = PolylinePoints();
-Map<PolylineId, Polyline> polylines = {};
 final Localisation _localisation = Localisation();
-final DatabaseService _database = DatabaseService();
 
 class _HomeState extends State<Home> {
-  final Set<Polyline> polyline = {};
-  String _address, _dateTime;
-  bool status = true;
   final AuthService _authService = AuthService();
   Completer<GoogleMapController> _controller = Completer();
-  Set<Polyline> _polylines = {};
-  List<LatLng> polylineCoordinates = [];
-  PolylinePoints polylinePoints = PolylinePoints();
-  Vector3 _userAaccelerometer = Vector3.zero();
+
+  Socket socket;
 
   @override
   void initState() {
     super.initState();
-    _localisation.determinePosition().then((value) {
-      _getPolyline(value);
-    });
-    motionSensors.userAccelerometer.listen((UserAccelerometerEvent event) {
-      setState(() {
-        _userAaccelerometer.setValues(event.x, event.y, event.z);
-      });
-    });
     // ignore: cancel_subscriptions
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream().listen((Position position) {
-      setState(() {
-        _localisation.geocodePosition(position).then((value) async {
-          _address = value;
-          _localisation.storePosition(position);
+      if (this.mounted)
+        setState(() {
+          _localisation.geocodePosition(position).then((value) async {
+            _address = value;
+          });
         });
-        DateTime now = DateTime.now();
-        _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
-      });
     });
+    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      DateTime now = DateTime.now();
+      if (this.mounted)
+        setState(() {
+          x = event.x;
+          y = event.y;
+          z = event.z;
+          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+        });
+    });
+  }
 
-    _addMarker(LatLng(positioninit.latitude, positioninit.longitude), "origin",
-        BitmapDescriptor.defaultMarker);
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -89,7 +82,6 @@ class _HomeState extends State<Home> {
                   RaisedButton(
                     onPressed: () {
                       _localisation.checkPermission();
-                      status = true;
                       print("Start");
                       _localisation.determinePosition().then((value) {
                         positioninit = value;
@@ -99,14 +91,7 @@ class _HomeState extends State<Home> {
                   ),
                   RaisedButton(
                     onPressed: () {
-                      status = false;
                       print("Stop");
-                      _localisation.determinePosition().then((value) {
-                        _addMarker(
-                            LatLng(value.latitude, value.longitude),
-                            "destination",
-                            BitmapDescriptor.defaultMarkerWithHue(90));
-                      });
                     },
                     child: Text("Stop"),
                   ),
@@ -133,10 +118,10 @@ class _HomeState extends State<Home> {
                   SizedBox(
                     height: 3,
                   ),
-                  if (_userAaccelerometer != Vector3.zero())
-                    Text('x: ${(_userAaccelerometer.x).toStringAsFixed(3)}' +
-                        ' y: ${(_userAaccelerometer.y).toStringAsFixed(3)}' +
-                        ' z: ${(_userAaccelerometer.z).toStringAsFixed(3)}'),
+                  if (x != null)
+                    Text('x: ${x.toStringAsFixed(2)}' +
+                        ' y: ${y.toStringAsFixed(2)}' +
+                        ' z: ${z.toStringAsFixed(2)}'),
                 ],
               ),
             ),
@@ -144,20 +129,19 @@ class _HomeState extends State<Home> {
               height: 400,
               child: Container(
                 child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                        target: LatLng(
-                            positioninit.latitude, positioninit.longitude),
-                        zoom: 15),
-                    myLocationEnabled: true,
-                    tiltGesturesEnabled: true,
-                    compassEnabled: true,
-                    scrollGesturesEnabled: true,
-                    zoomGesturesEnabled: true,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller.complete(controller);
-                    },
-                    polylines: Set<Polyline>.of(polylines.values),
-                    markers: Set<Marker>.of(markers.values)),
+                  initialCameraPosition: CameraPosition(
+                      target:
+                          LatLng(positioninit.latitude, positioninit.longitude),
+                      zoom: 15),
+                  myLocationEnabled: true,
+                  tiltGesturesEnabled: true,
+                  compassEnabled: true,
+                  scrollGesturesEnabled: true,
+                  zoomGesturesEnabled: true,
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                ),
               ),
             ),
             RaisedButton(
@@ -168,42 +152,5 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
-  }
-
-  _addMarker(LatLng position, String id, BitmapDescriptor descriptor) {
-    MarkerId markerId = MarkerId(id);
-    Marker marker =
-        Marker(markerId: markerId, icon: descriptor, position: position);
-    markers[markerId] = marker;
-  }
-
-  void _getPolyline(Position position) async {
-    List<LatLng> polylineCoordinates = [];
-
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      "AIzaSyCE2L8QxWYSXlydQlVCsLpkqt9e8B8N080",
-      PointLatLng(45.6383, -73.7298),
-      PointLatLng(position.latitude, position.longitude),
-      travelMode: TravelMode.driving,
-    );
-    if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
-    } else {
-      print(result.errorMessage);
-    }
-    _addPolyLine(polylineCoordinates);
-  }
-
-  _addPolyLine(List<LatLng> polylineCoordinates) {
-    PolylineId id = PolylineId("poly");
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.blue,
-      points: polylineCoordinates,
-      width: 8,
-    );
-    polylines[id] = polyline;
   }
 }
