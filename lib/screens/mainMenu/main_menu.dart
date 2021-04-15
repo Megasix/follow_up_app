@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/home.dart';
-import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/screens/mainMenu/messaging/messaging.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/shared_functions.dart';
+import 'messaging/messaging.dart';
 
 class MainMenu extends StatefulWidget {
   @override
