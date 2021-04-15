@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:get/get.dart';
