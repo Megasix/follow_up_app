@@ -68,9 +68,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
       body: Container(
         child: Column(
           children: [
-            messageList(),
             Expanded(
-              child: Container(),
+              child: Container(padding: EdgeInsets.symmetric(horizontal: 10.0), child: messageList()),
             ),
             Container(
               decoration: BoxDecoration(
@@ -104,13 +103,20 @@ class MessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: sender == UserInformations.userFirstName
-            ? BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomLeft: Radius.circular(30.0))
-            : BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
-        color: Theme.of(context).backgroundColor,
+      padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 5.0),
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        decoration: sender == UserInformations.userFirstName
+            ? BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomLeft: Radius.circular(30.0)),
+                color: Theme.of(context).backgroundColor,
+              )
+            : BoxDecoration(
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+        child: Text(message),
       ),
-      child: Text(message),
     );
   }
 }
