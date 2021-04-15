@@ -9,8 +9,10 @@ final lightThemeConstant = ThemeData(
   scaffoldBackgroundColor: Colors.white,
   buttonColor: Color(0xFFFBAF00),
   secondaryHeaderColor: Color(0xFFFBAF00),
+  textSelectionColor: Colors.white,
   brightness: Brightness.light,
-  accentColor: Colors.black,
+  accentColor: Colors.grey[400],
+  splashColor: Colors.grey,
 );
 
 final darkThemeConstant = ThemeData(
@@ -18,6 +20,13 @@ final darkThemeConstant = ThemeData(
   scaffoldBackgroundColor: Colors.grey[800],
   buttonColor: Color(0xFFFFAA33),
   secondaryHeaderColor: Colors.grey[700],
+  textSelectionColor: Colors.grey[800],
   brightness: Brightness.dark,
-  accentColor: Colors.white,
+  accentColor: Colors.grey[600],
+  splashColor: Colors.grey,
 );
+
+class UserInformations {
+  static String userFirstName ="";
+  static String userEmail = "";
+}
