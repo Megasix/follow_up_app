@@ -99,7 +99,7 @@ class DatabaseService {
   }
 
   getUserByFirstName(String name) async {
-    return await usersCollection.where("firstName", isEqualTo: name).get();
+    return await usersCollection.where('firstName', isEqualTo: name).get();
   }
 
   getUserByLastName(String name) async {
