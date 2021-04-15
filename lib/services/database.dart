@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
 
 class DatabaseService {
@@ -111,8 +110,18 @@ class DatabaseService {
   }
 
   createChatRoom(String chatRoomID, chatRoomMap) async {
-      return await chatRoomCollection.doc(chatRoomID).set(chatRoomMap).catchError((e) {
-        print(e.toString());
-      });
+    await chatRoomCollection.doc(chatRoomID).set(chatRoomMap).catchError((e) {
+      print(e.toString());
+    });
+  }
+
+  addConversationMessage(String chatRoomID, messageMap) async {
+    await chatRoomCollection.doc(chatRoomID).collection('chats').add(messageMap).catchError((e) {
+      print(e.toString());
+    });
+  }
+
+  getConversationMessages(String chatRoomID) async {
+    return await chatRoomCollection.doc(chatRoomID).collection('chats').orderBy('time', descending: false).snapshots();
   }
 }
