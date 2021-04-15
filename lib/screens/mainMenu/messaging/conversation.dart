@@ -102,11 +102,15 @@ class MessageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isUser = sender == UserInformations.userFirstName;
+
     return Container(
       padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 5.0),
+      width: MediaQuery.of(context).size.width,
+      alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
         padding: EdgeInsets.all(10.0),
-        decoration: sender == UserInformations.userFirstName
+        decoration: isUser
             ? BoxDecoration(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomLeft: Radius.circular(30.0)),
                 color: Theme.of(context).backgroundColor,
