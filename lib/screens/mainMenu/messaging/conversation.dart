@@ -69,7 +69,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Container(padding: EdgeInsets.symmetric(horizontal: 10.0), child: messageList()),
+              child: Container(child: messageList()),
             ),
             Container(
               decoration: BoxDecoration(
@@ -105,7 +105,8 @@ class MessageTile extends StatelessWidget {
     bool isUser = sender == UserInformations.userFirstName;
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 7.0, horizontal: 5.0),
+      padding: EdgeInsets.only(left: isUser ? 0 : 24, right: !isUser ? 0 : 24),
+      margin: EdgeInsets.symmetric(vertical: 7.0),
       width: MediaQuery.of(context).size.width,
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
