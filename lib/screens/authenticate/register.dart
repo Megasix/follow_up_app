@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -8,6 +10,7 @@ import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/shared_functions.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,7 +31,7 @@ class _RegisterState extends State<Register> {
   final PageController _pageController = PageController(initialPage: 0);
 
 // text field state
-  DateTime birthDate;
+  Timestamp birthDate;
   String country;
   String firstName;
   String lastName;
@@ -86,7 +89,8 @@ class _RegisterState extends State<Register> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(top: 40.0*heightRatio, bottom: 30.0*heightRatio, left: 20.0*widthRatio, right: 20.0*widthRatio),
+                      padding:
+                          EdgeInsets.only(top: 40.0 * heightRatio, bottom: 30.0 * heightRatio, left: 20.0 * widthRatio, right: 20.0 * widthRatio),
                       child: AspectRatio(
                         aspectRatio: contextAspectRatio,
                         child: Image(
@@ -99,7 +103,7 @@ class _RegisterState extends State<Register> {
                     // email field
                     Expanded(
                       child: Container(
-                        padding: EdgeInsets.only(bottom: 40.0*heightRatio),
+                        padding: EdgeInsets.only(bottom: 40.0 * heightRatio),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(50.0),
@@ -115,7 +119,7 @@ class _RegisterState extends State<Register> {
                                 //physics: NeverScrollableScrollPhysics(),
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
+                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -139,7 +143,7 @@ class _RegisterState extends State<Register> {
                                                     child: Text('$country'),
                                                   ))
                                               .toList(),
-                                          onSaved: (val) {
+                                          onChanged: (val) {
                                             setState(() => country = val);
                                           },
                                         ),
@@ -153,11 +157,11 @@ class _RegisterState extends State<Register> {
                                           inputType: InputType.date,
                                           decoration: textInputDecoration.copyWith(hintText: 'Date of Birth'),
                                           validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                                          onSaved: (val) {
-                                            setState(() => birthDate = val);
+                                          onChanged: (val) {
+                                            setState(() => birthDate = Timestamp.fromDate(val));
                                           },
                                         ),
-                                        SizedBox(height: 50.0*heightRatio),
+                                        SizedBox(height: 50.0 * heightRatio),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
@@ -199,7 +203,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
+                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -262,7 +266,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
+                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -324,7 +328,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
+                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -388,7 +392,7 @@ class _RegisterState extends State<Register> {
                                     ),
                                   ),
                                   Container(
-                                    padding: EdgeInsets.only(left: 40.0*widthRatio, top: 40.0*heightRatio, right: 40.0*widthRatio),
+                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
                                     child: Column(
                                       children: [
                                         Text(
@@ -425,7 +429,8 @@ class _RegisterState extends State<Register> {
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   setState(() => loading = true);
-                                                  dynamic result = await _authService.registerWithEmailAndPassword(email, password);
+                                                  dynamic result = await _authService.registerWithEmailAndPassword(
+                                                      firstName, lastName, country, email, phoneNumber, birthDate, password);
                                                   if (result == null)
                                                     setState(() {
                                                       error = 'There was an error using these credential please retry';
