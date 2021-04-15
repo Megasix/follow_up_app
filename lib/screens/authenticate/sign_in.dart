@@ -122,7 +122,7 @@ class _SignInState extends State<SignIn> {
                                   child: Text('Sign In',
                                       style: TextStyle(color: Colors.white)),
                                   onPressed: () async {
-                                    if (_formKey.currentState.validate()) {
+                                    //if (_formKey.currentState.validate()) {
                                       setState(() => loading = true);
                                       dynamic result = await _authService
                                           .signInWithEmailAndPassword(
@@ -133,7 +133,7 @@ class _SignInState extends State<SignIn> {
                                               'There was an error using these credential please retry';
                                           loading = false;
                                         });
-                                    }
+                                    //}
                                   }),
                             ),
 
