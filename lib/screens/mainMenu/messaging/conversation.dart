@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/shared_functions.dart';
+import 'package:ntp/ntp.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String recipientName;
@@ -38,12 +39,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
         });
   }
 
-  sendMessage(String message) {
+  sendMessage(String message) async {
     if (message != null) {
       Map<String, dynamic> messageMap = {
         'message': message,
         'sendBy': UserInformations.userFirstName,
-        'time': DateTime.now().toUtc().millisecondsSinceEpoch,
+        'time': await NTP.now(),
       };
       _databaseService.addConversationMessage(widget.chatRoomID, messageMap);
     }
