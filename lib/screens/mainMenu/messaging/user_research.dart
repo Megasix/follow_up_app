@@ -5,6 +5,7 @@ import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
 
 final   DatabaseService _databaseService = new DatabaseService();
+String chatRoomID;
 
 class UserResearch extends StatefulWidget {
   @override
@@ -50,11 +51,6 @@ class _UserResearchState extends State<UserResearch> {
       },
     )
         : Container();
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -150,7 +146,7 @@ class SearchTile extends StatelessWidget {
                     .textSelectionColor),),
               onPressed: () {
                 createChatRoom(email);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(firstName)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(firstName, chatRoomID)));
               },
             ),
           ),
@@ -168,7 +164,7 @@ getChatRoomID(String a, String b) {
 }
 
 createChatRoom(String recipientEmail) {
-  String chatRoomID = getChatRoomID(UserInformations.userEmail, recipientEmail);
+  chatRoomID = getChatRoomID(UserInformations.userEmail, recipientEmail);
   List<String> usersEmail = [UserInformations.userEmail, recipientEmail];
   Map<String, dynamic> chatRoomMap = {
     'users': usersEmail,
