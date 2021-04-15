@@ -56,7 +56,6 @@ class _SignInState extends State<SignIn> {
     var generalVerticalPadding = 30.0 * contextHeight / _referenceHeight;
     var heightRatio = contextHeight / _referenceHeight;
     var widthRatio = contextWidth / _referenceWidth;
-    print(heightRatio);
 
     bool lightThemeEnabled = getTheme();
 
