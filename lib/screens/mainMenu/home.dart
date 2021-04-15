@@ -31,16 +31,16 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    gyroscopeEvents.listen((GyroscopeEvent event) {
+    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       DateTime now = DateTime.now();
       if (this.mounted)
         setState(() {
-          // x = event.x;
-          // y = event.y;
-          //  z = event.z;
+          x = event.x;
+          y = event.y;
+          z = event.z;
           _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
         });
-      //_acceleration.verifyAcceleration(event);
+      _acceleration.verifyAcceleration(event);
     });
     positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
