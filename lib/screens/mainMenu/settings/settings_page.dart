@@ -7,16 +7,21 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sameTypePadding = 10.0;
-    final double generalTypePadding = 20.0;
+    const _referenceHeight = 820.5714285714286;
+    const _referenceWidth = 411.42857142857144;
+    final double contextHeight = MediaQuery.of(context).size.height;
     final double contextWidth = MediaQuery.of(context).size.width;
+    var sameTypeVerticalPadding = 10.0 * contextHeight / _referenceHeight;
+    var generalVerticalPadding = 30.0 * contextHeight / _referenceHeight;
+    var heightRatio = contextHeight / _referenceHeight;
+    var widthRatio = contextWidth / _referenceWidth;
 
     void _showSettingsPanel(Widget settingPanel) {
       showModalBottomSheet(
           context: context,
           builder: (context) {
             return Container(
-              padding: EdgeInsets.all(10.0),
+              padding: EdgeInsets.only(left: 10.0*widthRatio, top: 10.0*heightRatio, right: 10.0*widthRatio, bottom: 10.0*heightRatio),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -27,13 +32,13 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(top: 50.0, left: 10.0, right: 10.0, bottom: 50.0),
+        padding: EdgeInsets.only(top: 50.0*heightRatio, left: 10.0*widthRatio, right: 10.0*widthRatio, bottom: 50.0*heightRatio),
         child: Column(
           children: <Widget>[
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0, left: 5.0, right: 5.0, bottom: 10.0),
+                padding: EdgeInsets.only(top: 10.0*heightRatio, left: 5.0*widthRatio, right: 5.0*widthRatio, bottom: 10.0*heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
@@ -47,13 +52,13 @@ class SettingsPage extends StatelessWidget {
                         fontSize: 17.0,
                       ),
                     ),
-                    SizedBox(height: sameTypePadding),
+                    SizedBox(height: sameTypeVerticalPadding),
                     FlatButton(
                         onPressed: () {},
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.account_circle),
-                            SizedBox(width: 8.0),
+                            SizedBox(width: 8.0*widthRatio),
                             Text('Edit profile'),
                             Spacer(),
                             Icon(
@@ -67,7 +72,7 @@ class SettingsPage extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.poll),
-                            SizedBox(width: 8.0),
+                            SizedBox(width: 8.0*widthRatio),
                             Text('Unit type'),
                             Spacer(),
                             Icon(
@@ -94,11 +99,11 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: generalTypePadding),
+            SizedBox(height: generalVerticalPadding),
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0, left: 5.0, right: 5.0, bottom: 10.0),
+                padding: EdgeInsets.only(top: 10.0*heightRatio, left: 5.0*widthRatio, right: 5.0*widthRatio, bottom: 10.0*heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
@@ -112,7 +117,7 @@ class SettingsPage extends StatelessWidget {
                         fontSize: 17.0,
                       ),
                     ),
-                    SizedBox(height: sameTypePadding),
+                    SizedBox(height: sameTypeVerticalPadding),
                     FlatButton(
                         onPressed: () {
                           _showSettingsPanel(DisplaySettingsForm());
@@ -120,7 +125,7 @@ class SettingsPage extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.settings_display),
-                            SizedBox(width: 8.0),
+                            SizedBox(width: 8.0*widthRatio),
                             Text('Display'),
                             Spacer(),
                             Icon(
