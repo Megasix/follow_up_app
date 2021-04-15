@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:sensors/sensors.dart';
-import 'dart:io';
 
 double x;
 double y;
@@ -22,19 +21,28 @@ class Home extends StatefulWidget {
 Position positioninit =
     new Position(latitude: 45.501861, longitude: -73.593889);
 final Localisation _localisation = Localisation();
+final Acceleration _acceleration = Acceleration();
 
 class _HomeState extends State<Home> {
   final AuthService _authService = AuthService();
   Completer<GoogleMapController> _controller = Completer();
-
-  Socket socket;
+  StreamSubscription<Position> positionStream;
 
   @override
   void initState() {
     super.initState();
-    // ignore: cancel_subscriptions
-    StreamSubscription<Position> positionStream =
-        Geolocator.getPositionStream().listen((Position position) {
+    gyroscopeEvents.listen((GyroscopeEvent event) {
+      DateTime now = DateTime.now();
+      if (this.mounted)
+        setState(() {
+          // x = event.x;
+          // y = event.y;
+          //  z = event.z;
+          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+        });
+      //_acceleration.verifyAcceleration(event);
+    });
+    positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
         setState(() {
           _localisation.geocodePosition(position).then((value) async {
@@ -42,20 +50,11 @@ class _HomeState extends State<Home> {
           });
         });
     });
-    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      DateTime now = DateTime.now();
-      if (this.mounted)
-        setState(() {
-          x = event.x;
-          y = event.y;
-          z = event.z;
-          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
-        });
-    });
   }
 
   @override
   void dispose() {
+    positionStream.cancel();
     super.dispose();
   }
 
