@@ -1,10 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/shared_functions.dart';
 
 class ConversationScreen extends StatefulWidget {
   final String recipientName;
+  final String chatRoomID;
 
-  const ConversationScreen(this.recipientName);
+  const ConversationScreen(this.recipientName, this.chatRoomID);
 
   @override
   _ConversationScreenState createState() => _ConversationScreenState(recipientName);
@@ -12,11 +16,45 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final String recipientName;
+  final messageController = TextEditingController();
+  Stream chatMessagesStream;
+
+  DatabaseService _databaseService = new DatabaseService();
 
   _ConversationScreenState(this.recipientName);
 
-  Widget messageList(){
+  Widget messageList() {
+    return StreamBuilder(
+        stream: chatMessagesStream,
+        builder: (context, snapshot) {
+          return snapshot.hasData
+              ? ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data.docs.length,
+                  itemBuilder: (context, index) {
+                    return MessageTile(snapshot.data.docs[index].get('message'), snapshot.data.docs[index].get('sendBy'));
+                  })
+              : Container();
+        });
+  }
 
+  sendMessage(String message) {
+    if (message != null) {
+      Map<String, dynamic> messageMap = {
+        'message': message,
+        'sendBy': UserInformations.userFirstName,
+        'time': DateTime.now().millisecondsSinceEpoch,
+      };
+      _databaseService.addConversationMessage(widget.chatRoomID, messageMap);
+    }
+  }
+
+  @override
+  void initState() {
+    _databaseService.getConversationMessages(widget.chatRoomID).then((val) {
+      chatMessagesStream = val;
+    });
+    super.initState();
   }
 
   @override
@@ -29,16 +67,49 @@ class _ConversationScreenState extends State<ConversationScreen> {
       body: Container(
         child: Column(
           children: [
+            messageList(),
             Expanded(
               child: Container(),
             ),
             Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(30.0), color: Theme.of(context).accentColor),
-              child: TextFormField(decoration: textInputDecoration.copyWith(hintText: 'Message', contentPadding: EdgeInsets.only(left: 10.0))),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30.0),
+                color: Theme.of(context).accentColor,
+              ),
+              child: TextFormField(
+                controller: messageController,
+                decoration: textInputDecoration.copyWith(hintText: 'Message', contentPadding: EdgeInsets.only(left: 10.0)),
+                onFieldSubmitted: (message) {
+                  setState(() {
+                    sendMessage(message);
+                    messageController.clear();
+                  });
+                },
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class MessageTile extends StatelessWidget {
+  final String message;
+  final String sender;
+
+  const MessageTile(this.message, this.sender);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: sender == UserInformations.userFirstName
+            ? BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomLeft: Radius.circular(30.0))
+            : BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
+        color: Theme.of(context).backgroundColor,
+      ),
+      child: Text(message),
     );
   }
 }
