@@ -43,7 +43,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       Map<String, dynamic> messageMap = {
         'message': message,
         'sendBy': UserInformations.userFirstName,
-        'time': DateTime.now().millisecondsSinceEpoch,
+        'time': DateTime.now().toUtc().millisecondsSinceEpoch,
       };
       _databaseService.addConversationMessage(widget.chatRoomID, messageMap);
     }
