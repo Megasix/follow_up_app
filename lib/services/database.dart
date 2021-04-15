@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:follow_up_app/models/user.dart';
 
 class DatabaseService {
@@ -123,5 +124,9 @@ class DatabaseService {
 
   getConversationMessages(String chatRoomID) async {
     return await chatRoomCollection.doc(chatRoomID).collection('chats').orderBy('time', descending: false).snapshots();
+  }
+
+  getChatRooms(String name) async {
+    return await chatRoomCollection.where('users', arrayContains: name).snapshots();
   }
 }
