@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
+import 'package:ntp/ntp.dart';
 
-final   DatabaseService _databaseService = new DatabaseService();
+final DatabaseService _databaseService = new DatabaseService();
 String chatRoomID;
 
 class UserResearch extends StatefulWidget {
@@ -24,32 +25,32 @@ class _UserResearchState extends State<UserResearch> {
   Widget searchListFirstName() {
     return searchSnapshotFirstName != null
         ? ListView.builder(
-      shrinkWrap: true,
-      itemCount: searchSnapshotFirstName.docs.length,
-      itemBuilder: (context, index) {
-        return SearchTile(
-          firstName: searchSnapshotFirstName.docs[index].get('firstName'),
-          lastName: searchSnapshotFirstName.docs[index].get('lastName'),
-          email: searchSnapshotFirstName.docs[index].get('email'),
-        );
-      },
-    )
+            shrinkWrap: true,
+            itemCount: searchSnapshotFirstName.docs.length,
+            itemBuilder: (context, index) {
+              return SearchTile(
+                firstName: searchSnapshotFirstName.docs[index].get('firstName'),
+                lastName: searchSnapshotFirstName.docs[index].get('lastName'),
+                email: searchSnapshotFirstName.docs[index].get('email'),
+              );
+            },
+          )
         : Container();
   }
 
   Widget searchListLastName() {
     return searchSnapshotLastName != null
         ? ListView.builder(
-      shrinkWrap: true,
-      itemCount: searchSnapshotLastName.docs.length,
-      itemBuilder: (context, index) {
-        return SearchTile(
-          firstName: searchSnapshotLastName.docs[index].get('firstName'),
-          lastName: searchSnapshotLastName.docs[index].get('lastName'),
-          email: searchSnapshotLastName.docs[index].get('email'),
-        );
-      },
-    )
+            shrinkWrap: true,
+            itemCount: searchSnapshotLastName.docs.length,
+            itemBuilder: (context, index) {
+              return SearchTile(
+                firstName: searchSnapshotLastName.docs[index].get('firstName'),
+                lastName: searchSnapshotLastName.docs[index].get('lastName'),
+                email: searchSnapshotLastName.docs[index].get('email'),
+              );
+            },
+          )
         : Container();
   }
 
@@ -57,22 +58,14 @@ class _UserResearchState extends State<UserResearch> {
   Widget build(BuildContext context) {
     const _referenceHeight = 820.5714285714286;
     const _referenceWidth = 411.42857142857144;
-    final double contextHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final double contextWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final double contextHeight = MediaQuery.of(context).size.height;
+    final double contextWidth = MediaQuery.of(context).size.width;
     var heightRatio = contextHeight / _referenceHeight;
     var widthRatio = contextWidth / _referenceWidth;
 
     return Container(
       padding: EdgeInsets.only(top: 50.0 * heightRatio, left: 20.0 * widthRatio, right: 20.0 * widthRatio),
-      color: Theme
-          .of(context)
-          .backgroundColor,
+      color: Theme.of(context).backgroundColor,
       child: Column(
         children: [
           Row(
@@ -107,14 +100,8 @@ class SearchTile extends StatelessWidget {
   Widget build(BuildContext context) {
     const _referenceHeight = 820.5714285714286;
     const _referenceWidth = 411.42857142857144;
-    final double contextHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
-    final double contextWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final double contextHeight = MediaQuery.of(context).size.height;
+    final double contextWidth = MediaQuery.of(context).size.width;
     var heightRatio = contextHeight / _referenceHeight;
     var widthRatio = contextWidth / _referenceWidth;
 
@@ -136,14 +123,12 @@ class SearchTile extends StatelessWidget {
           ),
           Spacer(),
           Container(
-            decoration: BoxDecoration(color: Theme
-                .of(context)
-                .buttonColor, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: Theme.of(context).buttonColor, borderRadius: BorderRadius.circular(20)),
             child: FlatButton(
-              child: Text('Message',
-                style: TextStyle(color: Theme
-                    .of(context)
-                    .textSelectionColor),),
+              child: Text(
+                'Message',
+                style: TextStyle(color: Theme.of(context).textSelectionColor),
+              ),
               onPressed: () {
                 createChatRoom(email);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(firstName, chatRoomID)));
@@ -163,12 +148,9 @@ getChatRoomID(String a, String b) {
     return '$a\_$b';
 }
 
-createChatRoom(String recipientEmail) {
+createChatRoom(String recipientEmail) async {
   chatRoomID = getChatRoomID(UserInformations.userEmail, recipientEmail);
   List<String> usersEmail = [UserInformations.userEmail, recipientEmail];
-  Map<String, dynamic> chatRoomMap = {
-    'users': usersEmail,
-    'chatRoomID': chatRoomID
-  };
+  Map<String, dynamic> chatRoomMap = {'users': usersEmail, 'chatRoomID': chatRoomID, 'lastActivity': await NTP.now()};
   _databaseService.createChatRoom(chatRoomID, chatRoomMap);
 }
