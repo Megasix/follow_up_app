@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:follow_up_app/models/user.dart';
+import 'package:ntp/ntp.dart';
 
 class DatabaseService {
   final String email;
@@ -117,6 +117,7 @@ class DatabaseService {
   }
 
   addConversationMessage(String chatRoomID, messageMap) async {
+    await chatRoomCollection.doc(chatRoomID).set({'lastActivity': await NTP.now()});
     await chatRoomCollection.doc(chatRoomID).collection('chats').add(messageMap).catchError((e) {
       print(e.toString());
     });
@@ -126,7 +127,7 @@ class DatabaseService {
     return await chatRoomCollection.doc(chatRoomID).collection('chats').orderBy('time', descending: false).snapshots();
   }
 
-  getChatRooms(String name) async {
-    return await chatRoomCollection.where('users', arrayContains: name).snapshots();
+  getChatRooms(String email) async {
+    return await chatRoomCollection.where('users', arrayContains: email).orderBy('lastActivity', descending: true).snapshots();
   }
 }
