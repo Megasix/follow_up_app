@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
+import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/user_research.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
-import 'package:provider/provider.dart';
 
 class Messaging extends StatefulWidget {
   @override
@@ -15,7 +15,20 @@ class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final DatabaseService _databaseService = new DatabaseService();
 
+  QuerySnapshot recipientSnapshot;
   Stream chatRoomStream;
+
+  void initRecipientSnapshot(String email) async {
+    await _databaseService.getUserByEmail(email).then((value) => setState(() {
+          recipientSnapshot = value;
+        }));
+  }
+
+  void initChatRoomStream() async {
+    await _databaseService.getChatRooms(UserInformations.userEmail).then((val) {
+      chatRoomStream = val;
+    });
+  }
 
   Widget chatRoomList() {
     return StreamBuilder(
@@ -23,30 +36,36 @@ class _MessagingState extends State<Messaging> {
         builder: (context, snapshot) {
           return snapshot.hasData
               ? ListView.builder(
-                  shrinkWrap: true,
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    UsersRecipient recipient = getRecipient(snapshot.data.docs[index].get('users'));
-                    return ChatRoomTile(recipient);
-                  })
-              : Container(color: Colors.black,);
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ChatRoomTile(
+                        getRecipient(snapshot.data.docs[index].get('users')),
+                        snapshot.data.docs[index].get('chatRoomID'),
+                      ),
+                    );
+                  },
+                )
+              : Container();
         });
   }
 
   UsersRecipient getRecipient(List users) {
-    DocumentSnapshot snapshot;
+    String email;
     if (users[0] == UserInformations.userEmail)
-      _databaseService.getUserByEmail(users[1]).then((value) => snapshot = value);
+      email = users[1];
     else
-      _databaseService.getUserByEmail(users[0]).then((value) => snapshot = value);
+      email = users[0];
+    initRecipientSnapshot(email);
     return UsersRecipient(
-      snapshot.get('firsName'),
-      snapshot.get('lastName'),
-      snapshot.get('country'),
-      snapshot.get('email'),
-      snapshot.get('phoneNumber'),
-      snapshot.get('birthDate'),
-      snapshot.get('profilePictureAdress'),
+      recipientSnapshot.docs[0].get('firstName'),
+      recipientSnapshot.docs[0].get('lastName'),
+      recipientSnapshot.docs[0].get('country'),
+      recipientSnapshot.docs[0].get('email'),
+      recipientSnapshot.docs[0].get('phoneNumber'),
+      recipientSnapshot.docs[0].get('birthDate'),
+      recipientSnapshot.docs[0].get('profilePictureAdress'),
     );
   }
 
@@ -60,11 +79,7 @@ class _MessagingState extends State<Messaging> {
 
   @override
   void initState() {
-    _databaseService.getChatRooms(UserInformations.userFirstName).then((val) {
-      setState(() {
-        chatRoomStream = val;
-      });
-    });
+    initChatRoomStream();
     super.initState();
   }
 
@@ -87,18 +102,35 @@ class _MessagingState extends State<Messaging> {
         actions: [FlatButton(onPressed: _openDrawer, child: Text('New Conversation'))],
       ),
       body: Container(
-        color: Colors.black,
+        padding: EdgeInsets.only(top: 50.0 * heightRatio, bottom: 30.0 * heightRatio, left: 25.0 * widthRatio, right: 25.0 * widthRatio),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+          color: Theme.of(context).backgroundColor,
+        ),
         child: chatRoomList(),
       ),
-      endDrawer: UserResearch(),
+      endDrawer: Column(
+        children: [
+          Expanded(child: UserResearch()),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            color: Theme.of(context).backgroundColor,
+            child: FlatButton(
+              onPressed: _closeDrawer,
+              child: Text('Close'),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
 
 class ChatRoomTile extends StatelessWidget {
   final UsersRecipient recipient;
+  final String chatRoomID;
 
-  const ChatRoomTile(this.recipient);
+  const ChatRoomTile(this.recipient, this.chatRoomID);
 
   @override
   Widget build(BuildContext context) {
@@ -109,24 +141,29 @@ class ChatRoomTile extends StatelessWidget {
     var heightRatio = contextHeight / _referenceHeight;
     var widthRatio = contextWidth / _referenceWidth;
 
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30.0),
-        color: Theme.of(context).backgroundColor,
-      ),
-      child: Row(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50.0),
-              color: Theme.of(context).secondaryHeaderColor,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(recipient.firstName, chatRoomID)));
+      },
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30.0),
+          color: Theme.of(context).accentColor,
+        ),
+        child: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50.0),
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+              child: Text(('${recipient.firstName.substring(0, 1).toUpperCase()}' + '${recipient.lastName.substring(0, 1).toUpperCase()}')),
             ),
-            child: Text(('${recipient.firstName.substring(0, 1).toUpperCase()}' + '${recipient.lastName.substring(0, 1).toUpperCase()}')),
-          ),
-          SizedBox(width: 8.0),
-          Text((recipient.firstName + ' ' + recipient.lastName)),
-        ],
+            SizedBox(width: 8.0),
+            Text((recipient.firstName + ' ' + recipient.lastName)),
+          ],
+        ),
       ),
     );
   }
