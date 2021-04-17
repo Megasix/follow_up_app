@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
-import 'package:follow_up_app/shared/shared_functions.dart';
 import 'package:ntp/ntp.dart';
 
 class ConversationScreen extends StatefulWidget {
