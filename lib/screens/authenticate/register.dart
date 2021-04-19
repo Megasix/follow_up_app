@@ -12,6 +12,7 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;
@@ -111,18 +112,18 @@ class _RegisterState extends State<Register> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          'Commençons!',
-                                          textScaleFactor: 2.5,
-                                        ),
+                                        (AppLocalizations.of(context).letsBegin)),
+
+
                                         SizedBox(height: sameTypePadding),
                                         Text(
-                                          'Allons vérifier quelques informations pour pouvoir initialiser votre compte.',
-                                          textAlign: TextAlign.center,
-                                        ),
+                                            (AppLocalizations.of(context).verifInfo)),
+
+
                                         SizedBox(height: generalPadding),
                                         FormBuilderDropdown(
                                           name: 'Country',
-                                          decoration: textInputDecoration.copyWith(hintText: 'pays'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).country)),
                                           allowClear: true,
                                           validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
                                           items: countriesOptions
@@ -143,7 +144,7 @@ class _RegisterState extends State<Register> {
                                           lastDate: DateTime(lastDate),
                                           initialDate: DateTime(lastDate),
                                           inputType: InputType.date,
-                                          decoration: textInputDecoration.copyWith(hintText: 'date de naissance'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).birth)),
                                           validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
                                           onSaved: (val) {
                                             setState(() => birthDate = val);
@@ -154,7 +155,7 @@ class _RegisterState extends State<Register> {
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text('continuer', style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).continue), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -162,7 +163,7 @@ class _RegisterState extends State<Register> {
                                               }),
                                         ),
                                         SizedBox(height: generalPadding),
-                                        Text('Ou inscrivez-vous'),
+                                        Text((AppLocalizations.of(context).signOther)),
                                         SizedBox(height: generalPadding),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
@@ -182,7 +183,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: generalPadding),
                                         FlatButton(
-                                          child: Text('Avez-vous déja un compte ? Connectez-vous'),
+                                          child: Text((AppLocalizations.of(context).alreadyACC)),
                                           onPressed: () {
                                             widget.toggleView();
                                           },

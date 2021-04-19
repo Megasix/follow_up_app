@@ -104,6 +104,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Let's Begin!`
+  String get letsBegin {
+    return Intl.message(
+      'Let\'s Begin!',
+      name: 'letsBegin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lets Go over some information regarding your account`
+  String get verifInfo {
+    return Intl.message(
+      'Lets Go over some information regarding your account',
+      name: 'verifInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `country`
+  String get country {
+    return Intl.message(
+      'country',
+      name: 'country',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `date of birth`
+  String get birth {
+    return Intl.message(
+      'date of birth',
+      name: 'birth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `continue`
+  String get continue {
+    return Intl.message(
+      'continue',
+      name: 'continue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you already have an Account ? Please Sign In`
+  String get alreadyACC {
+    return Intl.message(
+      'Do you already have an Account ? Please Sign In',
+      name: 'alreadyACC',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

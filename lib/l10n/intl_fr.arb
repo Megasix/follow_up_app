@@ -5,5 +5,11 @@
   "logIn": "Connectez-vous",
   "signOther": "Ou Enregistrez-vous Avec",
   "error": "Mauvais Courriel ou Mot de Passe! Veuillez Réessayer",
-  "createACC": "Créer un Compte Gratuitement!"
+  "createACC": "Créer un Compte Gratuitement!",
+  "letsBegin": "Commeçons !",
+  "verifInfo": "Allons vérifier quelques informations pour pouvoir initialiser votre compte.",
+  "country": "pays",
+  "birth": "date de naissance",
+  "continue": "Continuer",
+  "alreadyACC": "Avez-vous déja un compte? S'il vous plait veuillez vous connecter"
 }

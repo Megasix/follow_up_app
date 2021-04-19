@@ -24,5 +24,26 @@
     "description": ""},
   "createACC": "Create a account for free",
   "@createACC": {
+    "description": ""},
+  "letsBegin": "Let's Begin!",
+  "@letsBegin": {
+    "description": ""},
+"verifInfo": "Lets Go over some information regarding your account",
+"@verifInfo": {
+"description": ""},
+  "country": "country",
+  "@country": {
+    "description": ""},
+  "birth": "date of birth",
+  "@birth": {
+    "description": ""},
+  "continue": "continue",
+  "@continue": {
+    "description": ""},
+  "alreadyACC": "Do you already have an Account ? Please Sign In",
+  "@alreadyACC": {
     "description": ""}
+
+
 }
+
