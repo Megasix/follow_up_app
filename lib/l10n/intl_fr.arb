@@ -1,3 +1,5 @@
 {
-  "helloWorld": "Bonjour Monde!"
+  "helloWorld": "Bonjour Monde!",
+  "email": "Courriel",
+  "password": "Mot de passe"
 }

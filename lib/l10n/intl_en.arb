@@ -2,5 +2,13 @@
   "helloWorld": "Hello World!",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
+  },
+  "email": "Email",
+  "@email": {
+    "description": ""
+  },
+  "password": "Password",
+  "@password": {
+    "description": ""
   }
 }
