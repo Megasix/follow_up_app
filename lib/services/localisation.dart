@@ -7,6 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Localisation {
+  List listlocalisation;
   DatabaseService _databaseService = new DatabaseService();
   checkPermission() async {
     bool serviceEnabled;
@@ -44,5 +45,9 @@ class Localisation {
     String _currentAddress =
         "${place.street},${place.locality}, ${place.postalCode}, ${place.country}";
     return _currentAddress;
+  }
+
+  polylinesMaker(Position position) {
+    if (listlocalisation.last != position) listlocalisation.add(position);
   }
 }

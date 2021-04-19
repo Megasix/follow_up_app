@@ -12,6 +12,7 @@ double x;
 double y;
 double z;
 String _address, _dateTime;
+StreamSubscription accelerometer;
 
 class Home extends StatefulWidget {
   @override
@@ -30,17 +31,18 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    super.initState();
-    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    accelerometer =
+        userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       DateTime now = DateTime.now();
-      if (this.mounted)
+      if (this.mounted && userAccelerometerEvents.isBroadcast) {
         setState(() {
           x = event.x;
           y = event.y;
           z = event.z;
           _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
         });
-      _acceleration.verifyAcceleration(event);
+      }
+      //_acceleration.verifyAcceleration(event);
     });
     positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
@@ -50,10 +52,12 @@ class _HomeState extends State<Home> {
           });
         });
     });
+    super.initState();
   }
 
   @override
   void dispose() {
+    accelerometer.cancel();
     positionStream.cancel();
     super.dispose();
   }
@@ -144,7 +148,10 @@ class _HomeState extends State<Home> {
               ),
             ),
             RaisedButton(
-              onPressed: _authService.signOut,
+              onPressed: () {
+                dispose();
+                _authService.signOut();
+              },
               child: Text("signout"),
             ),
           ],
