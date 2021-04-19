@@ -10,5 +10,19 @@
   "password": "Password",
   "@password": {
     "description": ""
-  }
+  },
+  "logIn": "Log In",
+  "@logIn": {
+    "description": ""
+  },
+  "signOther": "Or Sign Up With",
+  "@signOther": {
+    "description": "To sign up with other platforms  "
+  },
+  "error": "Wrong email or password! Please try again",
+  "@error": {
+    "description": ""},
+  "createACC": "Create a account for free",
+  "@createACC": {
+    "description": ""}
 }

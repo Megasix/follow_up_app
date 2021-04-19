@@ -125,13 +125,13 @@ class _SignInState extends State<SignIn> {
                               width: contextWidth,
                               height: 40.0,
                               child: RaisedButton(
-                                  child: Text('Sign up', style: TextStyle(color: Colors.white)),
+                                  child: Text((AppLocalizations.of(context).logIn)),
                                   onPressed: () async {
                                     setState(() => loading = true);
                                     dynamic result = await _authService.signInWithEmailAndPassword(email, password);
                                     if (result == null)
                                       setState(() {
-                                        error = 'Wrong email or password! Please try again ';
+                                        Text((AppLocalizations.of(context).error));
                                         loading = false;
                                       });
                                   }),
@@ -139,7 +139,7 @@ class _SignInState extends State<SignIn> {
 
                             SizedBox(height: generalPadding),
 
-                            Text('Or sign up with'),
+                            Text((AppLocalizations.of(context).signOther)),
 
                             SizedBox(height: generalPadding),
 
@@ -163,7 +163,7 @@ class _SignInState extends State<SignIn> {
                             SizedBox(height: generalPadding),
 
                             FlatButton(
-                              child: Text('Create an account for free'),
+                              child: Text((AppLocalizations.of(context).createACC)),
                               onPressed: () {
                                 widget.toggleView();
                               },

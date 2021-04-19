@@ -1,5 +1,9 @@
 {
   "helloWorld": "Bonjour Monde!",
   "email": "Courriel",
-  "password": "Mot de passe"
+  "password": "Mot de passe",
+  "logIn": "Connectez-vous",
+  "signOther": "Ou Enregistrez-vous Avec",
+  "error": "Mauvais Courriel ou Mot de Passe! Veuillez Réessayer",
+  "createACC": "Créer un Compte Gratuitement!"
 }
