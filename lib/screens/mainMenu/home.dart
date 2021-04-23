@@ -1,65 +1,34 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/services/localisation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
-import 'package:sensors/sensors.dart';
-
-double x;
-double y;
-double z;
-String _address, _dateTime;
-StreamSubscription accelerometer;
+import 'package:follow_up_app/screens/mainMenu/mapData.dart';
 
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
 }
 
-Position positioninit =
-    new Position(latitude: 45.501861, longitude: -73.593889);
-final Localisation _localisation = Localisation();
-final Acceleration _acceleration = Acceleration();
+LatLng currentPostion;
 
 class _HomeState extends State<Home> {
   final AuthService _authService = AuthService();
   Completer<GoogleMapController> _controller = Completer();
-  StreamSubscription<Position> positionStream;
 
-  @override
-  void initState() {
-    accelerometer =
-        userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      DateTime now = DateTime.now();
-      if (this.mounted && userAccelerometerEvents.isBroadcast) {
-        setState(() {
-          x = event.x;
-          y = event.y;
-          z = event.z;
-          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
-        });
-      }
-      //_acceleration.verifyAcceleration(event);
+  void _getUserLocation() async {
+    var position = await GeolocatorPlatform.instance
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    setState(() {
+      currentPostion = LatLng(position.latitude, position.longitude);
     });
-    positionStream = Geolocator.getPositionStream().listen((Position position) {
-      if (this.mounted)
-        setState(() {
-          _localisation.geocodePosition(position).then((value) async {
-            _address = value;
-          });
-        });
-    });
-    super.initState();
   }
 
   @override
-  void dispose() {
-    accelerometer.cancel();
-    positionStream.cancel();
-    super.dispose();
+  void initState() {
+    _getUserLocation();
+    super.initState();
   }
 
   @override
@@ -84,11 +53,12 @@ class _HomeState extends State<Home> {
                 children: [
                   RaisedButton(
                     onPressed: () {
-                      _localisation.checkPermission();
-                      print("Start");
-                      _localisation.determinePosition().then((value) {
-                        positioninit = value;
-                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return Map();
+                        }),
+                      );
                     },
                     child: Text("Start"),
                   ),
@@ -101,55 +71,36 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 3,
-                  ),
-                  if (_dateTime != null)
-                    Text(
-                      "Date/Time: $_dateTime",
-                    ),
-                  SizedBox(
-                    height: 3,
-                  ),
-                  if (_address != null)
-                    Text(
-                      "Address: $_address",
-                    ),
-                  SizedBox(
-                    height: 3,
-                  ),
-                  if (x != null)
-                    Text('x: ${x.toStringAsFixed(2)}' +
-                        ' y: ${y.toStringAsFixed(2)}' +
-                        ' z: ${z.toStringAsFixed(2)}'),
-                ],
-              ),
-            ),
             SizedBox(
               height: 400,
-              child: Container(
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                      target:
-                          LatLng(positioninit.latitude, positioninit.longitude),
-                      zoom: 15),
-                  myLocationEnabled: true,
-                  tiltGesturesEnabled: true,
-                  compassEnabled: true,
-                  scrollGesturesEnabled: true,
-                  zoomGesturesEnabled: true,
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-              ),
+              child: currentPostion == null
+                  ? Container(
+                      child: Center(
+                        child: Text(
+                          'loading map..',
+                          style: TextStyle(
+                              fontFamily: 'Avenir-Medium',
+                              color: Colors.grey[400]),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      child: GoogleMap(
+                        initialCameraPosition:
+                            CameraPosition(target: currentPostion, zoom: 15),
+                        myLocationEnabled: true,
+                        tiltGesturesEnabled: true,
+                        compassEnabled: true,
+                        scrollGesturesEnabled: true,
+                        zoomGesturesEnabled: true,
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller.complete(controller);
+                        },
+                      ),
+                    ),
             ),
             RaisedButton(
               onPressed: () {
-                dispose();
                 _authService.signOut();
               },
               child: Text("signout"),

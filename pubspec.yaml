@@ -44,6 +44,7 @@ dependencies:
   google_maps_flutter: ^1.2.0
   flutter_polyline_points: ^0.2.4
   sensors: ^0.4.1+7
+  sliding_up_panel: ^1.0.2
 
 dev_dependencies:
   flutter_test:
