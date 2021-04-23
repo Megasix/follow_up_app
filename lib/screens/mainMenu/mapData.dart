@@ -1,14 +1,23 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
+import 'package:follow_up_app/services/localisation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sensors/sensors.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:intl/intl.dart';
 
 StreamSubscription accelerometer;
 LatLng currentPostion;
 Completer<GoogleMapController> _controller = Completer();
 final panelController = PanelController();
+double x, y, z, _vitesse;
+String _address, _dateTime;
+Stream<Position> positionStream;
+final Localisation _localisation = Localisation();
+final Acceleration _acceleration = Acceleration();
 
 class Map extends StatefulWidget {
   @override
@@ -17,6 +26,7 @@ class Map extends StatefulWidget {
 
 class _MapData extends State<Map> {
   final AuthService _authService = AuthService();
+  StreamSubscription<Position> positionStream;
 
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
@@ -29,8 +39,28 @@ class _MapData extends State<Map> {
 
   @override
   void initState() {
-    _getUserLocation();
     super.initState();
+    _getUserLocation();
+    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      DateTime now = DateTime.now();
+      if (this.mounted)
+        setState(() {
+          x = event.x;
+          y = event.y;
+          z = event.z;
+          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+        });
+      //_acceleration.verifyAcceleration(event);
+    });
+    positionStream = Geolocator.getPositionStream().listen((Position position) {
+      if (this.mounted)
+        setState(() {
+          _vitesse = position.speed;
+          _localisation.geocodePosition(position).then((value) async {
+            _address = value;
+          });
+        });
+    });
   }
 
   @override
@@ -49,8 +79,36 @@ class _MapData extends State<Map> {
         maxHeight: MediaQuery.of(context).size.height / 3,
         minHeight: 80,
         panel: Center(
-          child: Text("pending"),
-        ),
+            child: Container(
+          child: Column(
+            children: [
+              Expanded(
+                child: Text(
+                  _address,
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "1",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Text(
+                    "2",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  Text(
+                    "3",
+                    style: TextStyle(color: Colors.black),
+                  )
+                ],
+              )
+            ],
+          ),
+        )),
         collapsed: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
