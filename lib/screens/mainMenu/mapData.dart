@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/screens/mainMenu/tab_widget.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,7 +9,6 @@ StreamSubscription accelerometer;
 LatLng currentPostion;
 Completer<GoogleMapController> _controller = Completer();
 final panelController = PanelController();
-final double tabBarHeight = 80;
 
 class Map extends StatefulWidget {
   @override
@@ -41,55 +39,44 @@ class _MapData extends State<Map> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: SlidingUpPanel(
-          controller: panelController,
-          maxHeight: MediaQuery.of(context).size.height - tabBarHeight,
-          panelBuilder: (scrollController) => buildSlidingPanel(
-            scrollController: scrollController,
-            panelController: panelController,
-          ),
-          body: (bottomWidget()),
+  Widget build(BuildContext context) {
+    BorderRadiusGeometry radius = BorderRadius.only(
+      topLeft: Radius.circular(24.0),
+      topRight: Radius.circular(24.0),
+    );
+    return Scaffold(
+      body: SlidingUpPanel(
+        maxHeight: MediaQuery.of(context).size.height / 3,
+        minHeight: 80,
+        panel: Center(
+          child: Text("pending"),
         ),
-      );
-  Widget buildSlidingPanel({
-    @required PanelController panelController,
-    @required ScrollController scrollController,
-  }) =>
-      DefaultTabController(
-        length: 1,
-        child: Scaffold(
-          appBar: buildTabBar(
-            onClicked: panelController.open,
-          ),
-          body: TabBarView(
-            children: [TabWidget(scrollController: scrollController)],
-          ),
-        ),
-      );
-
-  Widget buildTabBar({
-    @required VoidCallback onClicked,
-  }) =>
-      PreferredSize(
-        preferredSize: Size.fromHeight(tabBarHeight - 8),
-        child: GestureDetector(
-          onTap: onClicked,
-          child: AppBar(
-            title: buildDragIcon(), // Icon(Icons.drag_handle),
-            centerTitle: true,
+        collapsed: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.orange,
+                  Colors.yellow,
+                ],
+              ),
+              color: Colors.blueGrey,
+              borderRadius: radius),
+          child: Center(
+            child: Text(
+              "Statistiques",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ),
-      );
-
-  Widget buildDragIcon() => Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(8),
+        body: Center(
+          child: bottomWidget(),
         ),
-        width: 40,
-        height: 8,
-      );
+        borderRadius: radius,
+      ),
+    );
+  }
 }
 
 class bottomWidget extends StatelessWidget {
@@ -118,6 +105,7 @@ class bottomWidget extends StatelessWidget {
                   compassEnabled: true,
                   scrollGesturesEnabled: true,
                   zoomGesturesEnabled: true,
+                  zoomControlsEnabled: false,
                   onMapCreated: (GoogleMapController controller) {
                     _controller.complete(controller);
                   },
