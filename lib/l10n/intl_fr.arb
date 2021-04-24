@@ -8,8 +8,16 @@
   "createACC": "Créer un Compte Gratuitement!",
   "letsBegin": "Commeçons !",
   "verifInfo": "Allons vérifier quelques informations pour pouvoir initialiser votre compte.",
-  "country": "pays",
-  "birth": "date de naissance",
-  "continue": "Continuer",
-  "alreadyACC": "Avez-vous déja un compte? S'il vous plait veuillez vous connecter"
+  "country": "Pays",
+  "birth": "Date de naissance",
+  "continuer": "Continuer",
+  "alreadyACC": "Avez-vous déja un compte? S'il vous plait veuillez vous connecter",
+  "back": "Retour",
+  "phoneNb": "Numéro de Téléphone",
+  "accept": "J'accepte les termes et conditions",
+  "acceptError": "Vous devez lire les termes et conditions",
+  "name": "Quel est votre nom",
+  "firstName": "Prénom",
+  "lastName": "Nom de Famille",
+  "infoName": "Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite"
 }

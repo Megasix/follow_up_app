@@ -155,7 +155,7 @@ class _RegisterState extends State<Register> {
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text((AppLocalizations.of(context).continue), style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).continuer), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -196,18 +196,18 @@ class _RegisterState extends State<Register> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          "Quel est votre nom ?",
+                                          (AppLocalizations.of(context).name),
                                           textScaleFactor: 2.5,
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         Text(
-                                          'Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite ',
+                                          (AppLocalizations.of(context).infoName),
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: generalPadding),
                                         FormBuilderTextField(
                                           name: 'First Name',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Prénom'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).firstName)),
                                           keyboardType: TextInputType.text,
                                           validator: FormBuilderValidators.compose([
                                             FormBuilderValidators.required(context),
@@ -221,7 +221,7 @@ class _RegisterState extends State<Register> {
                                         SizedBox(height: sameTypePadding),
                                         FormBuilderTextField(
                                           name: 'Last Name',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Nom de Famille'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).lastName)),
                                           keyboardType: TextInputType.text,
                                           validator: FormBuilderValidators.compose([
                                             FormBuilderValidators.required(context),
@@ -237,7 +237,7 @@ class _RegisterState extends State<Register> {
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).continuer), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -246,7 +246,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         FlatButton(
-                                          child: Text('Retour'),
+                                          child: Text((AppLocalizations.of(context).back)),
                                           onPressed: () {
                                             _pageController.animateToPage(0, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                           },
@@ -270,8 +270,8 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: generalPadding),
                                         FormBuilderTextField(
-                                          name: 'Account Email',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Courriel'),
+                                          name: 'Email ',
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).email)),
                                           keyboardType: TextInputType.text,
                                           validator: FormBuilderValidators.compose([
                                             FormBuilderValidators.required(context),
@@ -284,7 +284,7 @@ class _RegisterState extends State<Register> {
                                         SizedBox(height: sameTypePadding),
                                         FormBuilderTextField(
                                           name: 'Phone Number',
-                                          decoration: textInputDecoration.copyWith(hintText: '(Optionel) Numéro de téléphone'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).phoneNb)),
                                           keyboardType: TextInputType.text,
                                           validator: FormBuilderValidators.compose([
                                             FormBuilderValidators.numeric(context),
@@ -299,7 +299,7 @@ class _RegisterState extends State<Register> {
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).continuer), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -308,7 +308,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         FlatButton(
-                                          child: Text('Retour'),
+                                          child: Text((AppLocalizations.of(context).back)),
                                           onPressed: () {
                                             _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                           },
@@ -338,9 +338,9 @@ class _RegisterState extends State<Register> {
                                             text: TextSpan(
                                               children: [
                                                 TextSpan(
-                                                    text: 'Je suis en accord avec les conditions de sécurités ', style: TextStyle(color: Theme.of(context).accentColor)),
+                                                    text: (AppLocalizations.of(context).accept), style: TextStyle(color: Theme.of(context).accentColor)),
                                                 TextSpan(
-                                                    text: 'termes et conditions de sécurités',
+                                                    text: ' (termes et conditions de sécurités)',
                                                     style: TextStyle(color: Colors.blue),
                                                     recognizer: TapGestureRecognizer()
                                                       ..onTap = () async {
@@ -356,14 +356,14 @@ class _RegisterState extends State<Register> {
                                             ),
                                           ),
                                           validator: FormBuilderValidators.equal(context, true,
-                                              errorText: 'vous devez lire les conditions de sécurités'),
+                                              errorText: (AppLocalizations.of(context).acceptError)),
                                         ),
                                         SizedBox(height: 202.0),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text('Continuer', style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).continuer), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   _pageController.animateToPage(4, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -372,7 +372,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         FlatButton(
-                                          child: Text('Retour'),
+                                          child: Text((AppLocalizations.of(context).back)),
                                           onPressed: () {
                                             _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                           },
@@ -397,7 +397,7 @@ class _RegisterState extends State<Register> {
                                         SizedBox(height: generalPadding),
                                         FormBuilderTextField(
                                           name: 'Password',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Mot de Passe'),
+                                          decoration: textInputDecoration.copyWith(hintText: (AppLocalizations.of(context).password)),
                                           obscureText: true,
                                           keyboardType: TextInputType.text,
                                           validator: FormBuilderValidators.compose([
@@ -429,7 +429,7 @@ class _RegisterState extends State<Register> {
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         FlatButton(
-                                          child: Text('retour'),
+                                          child: Text((AppLocalizations.of(context).back)),
                                           onPressed: () {
                                             _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                           },

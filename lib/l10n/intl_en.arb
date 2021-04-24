@@ -21,29 +21,67 @@
   },
   "error": "Wrong email or password! Please try again",
   "@error": {
-    "description": ""},
+    "description": ""
+  },
   "createACC": "Create a account for free",
   "@createACC": {
-    "description": ""},
+    "description": ""
+  },
   "letsBegin": "Let's Begin!",
   "@letsBegin": {
-    "description": ""},
-"verifInfo": "Lets Go over some information regarding your account",
-"@verifInfo": {
-"description": ""},
-  "country": "country",
+    "description": ""
+  },
+  "verifInfo": "Let's go over some information regarding your account",
+  "@verifInfo": {
+  "description": ""
+  },
+  "country": "Country",
   "@country": {
-    "description": ""},
-  "birth": "date of birth",
+    "description": ""
+  },
+  "birth": "Date of birth",
   "@birth": {
-    "description": ""},
-  "continue": "continue",
-  "@continue": {
-    "description": ""},
+    "description": ""
+  },
+  "continuer": "Continue",
+  "@continuer": {
+    "description": ""
+  },
   "alreadyACC": "Do you already have an Account ? Please Sign In",
   "@alreadyACC": {
-    "description": ""}
-
-
+    "description": ""
+  },
+  "back": "Back",
+  "@back": {
+    "description": ""
+  },
+  "phoneNb": "Phone Number",
+  "@phoneNb": {
+    "description": ""
+  },
+  "accept": "I accept the terms and conditions",
+  "@accept": {
+    "description": "The user confirms that he accepts the terms and conditions for using our app"
+  },
+  "acceptError": "You need to read the terms and conditions",
+  "@acceptError": {
+    "description": "The user is told to read the terms and conditions if they haven't done it yet"
+  },
+  "name": "What is your name ?",
+  "@name": {
+    "description": "We ask the user for his name"
+  },
+  "firstName": "First name",
+  "@firstName": {
+    "description": ""
+  },
+  "lastName": "Last Name",
+  "@lastName": {
+    "description": ""
+  },
+  "infoName": "Your real name can be used to verify your identity by contacting your driving school",
+  "@infoName": {
+    "description": "We inform the user that using their real name can help them communicate with their school"
+  }
 }
 

@@ -115,41 +115,41 @@ class S {
     );
   }
 
-  /// `Lets Go over some information regarding your account`
+  /// `Let's go over some information regarding your account`
   String get verifInfo {
     return Intl.message(
-      'Lets Go over some information regarding your account',
+      'Let\'s go over some information regarding your account',
       name: 'verifInfo',
       desc: '',
       args: [],
     );
   }
 
-  /// `country`
+  /// `Country`
   String get country {
     return Intl.message(
-      'country',
+      'Country',
       name: 'country',
       desc: '',
       args: [],
     );
   }
 
-  /// `date of birth`
+  /// `Date of birth`
   String get birth {
     return Intl.message(
-      'date of birth',
+      'Date of birth',
       name: 'birth',
       desc: '',
       args: [],
     );
   }
 
-  /// `continue`
-  String get continue {
+  /// `Continue`
+  String get continuer {
     return Intl.message(
-      'continue',
-      name: 'continue',
+      'Continue',
+      name: 'continuer',
       desc: '',
       args: [],
     );
@@ -161,6 +161,86 @@ class S {
       'Do you already have an Account ? Please Sign In',
       name: 'alreadyACC',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back`
+  String get back {
+    return Intl.message(
+      'Back',
+      name: 'back',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Phone Number`
+  String get phoneNb {
+    return Intl.message(
+      'Phone Number',
+      name: 'phoneNb',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I accept the terms and conditions`
+  String get accept {
+    return Intl.message(
+      'I accept the terms and conditions',
+      name: 'accept',
+      desc: 'The user confirms that he accepts the terms and conditions for using our app',
+      args: [],
+    );
+  }
+
+  /// `You need to read the terms and conditions`
+  String get acceptError {
+    return Intl.message(
+      'You need to read the terms and conditions',
+      name: 'acceptError',
+      desc: 'The user is told to read the terms and conditions if they haven\'t done it yet',
+      args: [],
+    );
+  }
+
+  /// `What is your name ?`
+  String get name {
+    return Intl.message(
+      'What is your name ?',
+      name: 'name',
+      desc: 'We ask the user for his name',
+      args: [],
+    );
+  }
+
+  /// `First name`
+  String get firstName {
+    return Intl.message(
+      'First name',
+      name: 'firstName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Name`
+  String get lastName {
+    return Intl.message(
+      'Last Name',
+      name: 'lastName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your real name can be used to verify your identity by contacting your driving school`
+  String get infoName {
+    return Intl.message(
+      'Your real name can be used to verify your identity by contacting your driving school',
+      name: 'infoName',
+      desc: 'We inform the user that using their real name can help them communicate with their school',
       args: [],
     );
   }

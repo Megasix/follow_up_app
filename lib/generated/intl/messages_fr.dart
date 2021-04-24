@@ -21,14 +21,25 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
-    "country" : MessageLookupByLibrary.simpleMessage("pays"),
+    "accept" : MessageLookupByLibrary.simpleMessage("J\'accepte les termes et conditions"),
+    "acceptError" : MessageLookupByLibrary.simpleMessage("Vous devez lire les termes et conditions"),
+    "alreadyACC" : MessageLookupByLibrary.simpleMessage("Avez-vous déja un compte? S\'il vous plait veuillez vous connecter"),
+    "back" : MessageLookupByLibrary.simpleMessage("Retour"),
+    "birth" : MessageLookupByLibrary.simpleMessage("Date de naissance"),
+    "continuer" : MessageLookupByLibrary.simpleMessage("Continuer"),
+    "country" : MessageLookupByLibrary.simpleMessage("Pays"),
     "createACC" : MessageLookupByLibrary.simpleMessage("Créer un Compte Gratuitement!"),
     "email" : MessageLookupByLibrary.simpleMessage("Courriel"),
     "error" : MessageLookupByLibrary.simpleMessage("Mauvais Courriel ou Mot de Passe! Veuillez Réessayer"),
+    "firstName" : MessageLookupByLibrary.simpleMessage("Prénom"),
     "helloWorld" : MessageLookupByLibrary.simpleMessage("Bonjour Monde!"),
+    "infoName" : MessageLookupByLibrary.simpleMessage("Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite"),
+    "lastName" : MessageLookupByLibrary.simpleMessage("Nom de Famille"),
     "letsBegin" : MessageLookupByLibrary.simpleMessage("Commeçons !"),
     "logIn" : MessageLookupByLibrary.simpleMessage("Connectez-vous"),
+    "name" : MessageLookupByLibrary.simpleMessage("Quel est votre nom"),
     "password" : MessageLookupByLibrary.simpleMessage("Mot de passe"),
+    "phoneNb" : MessageLookupByLibrary.simpleMessage("Numéro de Téléphone"),
     "signOther" : MessageLookupByLibrary.simpleMessage("Ou Enregistrez-vous Avec"),
     "verifInfo" : MessageLookupByLibrary.simpleMessage("Allons vérifier quelques informations pour pouvoir initialiser votre compte.")
   };
