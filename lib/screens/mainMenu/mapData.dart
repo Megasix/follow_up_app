@@ -13,11 +13,18 @@ StreamSubscription accelerometer;
 LatLng currentPostion;
 Completer<GoogleMapController> _controller = Completer();
 final panelController = PanelController();
-double x, y, z, _vitesse;
+double x, y, z, _vitesse, _accelerationVecteur;
 String _address, _dateTime;
 Stream<Position> positionStream;
 final Localisation _localisation = Localisation();
 final Acceleration _acceleration = Acceleration();
+DateTime now = DateTime.now();
+StreamSubscription accelerometerSubscription;
+Stream<int> timerStream;
+StreamSubscription<int> timerSubscription;
+String hoursStr = '00';
+String minutesStr = '00';
+String secondsStr = '00';
 
 class Map extends StatefulWidget {
   @override
@@ -40,17 +47,27 @@ class _MapData extends State<Map> {
   @override
   void initState() {
     super.initState();
+    timerStream = stopWatchStream();
+    timerSubscription = timerStream.listen((int newTick) {
+      if (mounted)
+        setState(() {
+          hoursStr =
+              ((newTick / (60 * 60)) % 60).floor().toString().padLeft(2, '0');
+          minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
+          secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
+        });
+    });
     _getUserLocation();
-    userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      DateTime now = DateTime.now();
+    accelerometerSubscription =
+        userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       if (this.mounted)
         setState(() {
           x = event.x;
           y = event.y;
           z = event.z;
           _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+          _accelerationVecteur = _acceleration.verifyAcceleration(event);
         });
-      //_acceleration.verifyAcceleration(event);
     });
     positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
@@ -65,6 +82,9 @@ class _MapData extends State<Map> {
 
   @override
   void dispose() {
+    accelerometerSubscription.cancel();
+    positionStream.cancel();
+    timerSubscription.cancel();
     super.dispose();
   }
 
@@ -82,28 +102,27 @@ class _MapData extends State<Map> {
             child: Container(
           child: Column(
             children: [
-              Expanded(
-                child: Text(
-                  _address,
-                  style: TextStyle(color: Colors.black),
-                ),
+              Text(
+                _address,
+                style: TextStyle(color: Colors.black),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "1",
+                    "Vitesse: " + _vitesse.toString(),
                     style: TextStyle(color: Colors.black),
                   ),
                   Text(
-                    "2",
+                    "Acceleration: " +
+                        _accelerationVecteur.toStringAsPrecision(3),
                     style: TextStyle(color: Colors.black),
                   ),
                   Text(
-                    "3",
+                    "Temps écoulé: " + "$hoursStr:$minutesStr:$secondsStr",
                     style: TextStyle(color: Colors.black),
-                  )
+                  ),
                 ],
               )
             ],
@@ -172,4 +191,38 @@ class bottomWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+Stream<int> stopWatchStream() {
+  StreamController<int> streamController;
+  Timer timer;
+  Duration timerInterval = Duration(seconds: 1);
+  int counter = 0;
+
+  void stopTimer() {
+    if (timer != null) {
+      timer.cancel();
+      timer = null;
+      counter = 0;
+      streamController.close();
+    }
+  }
+
+  void tick(_) {
+    counter++;
+    streamController.add(counter);
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(timerInterval, tick);
+  }
+
+  streamController = StreamController<int>(
+    onListen: startTimer,
+    onCancel: stopTimer,
+    onResume: startTimer,
+    onPause: stopTimer,
+  );
+
+  return streamController.stream;
 }

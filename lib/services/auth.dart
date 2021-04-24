@@ -108,24 +108,27 @@ class AuthService {
 
   Future<String> signInWithFacebook() async {
     try {
-      final AccessToken accessToken = await FacebookAuth.instance.login();
-      final FacebookAuthCredential credential = FacebookAuthProvider.credential(
-        accessToken.token,
-      );
-
-      final UserCredential authResult =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      final User user = authResult.user;
-      if (user != null) {
-        final name = user.displayName;
-        if (authResult.additionalUserInfo.isNewUser) {
-          await DatabaseService(uid: user.uid)
-              .updateUserData(name, 16, 'nothing');
+      final LoginResult result = await FacebookAuth.instance
+          .login(); // by the fault we request the email and the public profile
+      if (result.status == LoginStatus.success) {
+        // you are logged
+        final AccessToken accessToken = result.accessToken;
+        final FacebookAuthCredential credential =
+            FacebookAuthProvider.credential(
+          accessToken.token,
+        );
+        final UserCredential authResult =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+        final User user = authResult.user;
+        if (user != null) {
+          final name = user.displayName;
+          if (authResult.additionalUserInfo.isNewUser) {
+            await DatabaseService(uid: user.uid)
+                .updateUserData(name, 16, 'nothing');
+          }
+          return '$_userFromFirebaseUser(user);';
         }
-        return '$_userFromFirebaseUser(user);';
       }
-    } on FacebookAuthException catch (e) {
-      // handle the FacebookAuthException
     } on FirebaseAuthException catch (e) {
       // handle the FirebaseAuthException
     } finally {}

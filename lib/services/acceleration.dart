@@ -6,6 +6,6 @@ class Acceleration {
   verifyAcceleration(UserAccelerometerEvent event) {
     double acceleration =
         sqrt(pow(event.x, 2) + pow(event.y, 2) + pow(event.z, 2));
-    print(acceleration);
+    return acceleration;
   }
 }

@@ -4,21 +4,21 @@ import 'package:follow_up_app/models/geoData.dart';
 import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseService {
   final String uid;
   UserData _userData = new UserData();
-
   DatabaseService({this.uid});
 
   //collections references
   final CollectionReference usersSettigsCollection =
-      Firestore.instance.collection('usersSettings');
+      FirebaseFirestore.instance.collection('usersSettings');
   final CollectionReference usersCollection =
       FirebaseFirestore.instance.collection('users');
 
   Future updateUserData(String name, int age, String hobby) async {
-    return await usersSettigsCollection.document(uid).setData({
+    return await usersSettigsCollection.doc(uid).set({
       'name': name,
       'age': age,
       'hobby': hobby,
@@ -27,7 +27,7 @@ class DatabaseService {
 
   //setting list from snapshot
   List<Setting> _settingListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.documents.map((doc) {
+    return snapshot.docs.map((doc) {
       return Setting(
           name: doc.get('name') ?? 'new User',
           age: doc.get('age') ?? 16,
