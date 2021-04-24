@@ -244,6 +244,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Identifie your account`
+  String get idCompte {
+    return Intl.message(
+      'Identifie your account',
+      name: 'idCompte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is the information that will be used for Follow Up`
+  String get infoCount {
+    return Intl.message(
+      'This is the information that will be used for Follow Up',
+      name: 'infoCount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please read the conditions for securitie reasons`
+  String get secLec {
+    return Intl.message(
+      'Please read the conditions for securitie reasons',
+      name: 'secLec',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `terms and condition`
+  String get terms {
+    return Intl.message(
+      'terms and condition',
+      name: 'terms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Put your Password Here`
+  String get titreMDP {
+    return Intl.message(
+      'Put your Password Here',
+      name: 'titreMDP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `For security reasons please put a complicated Password`
+  String get secMDP {
+    return Intl.message(
+      'For security reasons please put a complicated Password',
+      name: 'secMDP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect Yourself`
+  String get connect {
+    return Intl.message(
+      'Connect Yourself',
+      name: 'connect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `There was an error with your information please try again `
+  String get phError {
+    return Intl.message(
+      'There was an error with your information please try again ',
+      name: 'phError',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -19,5 +19,13 @@
   "name": "Quel est votre nom",
   "firstName": "Prénom",
   "lastName": "Nom de Famille",
-  "infoName": "Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite"
+  "infoName": "Votre vrai nom peut être utilisé pour vérifier votre identité en contactant votre école de conduite",
+  "idCompte": "Identifier votre compte",
+  "infoCount": "Ceci est le compte que vous allez utiliser pour utilisez Follow Up",
+  "secLec": "Lire les conditions de sécurités",
+  "terms": "termes et conditions de sécurités",
+  "titreMDP": "Mettre votre mot de passe",
+  "secMDP": "Pour la sécurité maximale veuillez prendre un mot de passe compliquer",
+  "connect": "Connectez-vous",
+  "phError": "Il y avait une erreur avec vos informations veuillez réessayer "
 }

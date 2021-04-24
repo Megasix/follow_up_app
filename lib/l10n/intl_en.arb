@@ -82,6 +82,39 @@
   "infoName": "Your real name can be used to verify your identity by contacting your driving school",
   "@infoName": {
     "description": "We inform the user that using their real name can help them communicate with their school"
+  },
+  "idCompte": "Identifie your account",
+  "@idCompte": {
+    "description": ""
+  },
+  "infoCount": "This is the information that will be used for Follow Up",
+  "@infoCount": {
+    "description": ""
+  },
+  "secLec": "Please read the conditions for securitie reasons",
+  "@secLec": {
+    "description": ""
+  },
+  "terms": "terms and condition",
+  "@terms": {
+    "description": ""
+  },
+  "titreMDP": "Put your Password Here",
+  "@titreMDP": {
+    "description": ""
+  },
+  "secMDP": "For security reasons please put a complicated Password",
+  "@secMDP": {
+    "description": ""
+  },
+  "connect": "Connect Yourself",
+  "@connect": {
+    "description": ""
+  },
+  "phError": "There was an error with your information please try again ",
+  "@phError": {
+    "description": ""
   }
 }
+
 

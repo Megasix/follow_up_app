@@ -259,13 +259,13 @@ class _RegisterState extends State<Register> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          'Identifier votre compte',
+                                           (AppLocalizations.of(context).idCompte),
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         Text(
-                                          'Ceci est le compte que vous allez utiliser pour utilisez Follow Up ',
+                                          (AppLocalizations.of(context).infoCount),
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: generalPadding),
@@ -321,13 +321,13 @@ class _RegisterState extends State<Register> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          'Lire les conditions de sécurités',
+                                          (AppLocalizations.of(context).secLec),
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         Text(
-                                          'Veuillez lire les conditions de sécurités',
+                                          (AppLocalizations.of(context).secLec),
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: generalPadding),
@@ -340,7 +340,7 @@ class _RegisterState extends State<Register> {
                                                 TextSpan(
                                                     text: (AppLocalizations.of(context).accept), style: TextStyle(color: Theme.of(context).accentColor)),
                                                 TextSpan(
-                                                    text: ' (termes et conditions de sécurités)',
+                                                    text: (AppLocalizations.of(context).terms),
                                                     style: TextStyle(color: Colors.blue),
                                                     recognizer: TapGestureRecognizer()
                                                       ..onTap = () async {
@@ -385,13 +385,13 @@ class _RegisterState extends State<Register> {
                                     child: Column(
                                       children: [
                                         Text(
-                                          'Mettre votre mot de passe ',
+                                          (AppLocalizations.of(context).titreMDP),
                                           textAlign: TextAlign.center,
                                           textScaleFactor: 2.5,
                                         ),
                                         SizedBox(height: sameTypePadding),
                                         Text(
-                                          'Pour la sécurité maximale veuillez prendre un mot de passe compliquer',
+                                          (AppLocalizations.of(context).secMDP),
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: generalPadding),
@@ -414,14 +414,14 @@ class _RegisterState extends State<Register> {
                                           width: contextWidth,
                                           height: 40.0,
                                           child: RaisedButton(
-                                              child: Text('Connectez-vous', style: TextStyle(color: Colors.white)),
+                                              child: Text((AppLocalizations.of(context).connect), style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
                                                 if (_formKey.currentState.validate()) {
                                                   setState(() => loading = true);
                                                   dynamic result = await _authService.registerWithEmailAndPassword(email, password);
                                                   if (result == null)
                                                     setState(() {
-                                                      error = 'Il y avait une erreur avec vos informations veuillez réessayer';
+                                                      error = (AppLocalizations.of(context).phError);
                                                       loading = false;
                                                     });
                                                 }
