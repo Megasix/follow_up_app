@@ -23,6 +23,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   _ConversationScreenState(this.recipientName);
 
+  void initChatMessageStream() async {
+    await _databaseService.getConversationMessages(widget.chatRoomID).then((val) {
+      chatMessagesStream = val;
+    });
+  }
+
   Widget messageList() {
     return StreamBuilder(
         stream: chatMessagesStream,
@@ -51,9 +57,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   void initState() {
-    _databaseService.getConversationMessages(widget.chatRoomID).then((val) {
-      chatMessagesStream = val;
-    });
+    initChatMessageStream();
     super.initState();
   }
 
