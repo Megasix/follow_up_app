@@ -15,19 +15,18 @@ class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final DatabaseService _databaseService = new DatabaseService();
 
-  QuerySnapshot recipientSnapshot;
+  DocumentSnapshot recipientSnapshot;
   Stream chatRoomStream;
-
-  void initRecipientSnapshot(String email) async {
-    await _databaseService.getUserByEmail(email).then((value) => setState(() {
-          recipientSnapshot = value;
-        }));
-  }
 
   void initChatRoomStream() async {
     await _databaseService.getChatRooms(UserInformations.userEmail).then((val) {
       chatRoomStream = val;
     });
+  }
+
+  void initRecipientSnapshot(email) async{
+    recipientSnapshot = await _databaseService.getUserByEmail(email);
+    print(recipientSnapshot.get('lastName'));
   }
 
   Widget chatRoomList() {
@@ -41,7 +40,7 @@ class _MessagingState extends State<Messaging> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ChatRoomTile(
-                        getRecipient(snapshot.data.docs[index].get('users')),
+                       getUsersRecipientObjectByEmail(snapshot.data.docs[index].get('users')),
                         snapshot.data.docs[index].get('chatRoomID'),
                       ),
                     );
@@ -51,22 +50,33 @@ class _MessagingState extends State<Messaging> {
         });
   }
 
-  UsersRecipient getRecipient(List users) {
+  String getRecipientEmail(List users) {
     String email;
     if (users[0] == UserInformations.userEmail)
       email = users[1];
     else
       email = users[0];
-    initRecipientSnapshot(email);
-    return UsersRecipient(
-      recipientSnapshot.docs[0].get('firstName'),
-      recipientSnapshot.docs[0].get('lastName'),
-      recipientSnapshot.docs[0].get('country'),
-      recipientSnapshot.docs[0].get('email'),
-      recipientSnapshot.docs[0].get('phoneNumber'),
-      recipientSnapshot.docs[0].get('birthDate'),
-      recipientSnapshot.docs[0].get('profilePictureAdress'),
-    );
+    print(email);
+    return email;
+  }
+
+  getUsersRecipientObjectByEmail(List users) {
+    try {
+      initRecipientSnapshot(getRecipientEmail(users));
+      print(recipientSnapshot.get('firstName'));
+      return UsersRecipient(
+        recipientSnapshot.get('firstName'),
+        recipientSnapshot.get('lastName'),
+        recipientSnapshot.get('country'),
+        recipientSnapshot.get('email'),
+        recipientSnapshot.get('phoneNumber'),
+        recipientSnapshot.get('birthDate'),
+        recipientSnapshot.get('profilePictureAdress'),
+      );
+    }catch (error){
+      print(error.toString());
+      return null;
+    }
   }
 
   void _openDrawer() {
