@@ -107,7 +107,25 @@ class DatabaseService {
   }
 
   getUserByEmail(String email) async {
-    return await usersCollection.where('email', isEqualTo: email).get();
+    return await usersCollection.doc(email).get();
+  }
+
+  getUsersRecipientObjectByEmail(String email) {
+    DocumentSnapshot recipientSnapshot = getUserByEmail(email);
+    print(recipientSnapshot);
+    if (recipientSnapshot != null) {
+      print(recipientSnapshot.get('firstName'));
+      return UsersRecipient(
+        recipientSnapshot.get('firstName'),
+        recipientSnapshot.get('lastName'),
+        recipientSnapshot.get('country'),
+        recipientSnapshot.get('email'),
+        recipientSnapshot.get('phoneNumber'),
+        recipientSnapshot.get('birthDate'),
+        recipientSnapshot.get('profilePictureAdress'),
+      );
+    } else
+      return UsersRecipient('Big', 'Fail', ' ', ' ', ' ', null, ' ');
   }
 
   createChatRoom(String chatRoomID, chatRoomMap) async {
