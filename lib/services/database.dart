@@ -6,8 +6,10 @@ class DatabaseService {
   final String email;
 
   //collections references
-  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
-  final CollectionReference chatRoomCollection = FirebaseFirestore.instance.collection('chatRoom');
+  final CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
+  final CollectionReference chatRoomCollection =
+      FirebaseFirestore.instance.collection('chatRoom');
 
   DatabaseService({this.email});
 
@@ -39,7 +41,13 @@ class DatabaseService {
     Timestamp birthDate,
     String profilePictureAdress,
   ) async {
-    return await usersCollection.doc(email).collection('usersData').doc('chatData').collection('recipients').doc(recipientEmail).set({
+    return await usersCollection
+        .doc(email)
+        .collection('usersData')
+        .doc('chatData')
+        .collection('recipients')
+        .doc(recipientEmail)
+        .set({
       'firstName': firstName,
       'lastName': lastName,
       'country': country,
@@ -135,17 +143,30 @@ class DatabaseService {
   }
 
   addConversationMessage(String chatRoomID, messageMap) async {
-    await chatRoomCollection.doc(chatRoomID).set({'lastActivity': await NTP.now()});
-    await chatRoomCollection.doc(chatRoomID).collection('chats').add(messageMap).catchError((e) {
+    await chatRoomCollection
+        .doc(chatRoomID)
+        .set({'lastActivity': await NTP.now()});
+    await chatRoomCollection
+        .doc(chatRoomID)
+        .collection('chats')
+        .add(messageMap)
+        .catchError((e) {
       print(e.toString());
     });
   }
 
   getConversationMessages(String chatRoomID) async {
-    return await chatRoomCollection.doc(chatRoomID).collection('chats').orderBy('time', descending: false).snapshots();
+    return await chatRoomCollection
+        .doc(chatRoomID)
+        .collection('chats')
+        .orderBy('time', descending: false)
+        .snapshots();
   }
 
   getChatRooms(String email) async {
-    return await chatRoomCollection.where('users', arrayContains: email).orderBy('lastActivity', descending: true).snapshots();
+    return await chatRoomCollection
+        .where('users', arrayContains: email)
+        .orderBy('lastActivity', descending: true)
+        .snapshots();
   }
 }

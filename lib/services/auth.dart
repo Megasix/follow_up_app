@@ -35,7 +35,8 @@ class AuthService {
 // sign-in with email & password
   Future signInWithEmailAndPassword(String email, String password) async {
     try {
-      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
       User user = result.user;
       String firstName;
       DocumentSnapshot userInfo = await DatabaseService(email: email).getUser();
@@ -61,12 +62,18 @@ class AuthService {
     String password,
   ) async {
     try {
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
       User user = result.user;
 
       //create a new document for the user with the uid
       await DatabaseService(email: user.email).updateUserPersonnalDatas(
-          firstName: firstName, lastName: lastName, country: country, email: email, phoneNumber: phoneNumber, birthDate: birthDate);
+          firstName: firstName,
+          lastName: lastName,
+          country: country,
+          email: email,
+          phoneNumber: phoneNumber,
+          birthDate: birthDate);
       Shared.saveUserLoggedInSharedPreference(true);
       Shared.saveUserEmailSharedPreference(user.email);
       Shared.saveUserNameSharedPreference(firstName);
@@ -84,14 +91,16 @@ class AuthService {
     await Firebase.initializeApp();
 
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final UserCredential authResult = await _auth.signInWithCredential(credential);
+    final UserCredential authResult =
+        await _auth.signInWithCredential(credential);
     final User user = authResult.user;
 
     if (user != null) {
@@ -103,8 +112,11 @@ class AuthService {
       final User currentUser = _auth.currentUser;
       assert(user.uid == currentUser.uid);
       if (authResult.additionalUserInfo.isNewUser)
-        await DatabaseService(email: user.email)
-            .updateUserPersonnalDatas(firstName: firstName, lastName: lastName, email: user.email, phoneNumber: user.phoneNumber);
+        await DatabaseService(email: user.email).updateUserPersonnalDatas(
+            firstName: firstName,
+            lastName: lastName,
+            email: user.email,
+            phoneNumber: user.phoneNumber);
       Shared.saveUserLoggedInSharedPreference(true);
       Shared.saveUserEmailSharedPreference(user.email);
       Shared.saveUserNameSharedPreference(firstName);
@@ -118,31 +130,23 @@ class AuthService {
 
   Future<String> signInWithFacebook() async {
     try {
-      final AccessToken accessToken = await FacebookAuth.instance.login();
-      final FacebookAuthCredential credential = FacebookAuthProvider.credential(
-        accessToken.token,
-      );
-
-      final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
-      final User user = authResult.user;
-      if (user != null) {
-        final firstName = user.displayName.split(" ")[0];
-        final lastName = user.displayName.split(" ")[1];
-        if (authResult.additionalUserInfo.isNewUser) {
-          await DatabaseService(email: user.email).updateUserPersonnalDatas(
-            firstName: firstName,
-            lastName: lastName,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-          );
-          Shared.saveUserLoggedInSharedPreference(true);
-          Shared.saveUserEmailSharedPreference(user.email);
-          Shared.saveUserNameSharedPreference(firstName);
+      final LoginResult result = await FacebookAuth.instance
+          .login(); // by the fault we request the email and the public profile
+      if (result.status == LoginStatus.success) {
+        // you are logged
+        final AccessToken accessToken = result.accessToken;
+        final FacebookAuthCredential credential =
+            FacebookAuthProvider.credential(
+          accessToken.token,
+        );
+        final UserCredential authResult =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+        final User user = authResult.user;
+        if (user != null) {
+          final name = user.displayName;
+          return '$_userFromFirebaseUser(user);';
         }
-        return '$_userFromFirebaseUser(user);';
       }
-    } on FacebookAuthException catch (e) {
-      // handle the FacebookAuthException
     } on FirebaseAuthException catch (e) {
       // handle the FirebaseAuthException
     } finally {}

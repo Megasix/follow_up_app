@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/home.dart';
+import 'package:follow_up_app/screens/mainMenu/rides/rides.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
-import 'file:///C:/Users/lawso/AndroidStudioProjects/follow_up_app/lib/screens/mainMenu/rides/rides.dart';
 import 'messaging/messaging.dart';
 
 class MainMenu extends StatefulWidget {
@@ -11,7 +11,8 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
     Statistics(),

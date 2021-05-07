@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -10,9 +11,27 @@ class Home extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(50.0),
-            topRight: Radius.circular(50.0)
+            topRight: Radius.circular(50.0),
           ),
-          color: Theme.of(context).backgroundColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
+        child: Column(
+          children: <Widget>[
+            Expanded(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                  RaisedButton(onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return Map();
+                      }),
+                    );
+                  })
+                ]))
+          ],
         ),
       ),
     );

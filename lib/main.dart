@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/wrapper.dart';
 import 'package:follow_up_app/services/auth.dart';
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
                 darkTheme: darkThemeConstant,
                 themeMode: ThemeMode.system,
                 localizationsDelegates: [
-                  AppLocalizations.delegate,
+                  //AppLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
