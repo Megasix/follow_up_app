@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:ntp/ntp.dart';
 
@@ -51,27 +52,12 @@ class DatabaseService {
     });
   }
 
-  Future addNewRide(String duration, Timestamp date, String polyline) async {
-    return await ridesCollection.doc(email).set({
+  Future addNewRide(String name, String duration, Timestamp date, String polyline) async {
+    return await ridesCollection.doc(email).collection('rides').doc(name).set({
       'duration': duration,
       'date': date,
       'polyline': polyline,
     });
-  }
-
-  //setting list from snapshot
-  List<UsersRecipient> _usersRecipientListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      return UsersRecipient(
-        doc.get('firstName'),
-        doc.get('lastName'),
-        doc.get('country'),
-        doc.get('email'),
-        doc.get('phoneNumber'),
-        doc.get('birtDate'),
-        doc.get('profilePictureAdress'),
-      );
-    }).toList();
   }
 
   // userData from snapshot
@@ -87,6 +73,30 @@ class DatabaseService {
     );
   }
 
+  List<UsersRecipient> _usersRecipientListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return UsersRecipient(
+        doc.get('firstName'),
+        doc.get('lastName'),
+        doc.get('country'),
+        doc.get('email'),
+        doc.get('phoneNumber'),
+        doc.get('birtDate'),
+        doc.get('profilePictureAdress'),
+      );
+    }).toList();
+  }
+
+  List<Ride> _ridesListFromSnapshot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) {
+      return Ride(
+        duration: doc.get('duration'),
+        date: doc.get('date'),
+        polylines: doc.get('polylines'),
+      );
+    }).toList();
+  }
+
   //get usersSettings stream
   Stream<List<UsersRecipient>> get usersRecipients {
     return usersCollection
@@ -96,6 +106,10 @@ class DatabaseService {
         .collection('recipients')
         .snapshots()
         .map(_usersRecipientListFromSnapshot);
+  }
+
+  Stream<List<Ride>> get Rides {
+    return ridesCollection.doc(email).collection('rides').snapshots().map(_ridesListFromSnapshot);
   }
 
   // get user doc stream
@@ -121,9 +135,7 @@ class DatabaseService {
 
   getUsersRecipientObjectByEmail(String email) {
     DocumentSnapshot recipientSnapshot = getUserByEmail(email);
-    print(recipientSnapshot);
     if (recipientSnapshot != null) {
-      print(recipientSnapshot.get('firstName'));
       return UsersRecipient(
         recipientSnapshot.get('firstName'),
         recipientSnapshot.get('lastName'),
@@ -134,7 +146,7 @@ class DatabaseService {
         recipientSnapshot.get('profilePictureAdress'),
       );
     } else
-      return UsersRecipient('Big', 'Fail', ' ', ' ', ' ', null, ' ');
+      return null;
   }
 
   createChatRoom(String chatRoomID, chatRoomMap) async {
@@ -156,5 +168,9 @@ class DatabaseService {
 
   getChatRooms(String email) async {
     return await chatRoomCollection.where('users', arrayContains: email).orderBy('lastActivity', descending: true).snapshots();
+  }
+
+  getRides() async {
+    return await ridesCollection.doc(email).collection('rides').orderBy('date', descending: false).get();
   }
 }
