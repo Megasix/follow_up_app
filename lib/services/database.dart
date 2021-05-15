@@ -84,12 +84,4 @@ class DatabaseService {
       'uid': uid,
     });
   }
-
-  storePosition(List<GeoPoint> position) {
-    usersCollection
-        .doc("olivier_dery-prevost@hotmail.com")
-        .collection("usersData")
-        .doc("Data")
-        .set({'Localisation': position});
-  }
 }

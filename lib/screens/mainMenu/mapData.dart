@@ -121,7 +121,7 @@ class _MapData extends State<Map> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          "Vitesse: " + _vitesse.toString(),
+                          "Vitesse: " + _vitesse.toStringAsPrecision(4),
                           style: TextStyle(color: Colors.black),
                         ),
                         Text(

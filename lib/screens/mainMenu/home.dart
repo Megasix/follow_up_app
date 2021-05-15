@@ -84,18 +84,23 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                     )
-                  : Container(
-                      child: GoogleMap(
-                        initialCameraPosition:
-                            CameraPosition(target: currentPostion, zoom: 15),
-                        myLocationEnabled: true,
-                        tiltGesturesEnabled: true,
-                        compassEnabled: true,
-                        scrollGesturesEnabled: true,
-                        zoomGesturesEnabled: true,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller.complete(controller);
-                        },
+                  : GestureDetector(
+                      onTap: () {
+                        print("test");
+                      },
+                      child: Container(
+                        child: GoogleMap(
+                          initialCameraPosition:
+                              CameraPosition(target: currentPostion, zoom: 15),
+                          myLocationEnabled: true,
+                          tiltGesturesEnabled: true,
+                          compassEnabled: true,
+                          scrollGesturesEnabled: true,
+                          zoomGesturesEnabled: true,
+                          onMapCreated: (GoogleMapController controller) {
+                            _controller.complete(controller);
+                          },
+                        ),
                       ),
                     ),
             ),
