@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/screens/mainMenu/home.dart';
-import 'package:follow_up_app/screens/mainMenu/rides/rides.dart';
+import 'package:follow_up_app/screens/mainMenu/rides/home.dart';
+import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'messaging/messaging.dart';
 
