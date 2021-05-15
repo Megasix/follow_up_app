@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Localisation {
   List listlocalisation;
-  DatabaseService _databaseService = new DatabaseService();
   checkPermission() async {
     bool serviceEnabled;
     LocationPermission permission;

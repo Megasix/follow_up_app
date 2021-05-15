@@ -25,6 +25,8 @@ StreamSubscription<int> timerSubscription;
 String hoursStr = '00';
 String minutesStr = '00';
 String secondsStr = '00';
+List<LatLng> listePosition = [];
+Position _latLng;
 
 class Map extends StatefulWidget {
   @override
@@ -60,20 +62,25 @@ class _MapData extends State<Map> {
     _getUserLocation();
     accelerometerSubscription =
         userAccelerometerEvents.listen((UserAccelerometerEvent event) {
-      if (this.mounted)
-        setState(() {
-          x = event.x;
-          y = event.y;
-          z = event.z;
-          _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
-          _accelerationVecteur = _acceleration.verifyAcceleration(event);
+          if (this.mounted)
+            setState(() {
+              x = event.x;
+              y = event.y;
+              z = event.z;
+              _dateTime = DateFormat('EEE d MMM kk:mm:ss ').format(now);
+              _accelerationVecteur = _acceleration.verifyAcceleration(event);
+            });
         });
-    });
     positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
         setState(() {
+          _latLng = position;
+          if (_latLng != null) {
+            LatLng point = LatLng(_latLng.latitude, _latLng.longitude);
+            listePosition.add(point);
+          }
           _vitesse = position.speed;
-          _localisation.geocodePosition(position).then((value) async {
+          _localisation.geocodePosition(_latLng).then((value) async {
             _address = value;
           });
         });
@@ -85,6 +92,7 @@ class _MapData extends State<Map> {
     accelerometerSubscription.cancel();
     positionStream.cancel();
     timerSubscription.cancel();
+    listePosition = [];
     super.dispose();
   }
 
@@ -95,39 +103,42 @@ class _MapData extends State<Map> {
       topRight: Radius.circular(24.0),
     );
     return Scaffold(
-      body: SlidingUpPanel(
+      body: _address == null || _vitesse == null || _accelerationVecteur == null
+          ? Text("loading...")
+          : SlidingUpPanel(
         maxHeight: MediaQuery.of(context).size.height / 3,
         minHeight: 80,
         panel: Center(
             child: Container(
-          child: Column(
-            children: [
-              Text(
-                _address,
-                style: TextStyle(color: Colors.black),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
                 children: [
                   Text(
-                    "Vitesse: " + _vitesse.toString(),
+                    _address,
                     style: TextStyle(color: Colors.black),
                   ),
-                  Text(
-                    "Acceleration: " +
-                        _accelerationVecteur.toStringAsPrecision(3),
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  Text(
-                    "Temps écoulé: " + "$hoursStr:$minutesStr:$secondsStr",
-                    style: TextStyle(color: Colors.black),
-                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Vitesse: " + _vitesse.toString(),
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      Text(
+                        "Acceleration: " +
+                            _accelerationVecteur.toStringAsPrecision(3),
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      Text(
+                        "Temps écoulé: " +
+                            "$hoursStr:$minutesStr:$secondsStr",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  )
                 ],
-              )
-            ],
-          ),
-        )),
+              ),
+            )),
         collapsed: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -165,29 +176,37 @@ class bottomWidget extends StatelessWidget {
       child: SizedBox(
         child: currentPostion == null
             ? Container(
-                child: Center(
-                  child: Text(
-                    'loading map..',
-                    style: TextStyle(
-                        fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-                  ),
-                ),
-              )
+          child: Center(
+            child: Text(
+              "loading map..",
+              style: TextStyle(
+                  fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
+            ),
+          ),
+        )
             : Container(
-                child: GoogleMap(
-                  initialCameraPosition:
-                      CameraPosition(target: currentPostion, zoom: 15),
-                  myLocationEnabled: true,
-                  tiltGesturesEnabled: true,
-                  compassEnabled: true,
-                  scrollGesturesEnabled: true,
-                  zoomGesturesEnabled: true,
-                  zoomControlsEnabled: false,
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-              ),
+          child: GoogleMap(
+            initialCameraPosition:
+            CameraPosition(target: currentPostion, zoom: 15),
+            myLocationEnabled: true,
+            tiltGesturesEnabled: true,
+            compassEnabled: true,
+            scrollGesturesEnabled: true,
+            zoomGesturesEnabled: true,
+            zoomControlsEnabled: false,
+            polylines: {
+              if (listePosition != null)
+                Polyline(
+                    polylineId: const PolylineId('trajet'),
+                    color: Theme.of(context).buttonColor,
+                    width: 4,
+                    points: listePosition),
+            },
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+          ),
+        ),
       ),
     );
   }
