@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/localisation.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sensors/sensors.dart';
@@ -11,7 +13,6 @@ import 'package:intl/intl.dart';
 
 StreamSubscription accelerometer;
 LatLng currentPostion;
-Completer<GoogleMapController> _controller = Completer();
 final panelController = PanelController();
 double x, y, z, _vitesse, _accelerationVecteur;
 String _address, _dateTime;
@@ -168,22 +169,34 @@ class _MapData extends State<Map> {
 }
 
 class bottomWidget extends StatelessWidget {
-  const bottomWidget({Key key}) : super(key: key);
+  GoogleMapController _controller;
+  bool isMapCreated = false;
+
+  changeMapMode() {
+    if (ThemeMode.system == ThemeMode.light)
+      getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
+    else
+      getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
+  }
+
+  Future<String> getJsonMapData(String path) async {
+    return await rootBundle.loadString(path);
+  }
+
+  void setMapStyle(String mapStyleData) {
+    _controller.setMapStyle(mapStyleData);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isMapCreated) {
+      changeMapMode();
+    }
+
     return Material(
       child: SizedBox(
         child: currentPostion == null
-            ? Container(
-          child: Center(
-            child: Text(
-              "loading map..",
-              style: TextStyle(
-                  fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-            ),
-          ),
-        )
+            ? Loading()
             : Container(
           child: GoogleMap(
             initialCameraPosition:
@@ -203,7 +216,9 @@ class bottomWidget extends StatelessWidget {
                     points: listePosition),
             },
             onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
+              isMapCreated = true;
+              _controller= controller;
+              changeMapMode();
             },
           ),
         ),
