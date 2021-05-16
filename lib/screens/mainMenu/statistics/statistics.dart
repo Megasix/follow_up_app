@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-Completer<GoogleMapController> _controller = Completer();
 
 class Statistics extends StatefulWidget {
   @override
@@ -115,8 +114,30 @@ class RideTile extends StatelessWidget {
 }
 
 class MapWidget extends StatelessWidget {
+  GoogleMapController _controller;
+  bool isMapCreated = false;
+
+  changeMapMode() {
+    if (ThemeMode.system == ThemeMode.light)
+      getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
+    else
+      getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
+  }
+
+  Future<String> getJsonMapData(String path) async {
+    return await rootBundle.loadString(path);
+  }
+
+  void setMapStyle(String mapStyleData) {
+    _controller.setMapStyle(mapStyleData);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isMapCreated) {
+      changeMapMode();
+    }
+
     return Material(
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
@@ -140,7 +161,9 @@ class MapWidget extends StatelessWidget {
       },*/
             //polylines
             onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
+              isMapCreated = true;
+              _controller= controller;
+              changeMapMode();
             },
           ),
         ),
