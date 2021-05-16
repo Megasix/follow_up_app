@@ -23,8 +23,6 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
         .size
         .width;
 
-    bool lightThemeEnabled = true;
-
     return StreamBuilder<UserDisplaySetting>(
       stream: null, //methode de database.dart qui permet de set cette valeur
       builder: (context, snapshot) {
