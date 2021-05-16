@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
+import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-Completer<GoogleMapController> _controller = Completer();
 
 class Home extends StatefulWidget {
   const Home({Key key}) : super(key: key);
@@ -27,7 +29,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _getUserLocation();
     super.initState();
   }
@@ -52,22 +53,34 @@ class _HomeState extends State<Home> {
 }
 
 class MapWidget extends StatelessWidget {
-  const MapWidget({Key key}) : super(key: key);
+  GoogleMapController _controller;
+  bool isMapCreated = false;
+
+  changeMapMode() {
+    if (getTheme())
+      getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
+    else
+      getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
+  }
+
+  Future<String> getJsonMapData(String path) async {
+    return await rootBundle.loadString(path);
+  }
+
+  void setMapStyle(String mapStyleData) {
+    _controller.setMapStyle(mapStyleData);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isMapCreated) {
+      changeMapMode();
+    }
+
     return Material(
       child: SizedBox(
         child: currentPostion == null
-            ? Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Center(
-                  child: Text(
-                    'loading map...',
-                    style: TextStyle(fontFamily: 'Avenir-Medium', color: Colors.grey[400]),
-                  ),
-                ),
-              )
+            ? Loading()
             : GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => Map()));
@@ -88,7 +101,9 @@ class MapWidget extends StatelessWidget {
                       zoomGesturesEnabled: true,
                       zoomControlsEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
+                        isMapCreated = true;
+                        _controller = controller;
+                        changeMapMode();
                       },
                     ),
                   ),
