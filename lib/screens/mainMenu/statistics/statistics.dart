@@ -7,6 +7,7 @@ import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 
 class Statistics extends StatefulWidget {
   @override
@@ -36,7 +37,7 @@ class _StatisticsState extends State<Statistics> {
                 child: RideTile(
                   date: rideSnapshot.docs[index].get('date'),
                   duration: rideSnapshot.docs[index].get('duration'),
-                  //polylines: rideSnapshot.docs[index].get('polylines'),
+                  polylines: rideSnapshot.docs[index].get('polylines'),
                 ),
               );
             },
@@ -123,7 +124,7 @@ class RideTile extends StatelessWidget {
               ],
             ),
             SizedBox(height: 5.0),
-            MapWidget(),
+            MapWidget(polylines),
           ],
         ),
       ),
@@ -134,6 +135,9 @@ class RideTile extends StatelessWidget {
 class MapWidget extends StatelessWidget {
   GoogleMapController _controller;
   bool isMapCreated = false;
+  final String polyline;
+
+  MapWidget(this.polyline);
 
   changeMapMode() {
     if (ThemeMode.system == ThemeMode.light)
@@ -171,13 +175,13 @@ class MapWidget extends StatelessWidget {
             scrollGesturesEnabled: false,
             zoomGesturesEnabled: false,
             zoomControlsEnabled: false,
-            /*polylines: {
+            polylines: {
           Polyline(
               polylineId: const PolylineId('trajet'),
               color: Theme.of(context).buttonColor,
               width: 4,
-              points: listePosition),
-      },*/
+              points: decodePolylines(polyline)),
+      },
             //polylines
             onMapCreated: (GoogleMapController controller) {
               isMapCreated = true;
@@ -189,4 +193,14 @@ class MapWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+List<LatLng> decodePolylines (String polyline) {
+  List<LatLng> points;
+  List<List<double>> pointsDouble = decodePolyline(polyline);
+  for (int i = 0; i < pointsDouble.length; i++) {
+    LatLng point = LatLng(pointsDouble[i][0], pointsDouble[i][1]);
+    points[i] = point;
+  }
+  return points;
 }
