@@ -197,9 +197,9 @@ class MapWidget extends StatelessWidget {
 
 List<LatLng> decodePolylines (String polyline) {
   List<LatLng> points;
-  List<List<double>> pointsDouble = decodePolyline(polyline);
-  for (int i = 0; i < pointsDouble.length; i++) {
-    LatLng point = LatLng(pointsDouble[i][0], pointsDouble[i][1]);
+  List<List<num>> pointsNum = decodePolyline(polyline);
+  for (int i = 0; i < pointsNum.length; i++) {
+    LatLng point = LatLng(pointsNum[i][0], pointsNum[i][1]);
     points[i] = point;
   }
   return points;
