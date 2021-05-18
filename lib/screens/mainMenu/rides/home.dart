@@ -78,6 +78,7 @@ class MapWidget extends StatelessWidget {
     }
 
     return Material(
+      color: Colors.transparent,
       child: SizedBox(
         child: currentPostion == null
             ? Loading()
