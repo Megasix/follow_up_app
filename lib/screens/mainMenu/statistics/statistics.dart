@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/constants.dart';
@@ -140,7 +141,7 @@ class MapWidget extends StatelessWidget {
   MapWidget(this.polyline);
 
   changeMapMode() {
-    if (ThemeMode.system == ThemeMode.light)
+    if (getTheme())
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -154,10 +155,31 @@ class MapWidget extends StatelessWidget {
     _controller.setMapStyle(mapStyleData);
   }
 
+  void _setMapFitToTour(List<LatLng> p) {
+    double minLat = p[0].latitude;
+    double minLong = p[0].longitude;
+    double maxLat = p[0].latitude;
+    double maxLong = p[0].longitude;
+    p.forEach((point) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLong) minLong = point.longitude;
+      if (point.longitude > maxLong) maxLong = point.longitude;
+    });
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+            southwest: LatLng(minLat, minLong),
+            northeast: LatLng(maxLat, maxLong)),
+        20));
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<LatLng> polylines = decodePolylines(polyline);
+
     if (isMapCreated) {
       changeMapMode();
+      _setMapFitToTour(polylines);
     }
 
     return Material(
@@ -182,12 +204,13 @@ class MapWidget extends StatelessWidget {
                     polylineId: const PolylineId('trajet'),
                     color: Theme.of(context).buttonColor,
                     width: 4,
-                    points: decodePolylines(polyline)),
+                    points: polylines),
               },
               //polylines
               onMapCreated: (GoogleMapController controller) {
                 isMapCreated = true;
                 _controller = controller;
+                _setMapFitToTour(polylines);
                 changeMapMode();
               },
             ),
