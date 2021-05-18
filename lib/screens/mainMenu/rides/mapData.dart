@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
@@ -89,7 +91,7 @@ class _MapData extends State<Map> {
             listePosition.add(point);
             listePositionNum.add([_latLng.latitude, _latLng.longitude]);
           }
-          _vitesse = position.speed;
+          _vitesse = position.speed.roundToDouble()*3.6;
           _localisation.geocodePosition(_latLng).then((value) async {
             _address = value;
           });
@@ -101,7 +103,7 @@ class _MapData extends State<Map> {
   void dispose() {
     listePositionNum.removeAt(0);
     _databaseService.addNewRide(
-        now.toString(),
+        DateTime.now().toString(),
         (hoursStr + ":" + minutesStr + ":" + secondsStr),
         myTimeStamp,
         encodePolyline(listePositionNum));
@@ -109,6 +111,7 @@ class _MapData extends State<Map> {
     positionStream.cancel();
     timerSubscription.cancel();
     listePosition = [];
+    listePositionNum = [];
     super.dispose();
   }
 
@@ -120,37 +123,34 @@ class _MapData extends State<Map> {
     );
     return Scaffold(
       body: _address == null || _vitesse == null || _accelerationVecteur == null
-          ? Text("loading...")
+          ? Loading()
           : SlidingUpPanel(
+        color: Theme.of(context).secondaryHeaderColor,
               maxHeight: MediaQuery.of(context).size.height / 3,
               minHeight: 80,
               panel: Center(
                   child: Container(
+                    color: Colors.transparent,
+                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                 child: Column(
                   children: [
                     Text(
                       _address,
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: Theme.of(context).textSelectionColor),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Vitesse: " + _vitesse.toString(),
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        Text(
-                          "Acceleration: " +
-                              _accelerationVecteur.toStringAsPrecision(3),
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        Text(
-                          "Temps écoulé: " +
-                              "$hoursStr:$minutesStr:$secondsStr",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ],
+                    Text(
+                      "Vitesse: " + _vitesse.toString() + " km/h",
+                      style: TextStyle(color: Theme.of(context).textSelectionColor),
+                    ),
+                    Text(
+                      "Acceleration: " +
+                          _accelerationVecteur.toStringAsPrecision(3) + " m/s²",
+                      style: TextStyle(color: Theme.of(context).textSelectionColor),
+                    ),
+                    Text(
+                      "Temps écoulé: " +
+                          "$hoursStr:$minutesStr:$secondsStr",
+                      style: TextStyle(color: Theme.of(context).textSelectionColor),
                     ),
                   ],
                 ),
@@ -188,7 +188,7 @@ class bottomWidget extends StatelessWidget {
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (ThemeMode.system == ThemeMode.light)
+    if (getTheme())
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
