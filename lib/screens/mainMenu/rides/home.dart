@@ -95,11 +95,11 @@ class MapWidget extends StatelessWidget {
                     absorbing: true,
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(target: currentPostion, zoom: 15),
-                      myLocationEnabled: true,
-                      tiltGesturesEnabled: true,
-                      compassEnabled: true,
-                      scrollGesturesEnabled: true,
-                      zoomGesturesEnabled: true,
+                      myLocationEnabled: false,
+                      tiltGesturesEnabled: false,
+                      compassEnabled: false,
+                      scrollGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
                       zoomControlsEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
                         isMapCreated = true;
