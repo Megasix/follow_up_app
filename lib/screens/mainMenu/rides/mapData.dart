@@ -36,6 +36,7 @@ String secondsStr = '00';
 List<LatLng> listePosition = [];
 List<List<double>> listePositionNum = [[]];
 Position _latLng;
+Completer<GoogleMapController> _controllerCam = Completer();
 
 class Map extends StatefulWidget {
   @override
@@ -88,6 +89,7 @@ class _MapData extends State<Map> {
             LatLng point = LatLng(_latLng.latitude, _latLng.longitude);
             listePosition.add(point);
             listePositionNum.add([_latLng.latitude, _latLng.longitude]);
+            centerScreen(_latLng);
           }
           _vitesse = position.speed;
           _localisation.geocodePosition(_latLng).then((value) async {
@@ -231,6 +233,7 @@ class bottomWidget extends StatelessWidget {
                           points: listePosition),
                   },
                   onMapCreated: (GoogleMapController controller) {
+                    _controllerCam.complete(controller);
                     isMapCreated = true;
                     _controller = controller;
                     changeMapMode();
@@ -274,4 +277,10 @@ Stream<int> stopWatchStream() {
   );
 
   return streamController.stream;
+}
+
+Future<void> centerScreen(Position position) async {
+  final GoogleMapController controller = await _controllerCam.future;
+  controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: LatLng(position.latitude, position.longitude), zoom: 18.0)));
 }
