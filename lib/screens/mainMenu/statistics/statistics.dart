@@ -16,15 +16,12 @@ class Statistics extends StatefulWidget {
 
 class _StatisticsState extends State<Statistics> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final DatabaseService _databaseService =
-      new DatabaseService(email: UserInformations.userEmail);
+  final DatabaseService _databaseService = new DatabaseService(email: UserInformations.userEmail);
 
   QuerySnapshot rideSnapshot;
 
   void initRideStream() async {
-    await _databaseService
-        .getRides()
-        .then((value) => setState(() => rideSnapshot = value));
+    await _databaseService.getRides().then((value) => setState(() => rideSnapshot = value));
   }
 
   Widget rideList() {
@@ -37,7 +34,7 @@ class _StatisticsState extends State<Statistics> {
                 child: RideTile(
                   date: rideSnapshot.docs[index].get('date'),
                   duration: rideSnapshot.docs[index].get('duration'),
-                  polylines: rideSnapshot.docs[index].get('polylines'),
+                  polylines: rideSnapshot.docs[index].get('polyline'),
                 ),
               );
             },
@@ -69,14 +66,9 @@ class _StatisticsState extends State<Statistics> {
         elevation: 0.0,
       ),
       body: Container(
-        padding: EdgeInsets.only(
-            top: 50.0 * heightRatio,
-            bottom: 30.0 * heightRatio,
-            left: 25.0 * widthRatio,
-            right: 25.0 * widthRatio),
+        padding: EdgeInsets.only(top: 50.0 * heightRatio, bottom: 30.0 * heightRatio, left: 25.0 * widthRatio, right: 25.0 * widthRatio),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
           color: Theme.of(context).backgroundColor,
         ),
         child: rideList(),
@@ -96,8 +88,7 @@ class RideTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => RideMap()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => RideMap()));
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
@@ -109,18 +100,10 @@ class RideTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                    (date.toDate().day.toString() +
-                        " / " +
-                        date.toDate().month.toString() +
-                        " / " +
-                        date.toDate().year.toString()),
-                    style:
-                        TextStyle(color: Theme.of(context).textSelectionColor)),
+                Text((date.toDate().day.toString() + " / " + date.toDate().month.toString() + " / " + date.toDate().year.toString()),
+                    style: TextStyle(color: Theme.of(context).textSelectionColor)),
                 Spacer(),
-                Text(("Duration : " + duration),
-                    style:
-                        TextStyle(color: Theme.of(context).textSelectionColor))
+                Text(("Duration : " + duration), style: TextStyle(color: Theme.of(context).textSelectionColor))
               ],
             ),
             SizedBox(height: 5.0),
@@ -161,14 +144,14 @@ class MapWidget extends StatelessWidget {
     }
 
     return Material(
+      color: Colors.transparent,
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: 100.0,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(25.0),
           child: GoogleMap(
-            initialCameraPosition:
-                CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
+            initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
             myLocationEnabled: false,
             tiltGesturesEnabled: false,
             compassEnabled: false,
@@ -176,12 +159,8 @@ class MapWidget extends StatelessWidget {
             zoomGesturesEnabled: false,
             zoomControlsEnabled: false,
             polylines: {
-          Polyline(
-              polylineId: const PolylineId('trajet'),
-              color: Theme.of(context).buttonColor,
-              width: 4,
-              points: decodePolylines(polyline)),
-      },
+              Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: decodePolylines(polyline)),
+            },
             //polylines
             onMapCreated: (GoogleMapController controller) {
               isMapCreated = true;
@@ -195,12 +174,14 @@ class MapWidget extends StatelessWidget {
   }
 }
 
-List<LatLng> decodePolylines (String polyline) {
-  List<LatLng> points;
+List<LatLng> decodePolylines(String polyline) {
+  List<LatLng> points = [];
   List<List<num>> pointsNum = decodePolyline(polyline);
-  for (int i = 0; i < pointsNum.length; i++) {
-    LatLng point = LatLng(pointsNum[i][0], pointsNum[i][1]);
-    points[i] = point;
-  }
+  if (pointsNum.length != null)
+    for (int i = 0; i < pointsNum.length; i++) {
+      LatLng point = LatLng(pointsNum[i][0], pointsNum[i][1]);
+      points.add(point);
+    }
+  points.removeAt(0);
   return points;
 }
