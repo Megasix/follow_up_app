@@ -98,7 +98,11 @@ class RideTile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => RideMap()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => RideMap(
+                      polyline: polylines,
+                    )));
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
