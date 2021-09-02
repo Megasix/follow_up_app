@@ -51,6 +51,10 @@ dependencies:
   flutter_gen: 3.1.2
   polyline: ^1.0.2 #depreciated
   google_polyline_algorithm: 3.1.0
+
+dependency_overrides:
+  meta: ">=1.7.0"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
