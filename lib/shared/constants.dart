@@ -27,6 +27,6 @@ final darkThemeConstant = ThemeData(
 );
 
 class UserInformations {
-  static String userFirstName ="";
-  static String userEmail = "";
+  static String? userFirstName = "";
+  static String? userEmail = "";
 }

@@ -4,7 +4,7 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:ntp/ntp.dart';
 
 class DatabaseService {
-  final String email;
+  final String? email;
 
   //collections references
   final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
@@ -14,12 +14,12 @@ class DatabaseService {
   DatabaseService({this.email});
 
   Future updateUserPersonnalDatas({
-    String firstName,
-    String lastName,
-    String country,
-    String email,
-    String phoneNumber,
-    Timestamp birthDate,
+    String? firstName,
+    String? lastName,
+    String? country,
+    String? email,
+    String? phoneNumber,
+    Timestamp? birthDate,
   }) async {
     return await usersCollection.doc(email).set({
       'firstName': firstName,
@@ -28,18 +28,18 @@ class DatabaseService {
       'email': email,
       'phoneNumber': phoneNumber,
       'birthDate': birthDate,
-      'profilePictureAdress': (country + "-_-" + firstName + "_" + lastName)
+      'profilePictureAdress': (country! + "-_-" + firstName! + "_" + lastName!)
     });
   }
 
   Future addUserRecipient(
-    String firstName,
-    String lastName,
-    String country,
-    String recipientEmail,
-    String phoneNumber,
-    Timestamp birthDate,
-    String profilePictureAdress,
+    String? firstName,
+    String? lastName,
+    String? country,
+    String? recipientEmail,
+    String? phoneNumber,
+    Timestamp? birthDate,
+    String? profilePictureAdress,
   ) async {
     return await usersCollection.doc(email).collection('usersData').doc('chatData').collection('recipients').doc(recipientEmail).set({
       'firstName': firstName,
@@ -99,13 +99,7 @@ class DatabaseService {
 
   //get usersSettings stream
   Stream<List<UsersRecipient>> get usersRecipients {
-    return usersCollection
-        .doc(email)
-        .collection('usersData')
-        .doc('chatData')
-        .collection('recipients')
-        .snapshots()
-        .map(_usersRecipientListFromSnapshot);
+    return usersCollection.doc(email).collection('usersData').doc('chatData').collection('recipients').snapshots().map(_usersRecipientListFromSnapshot);
   }
 
   Stream<List<Ride>> get Rides {

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/services/database.dart';
@@ -17,7 +18,7 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen> {
   final String recipientName;
   final messageController = TextEditingController();
-  Stream chatMessagesStream;
+  late Stream<QuerySnapshot> chatMessagesStream;
 
   DatabaseService _databaseService = new DatabaseService();
 
@@ -30,21 +31,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   Widget messageList() {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot>(
         stream: chatMessagesStream,
         builder: (context, snapshot) {
           return snapshot.hasData
               ? ListView.builder(
                   shrinkWrap: true,
-                  itemCount: snapshot.data.docs.length,
+                  itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    return MessageTile(snapshot.data.docs[index].get('message'), snapshot.data.docs[index].get('sendBy'));
+                    return MessageTile(snapshot.data!.docs[index].get('message'), snapshot.data!.docs[index].get('sendBy'));
                   })
               : Container();
         });
   }
 
-  sendMessage(String message) async {
+  sendMessage(String? message) async {
     if (message != null) {
       Map<String, dynamic> messageMap = {
         'message': message,

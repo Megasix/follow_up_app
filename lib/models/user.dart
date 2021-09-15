@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CustomUser {
   final String uid;
 
-  CustomUser({this.uid});
+  CustomUser({this.uid = ''});
 }
 
 class UserData {
@@ -19,5 +19,6 @@ class UserData {
 }
 
 class UsersRecipient extends UserData {
-  UsersRecipient(String firstName, String lastName, String country, String email, String phoneNumber, Timestamp birthDate, String profilePictureAdress) : super(firstName, lastName, country, email, phoneNumber, birthDate, profilePictureAdress);
+  UsersRecipient(String firstName, String lastName, String country, String email, String phoneNumber, Timestamp birthDate, String profilePictureAdress)
+      : super(firstName, lastName, country, email, phoneNumber, birthDate, profilePictureAdress);
 }

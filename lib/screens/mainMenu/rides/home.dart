@@ -7,12 +7,13 @@ import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 import 'package:follow_up_app/shared/constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key key}) : super(key: key);
+  const Home({Key? key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -53,11 +54,11 @@ class _HomeState extends State<Home> {
 }
 
 class MapWidget extends StatelessWidget {
-  GoogleMapController _controller;
+  late GoogleMapController _controller;
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (getTheme())
+    if (Shared.getTheme())
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -94,7 +95,7 @@ class MapWidget extends StatelessWidget {
                   child: AbsorbPointer(
                     absorbing: true,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(target: currentPostion, zoom: 15),
+                      initialCameraPosition: CameraPosition(target: currentPostion!, zoom: 15),
                       myLocationEnabled: false,
                       tiltGesturesEnabled: false,
                       compassEnabled: false,

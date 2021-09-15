@@ -6,7 +6,7 @@ import 'package:follow_up_app/shared/constants.dart';
 import 'package:ntp/ntp.dart';
 
 final DatabaseService _databaseService = new DatabaseService();
-String chatRoomID;
+late String chatRoomID;
 
 class UserResearch extends StatefulWidget {
   @override
@@ -14,8 +14,8 @@ class UserResearch extends StatefulWidget {
 }
 
 class _UserResearchState extends State<UserResearch> {
-  QuerySnapshot searchSnapshotFirstName;
-  QuerySnapshot searchSnapshotLastName;
+  late QuerySnapshot searchSnapshotFirstName;
+  late QuerySnapshot searchSnapshotLastName;
 
   initiateSearch(name) {
     _databaseService.getUserByFirstName(name).then((value) => setState(() => searchSnapshotFirstName = value));
@@ -94,7 +94,7 @@ class SearchTile extends StatelessWidget {
   final String lastName;
   final String email;
 
-  const SearchTile({this.firstName, this.lastName, this.email});
+  const SearchTile({required this.firstName, required this.lastName, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -149,8 +149,8 @@ getChatRoomID(String a, String b) {
 }
 
 createChatRoom(String recipientEmail) async {
-  chatRoomID = getChatRoomID(UserInformations.userEmail, recipientEmail);
-  List<String> usersEmail = [UserInformations.userEmail, recipientEmail];
+  chatRoomID = getChatRoomID(UserInformations.userEmail!, recipientEmail);
+  List<String> usersEmail = [UserInformations.userEmail!, recipientEmail];
   Map<String, dynamic> chatRoomMap = {'users': usersEmail, 'chatRoomID': chatRoomID, 'lastActivity': await NTP.now()};
   _databaseService.createChatRoom(chatRoomID, chatRoomMap);
 }

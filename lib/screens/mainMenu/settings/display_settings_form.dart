@@ -4,6 +4,7 @@ import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/shared.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -43,21 +44,19 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
                       width: contextWidth,
                       child: FormBuilderDropdown(
                         name: 'Theme choice',
-                        decoration:
-                            textInputDecoration.copyWith(labelText: 'Theme'),
+                        decoration: textInputDecoration.copyWith(labelText: 'Theme'),
                         allowClear: true,
                         items: themeOptions
                             .map((theme) => DropdownMenuItem(
                                   value: theme,
-                                  child: Text(
-                                      "${theme == ThemeMode.light ? "Light" : "Dark"}"),
+                                  child: Text("${theme == ThemeMode.light ? "Light" : "Dark"}"),
                                 ))
                             .toList(),
                         onChanged: (value) {
                           setState(() {
-                            _themeMode = value;
+                            _themeMode = value as ThemeMode;
                             Get.changeThemeMode(_themeMode);
-                            setTheme(_themeMode == ThemeMode.light);
+                            Shared.setTheme(_themeMode == ThemeMode.light);
                           });
                         },
                       ),

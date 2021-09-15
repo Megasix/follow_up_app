@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 
 class RideMap extends StatefulWidget {
   final String polyline;
 
-  const RideMap({Key key, this.polyline}) : super(key: key);
+  const RideMap({Key? key, required this.polyline}) : super(key: key);
 
   @override
   _RideMapState createState() => _RideMapState(polyline);
@@ -26,14 +27,14 @@ class _RideMapState extends State<RideMap> {
 }
 
 class MapWidget extends StatelessWidget {
-  GoogleMapController _controller;
+  late GoogleMapController _controller;
   bool isMapCreated = false;
   final String polyline;
 
   MapWidget(this.polyline);
 
   changeMapMode() {
-    if (getTheme())
+    if (Shared.getTheme())
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -58,11 +59,7 @@ class MapWidget extends StatelessWidget {
       if (point.longitude < minLong) minLong = point.longitude;
       if (point.longitude > maxLong) maxLong = point.longitude;
     });
-    _controller.moveCamera(CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-            southwest: LatLng(minLat, minLong),
-            northeast: LatLng(maxLat, maxLong)),
-        20));
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), 20));
   }
 
   @override
@@ -83,8 +80,7 @@ class MapWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(25.0),
           child: AbsorbPointer(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                  target: LatLng(45.503995, -73.593681), zoom: 10),
+              initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
               myLocationEnabled: false,
               tiltGesturesEnabled: false,
               compassEnabled: false,
@@ -92,11 +88,7 @@ class MapWidget extends StatelessWidget {
               zoomGesturesEnabled: false,
               zoomControlsEnabled: false,
               polylines: {
-                Polyline(
-                    polylineId: const PolylineId('trajet'),
-                    color: Theme.of(context).buttonColor,
-                    width: 4,
-                    points: polylines),
+                Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: polylines),
               },
               //polylines
               onMapCreated: (GoogleMapController controller) {
@@ -118,7 +110,7 @@ List<LatLng> decodePolylines(String polyline) {
   List<List<num>> pointsNum = decodePolyline(polyline);
   if (pointsNum.length != null)
     for (int i = 0; i < pointsNum.length; i++) {
-      LatLng point = LatLng(pointsNum[i][0], pointsNum[i][1]);
+      LatLng point = LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
       points.add(point);
     }
   points.removeAt(0);

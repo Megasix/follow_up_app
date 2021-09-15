@@ -1,48 +1,42 @@
-import 'package:follow_up_app/services/database.dart';
+import 'dart:developer';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class Localisation {
-  List listlocalisation;
-  checkPermission() async {
+  static List positions = [];
+
+  static void getPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
-    Geolocator.requestPermission();
+
     // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      print("pas service");
+      log('Pas de service GPS', name: 'Localisation', level: 1500);
     }
+
+    // Check if we have permission to access location.
     permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      serviceEnabled == false;
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        serviceEnabled == false;
-      }
-      if (permission == LocationPermission.denied) {
-        serviceEnabled == false;
-      }
+    while (!(permission == LocationPermission.always || permission == LocationPermission.whileInUse)) {
+      Geolocator.requestPermission();
     }
-    return serviceEnabled;
   }
 
-  determinePosition() async {
+  static Future<Position> determinePosition() async {
     Position position = await Geolocator.getCurrentPosition();
     return position;
   }
 
-  geocodePosition(Position coordinate) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-        coordinate.latitude, coordinate.longitude);
+  static Future<String> geocodePosition(Position coordinate) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(coordinate.latitude, coordinate.longitude);
     Placemark place = placemarks[0];
 
-    String _currentAddress =
-        "${place.street},${place.locality}, ${place.postalCode}, ${place.country}";
+    String _currentAddress = "${place.street},${place.locality}, ${place.postalCode}, ${place.country}";
     return _currentAddress;
   }
 
-  polylinesMaker(Position position) {
-    if (listlocalisation.last != position) listlocalisation.add(position);
+  static void appendToPositionList(Position position) {
+    if (positions.last != position) positions.add(position);
   }
 }

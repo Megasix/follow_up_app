@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/shared/button.dart';
+import 'package:follow_up_app/shared/sizeable_button.dart';
 
 /// A sign in button that matches Facebook's design guidelines.
 class FacebookSignInButton extends StatelessWidget {
@@ -7,7 +7,7 @@ class FacebookSignInButton extends StatelessWidget {
 
   /// Creates a new button.
   FacebookSignInButton({
-    @required this.onPressed,
+    required this.onPressed,
   });
 
   @override

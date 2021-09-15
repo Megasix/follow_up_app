@@ -10,57 +10,50 @@ import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-bool _lightThemeEnabled = true;
-
-// ignore: missing_return
-Future<void> main() {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  final Future<FirebaseApp> _initializationFuture = Firebase.initializeApp();
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: Firebase.initializeApp(),
+        future: _initializationFuture,
         builder: (context, snapshot) {
           // Check for errors
-          if (snapshot.hasError) {
-            print("erreur dans le builder");
-          }
-          if (snapshot.connectionState == ConnectionState.done) {
-            return StreamProvider<CustomUser>.value(
-              value: AuthService().user,
-              child: GetMaterialApp(
-                theme: lightThemeConstant,
-                darkTheme: darkThemeConstant,
-                themeMode: ThemeMode.system,
-                localizationsDelegates: [
-                  //AppLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                ],
-                supportedLocales: [
-                  const Locale('en', 'US'),
-                  const Locale('en', 'CA'),
-                  const Locale('fr', 'CA'),
-                  const Locale('fr', 'FR'),
-                ],
-                home: Wrapper(),
-              ),
+          if (snapshot.hasError)
+            return Container(
+              child: Text('Erreur dans l\'initialisation de Firebase...'),
             );
-          }
-          return Loading();
+
+          if (snapshot.connectionState != ConnectionState.done) return Loading();
+
+          return StreamProvider<CustomUser?>.value(
+            value: AuthService.user,
+            initialData: null,
+            child: GetMaterialApp(
+              theme: lightThemeConstant,
+              darkTheme: darkThemeConstant,
+              themeMode: ThemeMode.system,
+              localizationsDelegates: [
+                //AppLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: [
+                const Locale('en', 'US'),
+                const Locale('en', 'CA'),
+                const Locale('fr', 'CA'),
+                const Locale('fr', 'FR'),
+              ],
+              home: Wrapper(),
+            ),
+          );
         });
   }
-}
-
-bool getTheme() {
-  return _lightThemeEnabled;
-}
-
-void setTheme(bool lightThemeEnabled) {
-  _lightThemeEnabled = lightThemeEnabled;
 }

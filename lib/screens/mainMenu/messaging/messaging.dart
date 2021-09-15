@@ -15,33 +15,33 @@ class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final DatabaseService _databaseService = new DatabaseService();
 
-  DocumentSnapshot recipientSnapshot;
-  Stream chatRoomStream;
+  late DocumentSnapshot recipientSnapshot;
+  late Stream<QuerySnapshot> chatRoomStream;
 
   void initChatRoomStream() async {
-    await _databaseService.getChatRooms(UserInformations.userEmail).then((val) {
+    await _databaseService.getChatRooms(UserInformations.userEmail!).then((val) {
       chatRoomStream = val;
     });
   }
 
-  void initRecipientSnapshot(email) async{
+  void initRecipientSnapshot(email) async {
     recipientSnapshot = await _databaseService.getUserByEmail(email);
     print(recipientSnapshot.get('lastName'));
   }
 
   Widget chatRoomList() {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot>(
         stream: chatRoomStream,
         builder: (context, snapshot) {
           return snapshot.hasData
               ? ListView.builder(
-                  itemCount: snapshot.data.docs.length,
+                  itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ChatRoomTile(
-                       getUsersRecipientObjectByEmail(snapshot.data.docs[index].get('users')),
-                        snapshot.data.docs[index].get('chatRoomID'),
+                        getUsersRecipientObjectByEmail(snapshot.data!.docs[index].get('users')),
+                        snapshot.data!.docs[index].get('chatRoomID'),
                       ),
                     );
                   },
@@ -73,14 +73,14 @@ class _MessagingState extends State<Messaging> {
         recipientSnapshot.get('birthDate'),
         recipientSnapshot.get('profilePictureAdress'),
       );
-    }catch (error){
+    } catch (error) {
       print(error.toString());
       return null;
     }
   }
 
   void _openDrawer() {
-    _scaffoldKey.currentState.openEndDrawer();
+    _scaffoldKey.currentState?.openEndDrawer();
   }
 
   void _closeDrawer() {
@@ -109,7 +109,7 @@ class _MessagingState extends State<Messaging> {
         title: Text('Messages'),
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         elevation: 0.0,
-        actions: [FlatButton(onPressed: _openDrawer, child: Text('New Conversation'))],
+        actions: [TextButton(onPressed: _openDrawer, child: Text('New Conversation'))],
       ),
       body: Container(
         padding: EdgeInsets.only(top: 50.0 * heightRatio, bottom: 30.0 * heightRatio, left: 25.0 * widthRatio, right: 25.0 * widthRatio),
@@ -125,7 +125,7 @@ class _MessagingState extends State<Messaging> {
           Container(
             width: MediaQuery.of(context).size.width,
             color: Theme.of(context).backgroundColor,
-            child: FlatButton(
+            child: TextButton(
               onPressed: _closeDrawer,
               child: Text('Close'),
             ),

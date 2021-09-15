@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/shared/button.dart';
+import 'package:follow_up_app/shared/sizeable_button.dart';
 
 /// A sign in button that matches Google's design guidelines.
 class GoogleSignInButton extends StatelessWidget {
@@ -7,7 +7,7 @@ class GoogleSignInButton extends StatelessWidget {
 
   /// Creates a new button.
   GoogleSignInButton({
-    @required this.onPressed,
+    required this.onPressed,
   });
 
   @override
