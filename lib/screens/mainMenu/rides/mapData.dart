@@ -8,7 +8,7 @@ import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';

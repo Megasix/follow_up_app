@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';

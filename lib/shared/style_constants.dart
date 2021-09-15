@@ -25,8 +25,3 @@ final darkThemeConstant = ThemeData(
   accentColor: Colors.grey[600],
   splashColor: Colors.grey,
 );
-
-class UserInformations {
-  static String? userFirstName = "";
-  static String? userEmail = "";
-}

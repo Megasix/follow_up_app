@@ -12,12 +12,12 @@ class AuthService {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 // create custom user based on FirebaseUser
-  static CustomUser _userFromFirebaseUser(User? user) {
-    return CustomUser(uid: user?.uid as String);
+  static UserData _userFromFirebaseUser(User? user) {
+    return UserData((user as User).uid);
   }
 
 // auth change user stream
-  static Stream<CustomUser> get user {
+  static Stream<UserData> get user {
     return _firebaseAuth.authStateChanges().map(_userFromFirebaseUser);
   }
 
@@ -95,6 +95,7 @@ class AuthService {
     if (authResult.additionalUserInfo!.isNewUser)
       await DatabaseService(email: googleSignedUser.email)
           .updateUserPersonnalDatas(firstName: firstName, lastName: lastName, email: googleSignedUser.email, phoneNumber: googleSignedUser.phoneNumber);
+
     Shared.saveUserLoggedInSharedPreference(true);
     Shared.saveUserEmailSharedPreference(googleSignedUser.email as String); //won't be null since we're registering with a Google account
     Shared.saveUserNameSharedPreference(firstName);

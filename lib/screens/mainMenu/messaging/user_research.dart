@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:ntp/ntp.dart';
 
 final DatabaseService _databaseService = new DatabaseService();

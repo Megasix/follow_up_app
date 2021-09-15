@@ -1,10 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Ride {
-  Timestamp? date;
-  String? duration;
-  String? polylines;
-  String? name;
+class RideData {
+  final String rideId; //works as doc id and ride id
 
-  Ride({this.name, this.duration, this.date, this.polylines});
+  String? name;
+  String? polylines;
+  Duration? duration;
+  Timestamp? date;
+
+  RideData(this.rideId, {this.name, this.duration, this.date, this.polylines});
+
+  RideData.fromMap(String id, Map<String, dynamic>? map)
+      : this(id, name: map?['name'], duration: map?['duration'], date: map?['date'], polylines: map?['polylines']);
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'polylines': polylines,
+        'duration': duration,
+        'date': date,
+      };
 }

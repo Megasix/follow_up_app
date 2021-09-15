@@ -4,7 +4,7 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/user_research.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 
 class Messaging extends StatefulWidget {
   @override

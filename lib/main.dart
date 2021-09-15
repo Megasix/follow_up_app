@@ -5,7 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/wrapper.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

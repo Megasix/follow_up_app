@@ -1,4 +1,4 @@
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Shared {

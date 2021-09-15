@@ -1,170 +1,129 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:follow_up_app/models/chat.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
-import 'package:ntp/ntp.dart';
+import 'package:follow_up_app/shared/appdata.dart';
 
 class DatabaseService {
-  final String? email;
-
   //collections references
-  final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
-  final CollectionReference chatRoomCollection = FirebaseFirestore.instance.collection('chatRoom');
-  final CollectionReference ridesCollection = FirebaseFirestore.instance.collection('rides');
+  static final CollectionReference<UserData> usersCollection = FirebaseFirestore.instance
+      .collection('users')
+      .withConverter<UserData>(fromFirestore: (snap, opt) => UserData.fromMap(snap.id, snap.data()), toFirestore: (user, opt) => user.toMap());
 
-  DatabaseService({this.email});
+  static final CollectionReference<RideData> ridesCollection = FirebaseFirestore.instance
+      .collection('rides')
+      .withConverter(fromFirestore: (snap, opt) => RideData.fromMap(snap.id, snap.data()), toFirestore: (ride, opt) => ride.toMap());
 
-  Future updateUserPersonnalDatas({
-    String? firstName,
-    String? lastName,
-    String? country,
-    String? email,
-    String? phoneNumber,
-    Timestamp? birthDate,
-  }) async {
-    return await usersCollection.doc(email).set({
-      'firstName': firstName,
-      'lastName': lastName,
-      'country': country,
-      'email': email,
-      'phoneNumber': phoneNumber,
-      'birthDate': birthDate,
-      'profilePictureAdress': (country! + "-_-" + firstName! + "_" + lastName!)
+  static final CollectionReference<ChatroomData> chatRoomCollection = FirebaseFirestore.instance
+      .collection('chatrooms')
+      .withConverter(fromFirestore: (snap, opt) => ChatroomData.fromMap(snap.id, snap.data()), toFirestore: (chatroom, opt) => chatroom.toMap());
+
+  //
+  //UPDATERS
+  //
+
+  static Future updateUser(UserData data) {
+    return usersCollection.doc(data.uid).set(data);
+  }
+
+  static Future addChatroom(String userId, ChatroomData chatroomData) async {
+    await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData);
+    return usersCollection.doc(userId).collection('user.chatrooms').doc(chatroomData.chatroomId).set(chatroomData.toMap());
+  }
+
+  static Future addChatMessage(ChatroomData chatroomData, ChatMessage chatMessage) async {
+    chatroomData.lastMessage = chatMessage;
+
+    await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData, SetOptions(merge: true));
+    await chatRoomCollection.doc(chatroomData.chatroomId).collection('chatroom.chats').add(chatMessage.toMap()).catchError((e) {
+      print(e.toString());
     });
   }
 
-  Future addUserRecipient(
-    String? firstName,
-    String? lastName,
-    String? country,
-    String? recipientEmail,
-    String? phoneNumber,
-    Timestamp? birthDate,
-    String? profilePictureAdress,
-  ) async {
-    return await usersCollection.doc(email).collection('usersData').doc('chatData').collection('recipients').doc(recipientEmail).set({
-      'firstName': firstName,
-      'lastName': lastName,
-      'country': country,
-      'email': recipientEmail,
-      'phoneNumber': phoneNumber,
-      'birthDate': birthDate,
-      'profilePictureAdress': profilePictureAdress,
-    });
+  static Future addRide(String userId, RideData rideData) {
+    return ridesCollection.doc(userId).collection('user.rides').doc(rideData.rideId).set(rideData.toMap());
   }
 
-  Future addNewRide(String name, String duration, Timestamp date, String polyline) async {
-    return await ridesCollection.doc(email).collection('rides').doc(name).set({
-      'duration': duration,
-      'date': date,
-      'polyline': polyline,
-    });
+  //
+  // STREAMS
+  //
+
+  //get all chatrooms the signed in user has
+  Stream<List<ChatroomData>> get chatrooms {
+    return usersCollection.doc(AppData.signedInUser.uid).collection('user.chatrooms').snapshots().map(_chatroomsFromSnapshot);
   }
 
-  // userData from snapshot
-  UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-    return UserData(
-      snapshot.get('firstName'),
-      snapshot.get('lastName'),
-      snapshot.get('country'),
-      snapshot.get('email'),
-      snapshot.get('phoneNumber'),
-      snapshot.get('birthDate'),
-      snapshot.get('profilePictureAdress'),
-    );
-  }
-
-  List<UsersRecipient> _usersRecipientListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      return UsersRecipient(
-        doc.get('firstName'),
-        doc.get('lastName'),
-        doc.get('country'),
-        doc.get('email'),
-        doc.get('phoneNumber'),
-        doc.get('birtDate'),
-        doc.get('profilePictureAdress'),
-      );
-    }).toList();
-  }
-
-  List<Ride> _ridesListFromSnapshot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      return Ride(
-        duration: doc.get('duration'),
-        date: doc.get('date'),
-        polylines: doc.get('polylines'),
-      );
-    }).toList();
-  }
-
-  //get usersSettings stream
-  Stream<List<UsersRecipient>> get usersRecipients {
-    return usersCollection.doc(email).collection('usersData').doc('chatData').collection('recipients').snapshots().map(_usersRecipientListFromSnapshot);
-  }
-
-  Stream<List<Ride>> get Rides {
-    return ridesCollection.doc(email).collection('rides').snapshots().map(_ridesListFromSnapshot);
+  Stream<List<RideData>> get rides {
+    return ridesCollection.doc(AppData.signedInUser.uid).collection('user.rides').snapshots().map(_ridesFromSnapshot);
   }
 
   // get user doc stream
-  Stream<UserData> get userData {
-    return usersCollection.doc(email).snapshots().map(_userDataFromSnapshot);
+  Stream<UserData> get users {
+    return usersCollection.doc(AppData.signedInUser.uid).snapshots().map(_userFromSnapshot);
   }
 
-  getUser() async {
-    return await usersCollection.doc(email).get();
+  //
+  // FETCHERS
+  //
+
+  static Future<UserData> refreshUser() {
+    return usersCollection.doc(AppData.signedInUser.uid).get().then<UserData>((snap) => snap.data() as UserData);
   }
 
-  getUserByFirstName(String name) async {
-    return await usersCollection.where('firstName', isEqualTo: name).get();
+  static Future<List<UserData>> getUsersByFirstName(String name) {
+    return usersCollection.where('firstName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
   }
 
-  getUserByLastName(String name) async {
-    return await usersCollection.where('lastName', isEqualTo: name).get();
+  static Future<List<UserData>> getUsersByLastName(String name) async {
+    return await usersCollection.where('lastName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
   }
 
-  getUserByEmail(String email) async {
-    return await usersCollection.doc(email).get();
+  static Future<UserData> getUserById(String userId) {
+    return usersCollection.doc(userId).get().then<UserData>((docSnap) => docSnap.data() as UserData);
   }
 
-  getUsersRecipientObjectByEmail(String email) {
-    DocumentSnapshot recipientSnapshot = getUserByEmail(email);
-    if (recipientSnapshot != null) {
-      return UsersRecipient(
-        recipientSnapshot.get('firstName'),
-        recipientSnapshot.get('lastName'),
-        recipientSnapshot.get('country'),
-        recipientSnapshot.get('email'),
-        recipientSnapshot.get('phoneNumber'),
-        recipientSnapshot.get('birthDate'),
-        recipientSnapshot.get('profilePictureAdress'),
-      );
-    } else
-      return null;
+  static Future<List<ChatroomData>> getChatRoomsByMemberId(String userId) {
+    return chatRoomCollection
+        .where('chatroom.members', arrayContains: userId)
+        .orderBy('lastMessage.time', descending: true)
+        .get()
+        .then<List<ChatroomData>>(_chatroomsFromSnapshot);
   }
 
-  createChatRoom(String chatRoomID, chatRoomMap) async {
-    await chatRoomCollection.doc(chatRoomID).set(chatRoomMap).catchError((e) {
-      print(e.toString());
-    });
+  static Future<List<ChatMessage>> getChatMessages(String chatRoomID) {
+    return chatRoomCollection
+        .doc(chatRoomID)
+        .collection('chatroom.chats')
+        .orderBy('time', descending: false)
+        .get()
+        .then<List<ChatMessage>>(_chatMessagesFromSnapshot);
   }
 
-  addConversationMessage(String chatRoomID, messageMap) async {
-    await chatRoomCollection.doc(chatRoomID).set({'lastActivity': await NTP.now()});
-    await chatRoomCollection.doc(chatRoomID).collection('chats').add(messageMap).catchError((e) {
-      print(e.toString());
-    });
+  static Future<List<RideData>> getRides(String userId) {
+    return ridesCollection.doc(userId).collection('user.rides').orderBy('date', descending: false).get().then<List<RideData>>(_ridesFromSnapshot);
   }
 
-  getConversationMessages(String chatRoomID) async {
-    return await chatRoomCollection.doc(chatRoomID).collection('chats').orderBy('time', descending: false).snapshots();
+  //
+  //CONVERTERS
+  //
+
+  static UserData _userFromSnapshot(DocumentSnapshot<Object?> docSnapshot) {
+    return UserData.fromMap(docSnapshot.id, docSnapshot.data() as Map<String, dynamic>);
   }
 
-  getChatRooms(String email) async {
-    return await chatRoomCollection.where('users', arrayContains: email).orderBy('lastActivity', descending: true).snapshots();
+  static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as UserData).toList();
   }
 
-  getRides() async {
-    return await ridesCollection.doc(email).collection('rides').orderBy('date', descending: false).get();
+  static List<ChatroomData> _chatroomsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatroomData).toList();
+  }
+
+  static List<ChatMessage> _chatMessagesFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatMessage).toList();
+  }
+
+  static List<RideData> _ridesFromSnapshot(QuerySnapshot<Object?> snapshot) {
+    return snapshot.docs.map((queryDocSnap) => queryDocSnap.data() as RideData).toList();
   }
 }
