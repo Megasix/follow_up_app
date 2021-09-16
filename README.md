@@ -55,6 +55,7 @@ Contributors names and contact info
 
 * Barry Lawson  
     Github : [@Megasix](https://github.com/Megasix).
+    
 * Olivier Déry-Prévost
     Github : [@olivier123456](https://github.com/olivier123456).
 
