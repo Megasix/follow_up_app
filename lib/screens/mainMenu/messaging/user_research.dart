@@ -23,7 +23,7 @@ class _UserResearchState extends State<UserResearch> {
   Widget searchListByName() {
     return search.isNotEmpty
         ? FutureBuilder<List<ChatUserData>>(
-            future: _searchUsers,
+            future: DatabaseService.getUsersByName(search),
             builder: (context, asyncSnap) {
               //todo: add more cases (i.e. show an error msg if an error occurs)
               if (asyncSnap.connectionState != ConnectionState.done) {
@@ -128,7 +128,7 @@ class SearchTile extends StatelessWidget {
 
 Future<void> createChatRoom(BuildContext context, ChatUserData chatUser) async {
   ChatUserData signedInChatUser =
-      ChatUserData.fromUserData(Provider.of<UserData?>(context)!); //create a chat user from the current user (for chatroom creation)
+      ChatUserData.fromUserData(Provider.of<UserData?>(context, listen: false)!); //create a chat user from the current user (for chatroom creation)
 
   //create chatroom
   List<ChatUserData> members = [chatUser, signedInChatUser];

@@ -33,10 +33,9 @@ class DatabaseService {
   static Future<void> addChatMessage(ChatroomData chatroomData, ChatMessage chatMessage) async {
     chatroomData.lastMessage = chatMessage;
 
+    await usersCollection.doc(chatMessage.author.uid).collection('user.chatrooms').doc(chatroomData.chatroomId).set(chatroomData.toMap());
     await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData, SetOptions(merge: true));
-    await chatRoomCollection.doc(chatroomData.chatroomId).collection('chatroom.chats').add(chatMessage.toMap()).catchError((e) {
-      print(e.toString());
-    });
+    await chatRoomCollection.doc(chatroomData.chatroomId).collection('chatroom.chats').doc(chatMessage.messageId).set(chatMessage.toMap());
   }
 
   static Future<void> addRide(String userId, RideData rideData) {
@@ -49,8 +48,10 @@ class DatabaseService {
 
   static Future<List<ChatUserData>> getUsersByName(String name) async {
     //todo: test if a string is considered an array by Firestore
-    var firstNameList = await usersCollection.where('firstName', arrayContains: name).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
-    var lastNameList = await usersCollection.where('firstName', arrayContains: name).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var firstNameList =
+        await usersCollection.orderBy('firstName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var lastNameList =
+        await usersCollection.orderBy('lastName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
     var sortedNameList = firstNameList.followedBy(lastNameList).toList();
 
     //todo: also check if this is functioning properly
@@ -66,7 +67,7 @@ class DatabaseService {
     return await usersCollection.where('lastName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
   }
 
-  static Future<UserData> getUserById(String userId) {
+  static Future<UserData?> getUserById(String userId) {
     return usersCollection.doc(userId).get().then<UserData>((docSnap) => docSnap.data() as UserData);
   }
 
@@ -130,7 +131,7 @@ class DatabaseService {
   }
 
   static List<ChatroomData> _chatroomsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatroomData).toList();
+    return querySnapshot.docs.map((queryDocSnap) => ChatroomData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
   }
 
   static List<ChatMessage> _chatMessagesFromSnapshot(QuerySnapshot<Object?> querySnapshot) {

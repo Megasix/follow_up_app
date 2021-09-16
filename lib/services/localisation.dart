@@ -19,7 +19,7 @@ class Localisation {
     // Check if we have permission to access location.
     permission = await Geolocator.checkPermission();
     while (!(permission == LocationPermission.always || permission == LocationPermission.whileInUse)) {
-      Geolocator.requestPermission();
+      await Geolocator.requestPermission();
     }
   }
 

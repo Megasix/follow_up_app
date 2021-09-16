@@ -29,7 +29,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
         stream: chatMessagesStream,
         builder: (context, asyncSnap) {
           //todo: add more cases (i.e. show an error msg if an error occurs)
-          if (asyncSnap.connectionState != ConnectionState.done) {
+          if (asyncSnap.connectionState != ConnectionState.active) {
             return Loading();
           }
 
@@ -48,7 +48,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   sendMessage(String message) async {
     DatabaseService.addChatMessage(widget.chatroomData,
-        ChatMessage(Uuid().v1(), message: message, author: ChatUserData.fromUserData(Provider.of<UserData?>(context)!), time: Timestamp.now()));
+        ChatMessage(Uuid().v1(), message: message, author: ChatUserData.fromUserData(Provider.of<UserData?>(context, listen: false)!), time: Timestamp.now()));
   }
 
   @override

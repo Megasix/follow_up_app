@@ -17,14 +17,14 @@ class Messaging extends StatefulWidget {
 class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context)!.uid as String);
+  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context, listen: false)!.uid as String);
 
   Widget chatRoomList() {
     return StreamBuilder<List<ChatroomData>>(
         stream: chatRoomStream,
         builder: (context, asyncSnap) {
           //todo: add more cases (i.e. show an error msg if an error occurs)
-          if (asyncSnap.connectionState != ConnectionState.done) {
+          if (asyncSnap.connectionState != ConnectionState.active) {
             return Loading();
           }
           List<ChatroomData>? chatrooms = asyncSnap.data;

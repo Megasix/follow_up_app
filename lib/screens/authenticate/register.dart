@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/features/apple.dart';
@@ -13,6 +14,7 @@ import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 import '../../main.dart';
 
 class Register extends StatefulWidget {
@@ -411,13 +413,21 @@ class _RegisterState extends State<Register> {
                                               onPressed: () async {
                                                 if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   setState(() => loading = true);
-                                                  dynamic result = await AuthService.registerWithEmailAndPassword(
-                                                      firstName, lastName, country, email, phoneNumber, birthDate, password);
-                                                  if (result == null)
-                                                    setState(() {
-                                                      error = 'There was an error using these credential please retry';
-                                                      loading = false;
-                                                    });
+
+                                                  await AuthService.registerWithEmailAndPassword(
+                                                      password,
+                                                      UserData(Uuid().v4(),
+                                                          firstName: firstName,
+                                                          lastName: lastName,
+                                                          email: email,
+                                                          country: country,
+                                                          phoneNumber: phoneNumber,
+                                                          birthDate: birthDate));
+
+                                                  setState(() {
+                                                    error = 'There was an error using these credential please retry';
+                                                    loading = false;
+                                                  });
                                                 }
                                               }),
                                         ),

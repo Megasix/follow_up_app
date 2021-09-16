@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:follow_up_app/models/user.dart';
+import 'package:uuid/uuid.dart';
 
 // class containing the data for a chatroom
 class ChatroomData {
@@ -11,9 +12,13 @@ class ChatroomData {
 
   ChatroomData(this.chatroomId, {required this.name, this.members, this.lastMessage});
 
-  ChatroomData.fromMap(String id, Map<String, dynamic>? map) : this(id, name: map?['name'], members: map?['members'], lastMessage: map?['lastMessage']);
+  ChatroomData.fromMap(String id, Map<String, dynamic>? map)
+      : this(id,
+            name: map?['name'] ?? '',
+            members: (map?['members'] as List).map<ChatUserData>((map) => ChatUserData.fromMap(map)).toList(),
+            lastMessage: ChatMessage.fromMap(Uuid().v4(), map?['lastMessage']));
 
-  Map<String, dynamic> toMap() => {'name': name, 'lastMessage': lastMessage};
+  Map<String, dynamic> toMap() => {'name': name, 'members': members?.map((chatUser) => chatUser.toMap()).toList(), 'lastMessage': lastMessage?.toMap()};
 }
 
 //class containing the data for a chat message
@@ -29,7 +34,7 @@ class ChatMessage {
   ChatMessage.fromMap(String id, Map<String, dynamic>? map)
       : this(
           id,
-          message: map?['message'],
+          message: map?['message'] ?? '',
           author: ChatUserData.fromMap(map?['author']),
           time: map?['time'],
         );
