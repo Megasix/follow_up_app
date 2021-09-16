@@ -3,20 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/models/rides.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/acceleration.dart';
-import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:sensors/sensors.dart';
-import 'package:intl/intl.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:uuid/uuid.dart';
 
 late StreamSubscription accelerometer;
 LatLng? currentPostion;
@@ -24,9 +24,7 @@ final panelController = PanelController();
 double? x, y, z, _vitesse, _accelerationVecteur;
 String _address = "";
 late Stream<Position> positionStream;
-final Localisation _localisation = Localisation();
 final Acceleration _acceleration = Acceleration();
-final DatabaseService _databaseService = new DatabaseService(email: UserInformations.userEmail);
 DateTime now = DateTime.now();
 Timestamp myTimeStamp = Timestamp.fromDate(now);
 late StreamSubscription accelerometerSubscription;
@@ -46,7 +44,6 @@ class Map extends StatefulWidget {
 }
 
 class _MapData extends State<Map> {
-  final AuthService _authService = AuthService();
   late StreamSubscription<Position> positionStream;
 
   void _getUserLocation() async {
@@ -100,7 +97,17 @@ class _MapData extends State<Map> {
   @override
   void dispose() {
     listePositionNum.removeAt(0);
-    _databaseService.addNewRide(DateTime.now().toString(), (hoursStr + ":" + minutesStr + ":" + secondsStr), myTimeStamp, encodePolyline(listePositionNum));
+
+    DatabaseService.addRide(
+        Provider.of<UserData?>(context)!.uid as String,
+        RideData(
+          Uuid().v4(),
+          name: DateTime.now().toString(),
+          duration: Duration(seconds: DateTime.now().difference(now).inSeconds),
+          date: myTimeStamp,
+          polylines: encodePolyline(listePositionNum),
+        ));
+
     accelerometerSubscription.cancel();
     positionStream.cancel();
     timerSubscription.cancel();

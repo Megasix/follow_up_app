@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:follow_up_app/models/chat.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
-import 'package:follow_up_app/shared/appdata.dart';
 
 class DatabaseService {
   //collections references
@@ -22,16 +21,16 @@ class DatabaseService {
   //UPDATERS
   //
 
-  static Future updateUser(UserData data) {
+  static Future<void> updateUser(UserData data) {
     return usersCollection.doc(data.uid).set(data);
   }
 
-  static Future addChatroom(String userId, ChatroomData chatroomData) async {
+  static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
     await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData);
     return usersCollection.doc(userId).collection('user.chatrooms').doc(chatroomData.chatroomId).set(chatroomData.toMap());
   }
 
-  static Future addChatMessage(ChatroomData chatroomData, ChatMessage chatMessage) async {
+  static Future<void> addChatMessage(ChatroomData chatroomData, ChatMessage chatMessage) async {
     chatroomData.lastMessage = chatMessage;
 
     await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData, SetOptions(merge: true));
@@ -40,34 +39,23 @@ class DatabaseService {
     });
   }
 
-  static Future addRide(String userId, RideData rideData) {
+  static Future<void> addRide(String userId, RideData rideData) {
     return ridesCollection.doc(userId).collection('user.rides').doc(rideData.rideId).set(rideData.toMap());
-  }
-
-  //
-  // STREAMS
-  //
-
-  //get all chatrooms the signed in user has
-  Stream<List<ChatroomData>> get chatrooms {
-    return usersCollection.doc(AppData.signedInUser.uid).collection('user.chatrooms').snapshots().map(_chatroomsFromSnapshot);
-  }
-
-  Stream<List<RideData>> get rides {
-    return ridesCollection.doc(AppData.signedInUser.uid).collection('user.rides').snapshots().map(_ridesFromSnapshot);
-  }
-
-  // get user doc stream
-  Stream<UserData> get users {
-    return usersCollection.doc(AppData.signedInUser.uid).snapshots().map(_userFromSnapshot);
   }
 
   //
   // FETCHERS
   //
 
-  static Future<UserData> refreshUser() {
-    return usersCollection.doc(AppData.signedInUser.uid).get().then<UserData>((snap) => snap.data() as UserData);
+  static Future<List<ChatUserData>> getUsersByName(String name) async {
+    //todo: test if a string is considered an array by Firestore
+    var firstNameList = await usersCollection.where('firstName', arrayContains: name).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var lastNameList = await usersCollection.where('firstName', arrayContains: name).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var sortedNameList = firstNameList.followedBy(lastNameList).toList();
+
+    //todo: also check if this is functioning properly
+    sortedNameList.sort((data1, data2) => data1.lastName?.compareTo(data2.lastName as String) ?? 0);
+    return sortedNameList;
   }
 
   static Future<List<UserData>> getUsersByFirstName(String name) {
@@ -84,7 +72,7 @@ class DatabaseService {
 
   static Future<List<ChatroomData>> getChatRoomsByMemberId(String userId) {
     return chatRoomCollection
-        .where('chatroom.members', arrayContains: userId)
+        .where('members', arrayContains: userId)
         .orderBy('lastMessage.time', descending: true)
         .get()
         .then<List<ChatroomData>>(_chatroomsFromSnapshot);
@@ -104,15 +92,41 @@ class DatabaseService {
   }
 
   //
+  // STREAMERS (streams that require parameters)
+  //
+
+  static Stream<List<ChatMessage>> streamChatMessages(String chatRoomID) {
+    return chatRoomCollection
+        .doc(chatRoomID)
+        .collection('chatroom.chats')
+        .orderBy('time', descending: false)
+        .snapshots()
+        .map<List<ChatMessage>>(_chatMessagesFromSnapshot);
+  }
+
+  static Stream<List<ChatroomData>> streamChatroomsByMemberId(String userId) {
+    return chatRoomCollection.where('members', arrayContains: userId).snapshots().map<List<ChatroomData>>(_chatroomsFromSnapshot);
+  }
+
+  //get all chatrooms the signed in user has
+  static Stream<List<ChatroomData>> streamChatrooms(String userId) {
+    return usersCollection.doc(userId).collection('user.chatrooms').snapshots().map(_chatroomsFromSnapshot);
+  }
+
+  Stream<List<RideData>> streamRides(String userId) {
+    return usersCollection.doc(userId).collection('user.rides').snapshots().map(_ridesFromSnapshot);
+  }
+
+  //
   //CONVERTERS
   //
 
-  static UserData _userFromSnapshot(DocumentSnapshot<Object?> docSnapshot) {
-    return UserData.fromMap(docSnapshot.id, docSnapshot.data() as Map<String, dynamic>);
-  }
-
   static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
     return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as UserData).toList();
+  }
+
+  static List<ChatUserData> _chatUsersFromUsersSnapshot(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => ChatUserData.fromUserData(queryDocSnap.data() as UserData)).toList();
   }
 
   static List<ChatroomData> _chatroomsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {

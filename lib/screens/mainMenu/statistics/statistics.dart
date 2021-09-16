@@ -4,12 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/models/rides.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/shared/appdata.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
+import 'package:provider/provider.dart';
 
 class Statistics extends StatefulWidget {
   @override
@@ -18,36 +23,37 @@ class Statistics extends StatefulWidget {
 
 class _StatisticsState extends State<Statistics> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final DatabaseService _databaseService = new DatabaseService(email: UserInformations.userEmail);
 
-  late QuerySnapshot rideSnapshot;
-
-  void initRideStream() async {
-    await _databaseService.getRides().then((value) => setState(() => rideSnapshot = value));
-  }
+  //todo: check if late is the right way to do this
+  late Future<List<RideData>> _ridesFuture = DatabaseService.getRides(Provider.of<UserData?>(context)!.uid as String);
 
   Widget rideList() {
-    return rideSnapshot != null
-        ? ListView.builder(
-            itemCount: rideSnapshot.docs.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RideTile(
-                  date: rideSnapshot.docs[index].get('date'),
-                  duration: rideSnapshot.docs[index].get('duration'),
-                  polylines: rideSnapshot.docs[index].get('polyline'),
-                ),
-              );
-            },
-          )
-        : Container();
-  }
+    return FutureBuilder<List<RideData>?>(
+        future: _ridesFuture,
+        builder: (context, asyncSnap) {
+          //todo: add more cases (i.e. show an error msg if an error occurs)
+          if (asyncSnap.connectionState != ConnectionState.done) {
+            return Loading();
+          }
 
-  @override
-  void initState() {
-    initRideStream();
-    super.initState();
+          List<RideData>? rides = asyncSnap.data;
+
+          return rides != null && rides.isNotEmpty
+              ? ListView.builder(
+                  itemCount: rides.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: RideTile(
+                        date: rides[index].date as Timestamp,
+                        duration: rides[index].duration as Duration,
+                        polylines: rides[index].polylines as String,
+                      ),
+                    );
+                  },
+                )
+              : Container();
+        });
   }
 
   @override
@@ -79,9 +85,10 @@ class _StatisticsState extends State<Statistics> {
   }
 }
 
+//todo: separate every widget in its own file, for organization purposes
 class RideTile extends StatelessWidget {
   final Timestamp date;
-  final String duration;
+  final Duration duration;
   final String polylines;
 
   const RideTile({required this.date, required this.duration, required this.polylines});
@@ -110,7 +117,7 @@ class RideTile extends StatelessWidget {
                 Text((date.toDate().day.toString() + " / " + date.toDate().month.toString() + " / " + date.toDate().year.toString()),
                     style: TextStyle(color: Theme.of(context).textSelectionColor)),
                 Spacer(),
-                Text(("Duration : " + duration), style: TextStyle(color: Theme.of(context).textSelectionColor))
+                Text(("Duration : " + duration.toString()), style: TextStyle(color: Theme.of(context).textSelectionColor))
               ],
             ),
             SizedBox(height: 5.0),

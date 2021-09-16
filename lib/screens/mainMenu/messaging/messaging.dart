@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/models/chat.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/user_research.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
+import 'package:provider/provider.dart';
 
 class Messaging extends StatefulWidget {
   @override
@@ -13,70 +16,31 @@ class Messaging extends StatefulWidget {
 
 class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final DatabaseService _databaseService = new DatabaseService();
 
-  late DocumentSnapshot recipientSnapshot;
-  late Stream<QuerySnapshot> chatRoomStream;
-
-  void initChatRoomStream() async {
-    await _databaseService.getChatRooms(UserInformations.userEmail!).then((val) {
-      chatRoomStream = val;
-    });
-  }
-
-  void initRecipientSnapshot(email) async {
-    recipientSnapshot = await _databaseService.getUserByEmail(email);
-    print(recipientSnapshot.get('lastName'));
-  }
+  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context)!.uid as String);
 
   Widget chatRoomList() {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<ChatroomData>>(
         stream: chatRoomStream,
-        builder: (context, snapshot) {
-          return snapshot.hasData
+        builder: (context, asyncSnap) {
+          //todo: add more cases (i.e. show an error msg if an error occurs)
+          if (asyncSnap.connectionState != ConnectionState.done) {
+            return Loading();
+          }
+          List<ChatroomData>? chatrooms = asyncSnap.data;
+
+          return chatrooms != null && chatrooms.isNotEmpty
               ? ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: chatrooms.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: ChatRoomTile(
-                        getUsersRecipientObjectByEmail(snapshot.data!.docs[index].get('users')),
-                        snapshot.data!.docs[index].get('chatRoomID'),
-                      ),
+                      child: ChatRoomTile(chatrooms[index]),
                     );
                   },
                 )
               : Container();
         });
-  }
-
-  String getRecipientEmail(List users) {
-    String email;
-    if (users[0] == UserInformations.userEmail)
-      email = users[1];
-    else
-      email = users[0];
-    print(email);
-    return email;
-  }
-
-  getUsersRecipientObjectByEmail(List users) {
-    try {
-      initRecipientSnapshot(getRecipientEmail(users));
-      print(recipientSnapshot.get('firstName'));
-      return UsersRecipient(
-        recipientSnapshot.get('firstName'),
-        recipientSnapshot.get('lastName'),
-        recipientSnapshot.get('country'),
-        recipientSnapshot.get('email'),
-        recipientSnapshot.get('phoneNumber'),
-        recipientSnapshot.get('birthDate'),
-        recipientSnapshot.get('profilePictureAdress'),
-      );
-    } catch (error) {
-      print(error.toString());
-      return null;
-    }
   }
 
   void _openDrawer() {
@@ -85,12 +49,6 @@ class _MessagingState extends State<Messaging> {
 
   void _closeDrawer() {
     Navigator.of(context).pop();
-  }
-
-  @override
-  void initState() {
-    initChatRoomStream();
-    super.initState();
   }
 
   @override
@@ -137,10 +95,9 @@ class _MessagingState extends State<Messaging> {
 }
 
 class ChatRoomTile extends StatelessWidget {
-  final UsersRecipient recipient;
-  final String chatRoomID;
+  final ChatroomData chatroomData;
 
-  const ChatRoomTile(this.recipient, this.chatRoomID);
+  const ChatRoomTile(this.chatroomData);
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +110,7 @@ class ChatRoomTile extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(recipient.firstName, chatRoomID)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(chatroomData)));
       },
       child: Container(
         padding: EdgeInsets.all(10.0),
@@ -168,10 +125,10 @@ class ChatRoomTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(50.0),
                 color: Theme.of(context).secondaryHeaderColor,
               ),
-              child: Text(('${recipient.firstName.substring(0, 1).toUpperCase()}' + '${recipient.lastName.substring(0, 1).toUpperCase()}')),
+              child: Text('${chatroomData.lastMessage?.author.firstName} ${chatroomData.lastMessage?.author.lastName}'),
             ),
             SizedBox(width: 8.0),
-            Text((recipient.firstName + ' ' + recipient.lastName)),
+            Text(chatroomData.name),
           ],
         ),
       ),

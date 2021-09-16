@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:ntp/ntp.dart';
-
-final DatabaseService _databaseService = new DatabaseService();
-late String chatRoomID;
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class UserResearch extends StatefulWidget {
   @override
@@ -14,43 +16,30 @@ class UserResearch extends StatefulWidget {
 }
 
 class _UserResearchState extends State<UserResearch> {
-  late QuerySnapshot searchSnapshotFirstName;
-  late QuerySnapshot searchSnapshotLastName;
+  String search = '';
 
-  initiateSearch(name) {
-    _databaseService.getUserByFirstName(name).then((value) => setState(() => searchSnapshotFirstName = value));
-    _databaseService.getUserByLastName(name).then((value) => setState(() => searchSnapshotLastName = value));
-  }
+  late Future<List<ChatUserData>> _searchUsers = DatabaseService.getUsersByName(search);
 
-  Widget searchListFirstName() {
-    return searchSnapshotFirstName != null
-        ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: searchSnapshotFirstName.docs.length,
-            itemBuilder: (context, index) {
-              return SearchTile(
-                firstName: searchSnapshotFirstName.docs[index].get('firstName'),
-                lastName: searchSnapshotFirstName.docs[index].get('lastName'),
-                email: searchSnapshotFirstName.docs[index].get('email'),
-              );
-            },
-          )
-        : Container();
-  }
-
-  Widget searchListLastName() {
-    return searchSnapshotLastName != null
-        ? ListView.builder(
-            shrinkWrap: true,
-            itemCount: searchSnapshotLastName.docs.length,
-            itemBuilder: (context, index) {
-              return SearchTile(
-                firstName: searchSnapshotLastName.docs[index].get('firstName'),
-                lastName: searchSnapshotLastName.docs[index].get('lastName'),
-                email: searchSnapshotLastName.docs[index].get('email'),
-              );
-            },
-          )
+  Widget searchListByName() {
+    return search.isNotEmpty
+        ? FutureBuilder<List<ChatUserData>>(
+            future: _searchUsers,
+            builder: (context, asyncSnap) {
+              //todo: add more cases (i.e. show an error msg if an error occurs)
+              if (asyncSnap.connectionState != ConnectionState.done) {
+                return Loading();
+              }
+              List<ChatUserData>? matchingUsers = asyncSnap.data;
+              return matchingUsers != null && matchingUsers.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: matchingUsers.length,
+                      itemBuilder: (context, index) {
+                        return SearchTile(matchingUsers[index]);
+                      },
+                    )
+                  : Container();
+            })
         : Container();
   }
 
@@ -74,15 +63,14 @@ class _UserResearchState extends State<UserResearch> {
                 child: TextFormField(
                   decoration: textInputDecoration.copyWith(hintText: 'Search by name'),
                   onFieldSubmitted: (name) {
-                    initiateSearch(name);
+                    setState(() => search = name);
                   },
                 ),
               ),
               Icon(Icons.search)
             ],
           ),
-          searchListFirstName(),
-          searchListLastName(),
+          searchListByName(),
         ],
       ),
     );
@@ -90,11 +78,9 @@ class _UserResearchState extends State<UserResearch> {
 }
 
 class SearchTile extends StatelessWidget {
-  final String firstName;
-  final String lastName;
-  final String email;
+  final ChatUserData chatUser;
 
-  const SearchTile({required this.firstName, required this.lastName, required this.email});
+  const SearchTile(this.chatUser);
 
   @override
   Widget build(BuildContext context) {
@@ -112,11 +98,11 @@ class SearchTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                firstName + ' ' + lastName,
+                chatUser.firstName! + ' ' + chatUser.lastName!,
                 style: TextStyle(fontSize: 17),
               ),
               Text(
-                email,
+                chatUser.email!,
                 style: TextStyle(fontSize: 12),
               )
             ],
@@ -124,14 +110,13 @@ class SearchTile extends StatelessWidget {
           Spacer(),
           Container(
             decoration: BoxDecoration(color: Theme.of(context).buttonColor, borderRadius: BorderRadius.circular(20)),
-            child: FlatButton(
+            child: TextButton(
               child: Text(
                 'Message',
                 style: TextStyle(color: Theme.of(context).textSelectionColor),
               ),
               onPressed: () {
-                createChatRoom(email);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(firstName, chatRoomID)));
+                createChatRoom(context, chatUser);
               },
             ),
           ),
@@ -141,16 +126,17 @@ class SearchTile extends StatelessWidget {
   }
 }
 
-getChatRoomID(String a, String b) {
-  if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0))
-    return '$b\_$a';
-  else
-    return '$a\_$b';
-}
+Future<void> createChatRoom(BuildContext context, ChatUserData chatUser) async {
+  ChatUserData signedInChatUser =
+      ChatUserData.fromUserData(Provider.of<UserData?>(context)!); //create a chat user from the current user (for chatroom creation)
 
-createChatRoom(String recipientEmail) async {
-  chatRoomID = getChatRoomID(UserInformations.userEmail!, recipientEmail);
-  List<String> usersEmail = [UserInformations.userEmail!, recipientEmail];
-  Map<String, dynamic> chatRoomMap = {'users': usersEmail, 'chatRoomID': chatRoomID, 'lastActivity': await NTP.now()};
-  _databaseService.createChatRoom(chatRoomID, chatRoomMap);
+  //create chatroom
+  List<ChatUserData> members = [chatUser, signedInChatUser];
+  ChatroomData chatroomData = ChatroomData(Uuid().v4(), name: 'Chat between ${chatUser.firstName!} ${signedInChatUser.firstName!}', members: members);
+
+  //add it to the database
+  await DatabaseService.addChatroom(signedInChatUser.uid, chatroomData);
+
+  //switch to the new chatroom
+  Navigator.push(context, MaterialPageRoute(builder: (context) => ConversationScreen(chatroomData)));
 }

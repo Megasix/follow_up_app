@@ -32,7 +32,9 @@ class MyApp extends StatelessWidget {
 
           if (snapshot.connectionState != ConnectionState.done) return Loading();
 
-          return StreamProvider<CustomUser?>.value(
+          //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
+          //todo: get final user object from Firestore, so that it can be consumed by other widgets
+          return StreamProvider<UserData?>.value(
             value: AuthService.user,
             initialData: null,
             child: GetMaterialApp(

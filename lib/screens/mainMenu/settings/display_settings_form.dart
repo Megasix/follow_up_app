@@ -18,7 +18,7 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<CustomUser>(context);
+    final user = Provider.of<UserData?>(context);
     final themeOptions = [ThemeMode.light, ThemeMode.dark];
     final double contextWidth = MediaQuery.of(context).size.width;
 

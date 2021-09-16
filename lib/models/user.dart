@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 //class containing general user data
 class UserData {
-  String? uid;
+  String? uid; //needs to be nullable to check if user is logged in
 
   String? firstName;
   String? lastName;

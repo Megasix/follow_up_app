@@ -1,3 +1,4 @@
+import 'package:follow_up_app/shared/appdata.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,11 +16,6 @@ class Shared {
 
   static void setTheme(bool enableLightTheme) {
     lightThemeEnabled = enableLightTheme;
-  }
-
-  static void fillUserInfo() async {
-    UserInformations.userFirstName = await Shared.getUserNameSharedPreference();
-    UserInformations.userEmail = await Shared.getUserEmailSharedPreference();
   }
 
   //Preference saving methods!
