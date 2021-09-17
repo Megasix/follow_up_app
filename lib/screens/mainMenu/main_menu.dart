@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/home.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
+import 'package:follow_up_app/services/auth.dart';
 import 'messaging/messaging.dart';
 
 class MainMenu extends StatefulWidget {
@@ -11,8 +12,7 @@ class MainMenu extends StatefulWidget {
 
 class _MainMenuState extends State<MainMenu> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
     Statistics(),
@@ -34,6 +34,17 @@ class _MainMenuState extends State<MainMenu> {
         width: double.infinity,
         height: double.infinity,
         child: _widgetOptions.elementAt(_selectedIndex),
+      ),
+      floatingActionButton: CircleAvatar(
+        radius: 30,
+        backgroundColor: Theme.of(context).accentColor,
+        child: IconButton(
+          iconSize: 30,
+          color: Colors.white,
+          alignment: Alignment.center,
+          icon: Icon(Icons.exit_to_app_rounded),
+          onPressed: () => AuthService.signOutAll(),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[

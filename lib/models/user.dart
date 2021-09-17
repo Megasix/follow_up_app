@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:follow_up_app/models/chat.dart';
 
 //class containing general user data
 class UserData {
@@ -11,9 +13,10 @@ class UserData {
   String? phoneNumber;
   Timestamp? birthDate;
   String? profilePictureUrl;
+  List<DocumentReference<ChatroomData>>? activeChatrooms;
 
   //uid is separated because it's metadata and not directly user data
-  UserData(this.uid, {this.firstName, this.lastName, this.country, this.email, this.phoneNumber, this.birthDate, this.profilePictureUrl});
+  UserData(this.uid, {this.firstName, this.lastName, this.country, this.email, this.phoneNumber, this.birthDate, this.profilePictureUrl, this.activeChatrooms});
 
   UserData.fromMap(String id, Map<String, dynamic>? map)
       : this(id,
@@ -23,7 +26,8 @@ class UserData {
             email: map?['email'],
             phoneNumber: map?['phoneNumber'],
             birthDate: map?['birthDate'],
-            profilePictureUrl: map?['profilePictureUrl']);
+            profilePictureUrl: map?['profilePictureUrl'],
+            activeChatrooms: map?['activeChatrooms']);
 
   Map<String, dynamic> toMap() => {
         'firstName': firstName,
@@ -32,6 +36,7 @@ class UserData {
         'email': email,
         'phoneNumber': phoneNumber,
         'birthDate': birthDate,
-        'profilePictureUrl': profilePictureUrl
+        'profilePictureUrl': profilePictureUrl,
+        'activeChatrooms': activeChatrooms?.isEmpty ?? FieldValue.arrayUnion([])
       };
 }

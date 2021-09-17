@@ -17,7 +17,7 @@ class Messaging extends StatefulWidget {
 class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context, listen: false)!.uid as String);
+  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context, listen: false)!);
 
   Widget chatRoomList() {
     return StreamBuilder<List<ChatroomData>>(
@@ -115,20 +115,30 @@ class ChatRoomTile extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(10.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30.0),
+          borderRadius: BorderRadius.circular(20.0),
           color: Theme.of(context).accentColor,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50.0),
-                color: Theme.of(context).secondaryHeaderColor,
-              ),
-              child: Text('${chatroomData.lastMessage?.author.firstName} ${chatroomData.lastMessage?.author.lastName}'),
+            Text(
+              chatroomData.name,
+              textAlign: TextAlign.left,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(width: 8.0),
-            Text(chatroomData.name),
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50.0),
+                    color: Theme.of(context).secondaryHeaderColor,
+                  ),
+                  child: Text(chatroomData.members.firstWhere((member) => member.uid == chatroomData.lastMessage?.authorId).firstName as String),
+                ),
+                SizedBox(width: 8.0),
+                Text(chatroomData.lastMessage?.message as String),
+              ],
+            ),
           ],
         ),
       ),

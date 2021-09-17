@@ -40,7 +40,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   shrinkWrap: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    return MessageTile(messages[index].message, messages[index].author);
+                    return MessageTile(messages[index]);
                   })
               : Container();
         });
@@ -48,7 +48,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   sendMessage(String message) async {
     DatabaseService.addChatMessage(widget.chatroomData,
-        ChatMessage(Uuid().v1(), message: message, author: ChatUserData.fromUserData(Provider.of<UserData?>(context, listen: false)!), time: Timestamp.now()));
+        ChatMessage(Uuid().v1(), message: message, authorId: Provider.of<UserData?>(context, listen: false)!.uid as String, time: Timestamp.now()));
   }
 
   @override
@@ -89,14 +89,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
 //todo: separate every widget in its own file, for organization purposes
 class MessageTile extends StatelessWidget {
-  final String message;
-  final ChatUserData chatUser;
+  final ChatMessage chatMessage;
 
-  const MessageTile(this.message, this.chatUser);
+  const MessageTile(this.chatMessage);
 
   @override
   Widget build(BuildContext context) {
-    bool isUser = chatUser.uid == Provider.of<UserData?>(context)!.uid as String;
+    bool isUser = chatMessage.authorId == Provider.of<UserData?>(context)!.uid as String;
 
     return Container(
       padding: EdgeInsets.only(left: isUser ? 0 : 24, right: !isUser ? 0 : 24),
@@ -114,7 +113,7 @@ class MessageTile extends StatelessWidget {
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
                 color: Theme.of(context).secondaryHeaderColor,
               ),
-        child: Text(message),
+        child: Text(chatMessage.message),
       ),
     );
   }

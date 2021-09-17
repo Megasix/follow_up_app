@@ -11,31 +11,50 @@ class DatabaseService {
 
   static final CollectionReference<RideData> ridesCollection = FirebaseFirestore.instance
       .collection('rides')
-      .withConverter(fromFirestore: (snap, opt) => RideData.fromMap(snap.id, snap.data()), toFirestore: (ride, opt) => ride.toMap());
+      .withConverter<RideData>(fromFirestore: (snap, opt) => RideData.fromMap(snap.id, snap.data()), toFirestore: (ride, opt) => ride.toMap());
 
   static final CollectionReference<ChatroomData> chatRoomCollection = FirebaseFirestore.instance
       .collection('chatrooms')
-      .withConverter(fromFirestore: (snap, opt) => ChatroomData.fromMap(snap.id, snap.data()), toFirestore: (chatroom, opt) => chatroom.toMap());
+      .withConverter<ChatroomData>(fromFirestore: (snap, opt) => ChatroomData.fromMap(snap.data()), toFirestore: (chatroom, opt) => chatroom.toMap());
 
   //
   //UPDATERS
   //
 
   static Future<void> updateUser(UserData data) {
-    return usersCollection.doc(data.uid).set(data);
+    return usersCollection.doc(data.uid).set(data, SetOptions(merge: true));
   }
 
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
-    await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData);
-    return usersCollection.doc(userId).collection('user.chatrooms').doc(chatroomData.chatroomId).set(chatroomData.toMap());
+    //uploads the new chatroom to the chatroom collection
+    DocumentReference<ChatroomData> chatroomDocRef = chatRoomCollection.doc(chatroomData.chatroomId);
+    await chatroomDocRef.set(chatroomData);
+
+    return usersCollection.doc(userId).update({
+      'activeChatrooms': FieldValue.arrayUnion([
+        FirebaseFirestore.instance
+            .doc(chatroomDocRef.path) //have to re-reference the collection because the return of 'chatroomDocRef.path' is an incompatble type...
+      ])
+    });
   }
 
   static Future<void> addChatMessage(ChatroomData chatroomData, ChatMessage chatMessage) async {
+    //updates chatroom data with latest chat message
     chatroomData.lastMessage = chatMessage;
 
-    await usersCollection.doc(chatMessage.author.uid).collection('user.chatrooms').doc(chatroomData.chatroomId).set(chatroomData.toMap());
-    await chatRoomCollection.doc(chatroomData.chatroomId).set(chatroomData, SetOptions(merge: true));
-    await chatRoomCollection.doc(chatroomData.chatroomId).collection('chatroom.chats').doc(chatMessage.messageId).set(chatMessage.toMap());
+    //uploads the updated chatroom to the chatroom collection
+    DocumentReference<ChatroomData> chatroomDocRef = chatRoomCollection.doc(chatroomData.chatroomId);
+    await chatroomDocRef.set(chatroomData, SetOptions(merge: true));
+
+    await usersCollection.doc(chatMessage.authorId).update({
+      'activeChatrooms': FieldValue.arrayUnion([
+        FirebaseFirestore.instance
+            .doc(chatroomDocRef.path) //have to re-reference the collection because the return of 'chatroomDocRef.path' is an incompatble type...
+      ])
+    });
+
+    //uploads the chat message to the chatroom's chat collection
+    return chatRoomCollection.doc(chatroomData.chatroomId).collection('chatroom.chats').doc(chatMessage.messageId).set(chatMessage.toMap());
   }
 
   static Future<void> addRide(String userId, RideData rideData) {
@@ -110,8 +129,12 @@ class DatabaseService {
   }
 
   //get all chatrooms the signed in user has
-  static Stream<List<ChatroomData>> streamChatrooms(String userId) {
-    return usersCollection.doc(userId).collection('user.chatrooms').snapshots().map(_chatroomsFromSnapshot);
+  static Stream<List<ChatroomData>> streamChatrooms(UserData userData) {
+    var stuff = chatRoomCollection
+        .where('members', arrayContains: ChatUserData.fromUserData(userData).toMap())
+        .snapshots()
+        .map<List<ChatroomData>>(_chatroomsFromSnapshot);
+    return stuff;
   }
 
   Stream<List<RideData>> streamRides(String userId) {
@@ -131,11 +154,11 @@ class DatabaseService {
   }
 
   static List<ChatroomData> _chatroomsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => ChatroomData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
+    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatroomData).toList();
   }
 
   static List<ChatMessage> _chatMessagesFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatMessage).toList();
+    return querySnapshot.docs.map((queryDocSnap) => ChatMessage.fromMap(queryDocSnap.data() as Map<String, dynamic>?)).toList();
   }
 
   static List<RideData> _ridesFromSnapshot(QuerySnapshot<Object?> snapshot) {

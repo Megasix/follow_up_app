@@ -7,18 +7,19 @@ class ChatroomData {
   final String chatroomId;
 
   String name;
-  List<ChatUserData>? members;
+  List<ChatUserData> members;
   ChatMessage? lastMessage;
 
-  ChatroomData(this.chatroomId, {required this.name, this.members, this.lastMessage});
+  ChatroomData(this.chatroomId, {required this.name, required this.members, this.lastMessage});
 
-  ChatroomData.fromMap(String id, Map<String, dynamic>? map)
-      : this(id,
-            name: map?['name'] ?? '',
+  ChatroomData.fromMap(Map<String, dynamic>? map)
+      : this(map?['chatroomId'],
+            name: map?['name'],
             members: (map?['members'] as List).map<ChatUserData>((map) => ChatUserData.fromMap(map)).toList(),
-            lastMessage: ChatMessage.fromMap(Uuid().v4(), map?['lastMessage']));
+            lastMessage: ChatMessage.fromMap(map?['lastMessage']));
 
-  Map<String, dynamic> toMap() => {'name': name, 'members': members?.map((chatUser) => chatUser.toMap()).toList(), 'lastMessage': lastMessage?.toMap()};
+  Map<String, dynamic> toMap() =>
+      {'chatroomId': chatroomId, 'name': name, 'members': members.map((chatUser) => chatUser.toMap()).toList(), 'lastMessage': lastMessage?.toMap()};
 }
 
 //class containing the data for a chat message
@@ -26,22 +27,23 @@ class ChatMessage {
   final String messageId; //works as doc id and chat message id
 
   String message;
-  ChatUserData author;
+  String authorId;
   Timestamp time;
 
-  ChatMessage(this.messageId, {required this.message, required this.author, required this.time});
+  ChatMessage(this.messageId, {required this.message, required this.authorId, required this.time});
 
-  ChatMessage.fromMap(String id, Map<String, dynamic>? map)
+  ChatMessage.fromMap(Map<String, dynamic>? map)
       : this(
-          id,
-          message: map?['message'] ?? '',
-          author: ChatUserData.fromMap(map?['author']),
+          map?['messageId'],
+          message: map?['message'],
+          authorId: map?['authorId'],
           time: map?['time'],
         );
 
   Map<String, dynamic> toMap() => {
+        'messageId': messageId,
         'message': message,
-        'authorId': author.toMap(),
+        'authorId': authorId,
         'time': time,
       };
 }

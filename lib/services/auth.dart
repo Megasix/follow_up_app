@@ -13,9 +13,15 @@ class AuthService {
   static final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
+//todo: fix the delay between the app opening and the user being signed in automatically (because of the fetching delay)
 // auth change user stream
   static Stream<UserData?> get user {
-    return _firebaseAuth.authStateChanges().asyncMap<UserData?>((user) => user == null ? Future.value(null) : DatabaseService.getUserById(user.uid));
+    return _firebaseAuth.authStateChanges().asyncMap<UserData?>((User? user) => user == null ? Future.value(null) : DatabaseService.getUserById(user.uid));
+  }
+
+  // Sign out from all providers.
+  static void signOutAll() {
+    _firebaseAuth.signOut();
   }
 
 // sign-in with email & password
@@ -63,12 +69,14 @@ class AuthService {
     final firstName = googleSignedUser.displayName!.split(" ")[0];
     final lastName = googleSignedUser.displayName!.split(" ")[1];
 
-    UserData userData = UserData(googleSignedUser.uid,
-        firstName: firstName,
-        lastName: lastName,
-        email: googleSignedUser.email,
-        phoneNumber: googleSignedUser.phoneNumber,
-        profilePictureUrl: googleSignedUser.photoURL);
+    UserData userData = UserData(
+      googleSignedUser.uid,
+      firstName: firstName,
+      lastName: lastName,
+      email: googleSignedUser.email,
+      phoneNumber: googleSignedUser.phoneNumber,
+      profilePictureUrl: googleSignedUser.photoURL,
+    );
 
     await DatabaseService.updateUser(userData);
 
