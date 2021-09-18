@@ -10,9 +10,11 @@ The tracking app that enhance your skills
 
 ### Dependencies
 
+
 * Flutter 2.5.0
 * OS : Windows 10 / MacOS 10.14 or better (/!\ M1 chip mac are supported with specific build configuration)
 * To build this app you will also need keystore passwords and the autorisation of the Follow Up Team
+
 
 ### Installing
 
@@ -36,6 +38,7 @@ for [cloning the repository](https://docs.github.com/en/github/creating-cloning-
     ```
     flutter run
     ```
+
    * On physical device :
      * Plug your device in your pc
      * Locate your device in the build config
@@ -57,8 +60,7 @@ for [cloning the repository](https://docs.github.com/en/github/creating-cloning-
     
     ```
     flutter run
-    ```
-    
+    ```  
     * For more info : [Build and release an iOS app](https://flutter.dev/docs/deployment/ios)
 
 ## Help
@@ -77,6 +79,7 @@ Contributors names and contact info
     
 * Augusto Mota-Pinheiro  
     Github : [@AugustDG](https://github.com/AugustDG).
+
 
 ## Version History
 
