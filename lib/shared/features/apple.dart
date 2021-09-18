@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/shared/button.dart';
+import 'package:follow_up_app/shared/sizeable_button.dart';
 
 /// A sign in button that matches Apple's design guidelines.
 class AppleSignInButton extends StatelessWidget {
@@ -8,8 +8,8 @@ class AppleSignInButton extends StatelessWidget {
 
   /// Creates a new button. Set [darkMode] to `true` to use the dark black background variant
   AppleSignInButton({
-    @required this.onPressed,
-    @required this.darkMode,
+    required this.onPressed,
+    required this.darkMode,
   });
 
   @override

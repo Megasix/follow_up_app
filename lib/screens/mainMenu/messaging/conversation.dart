@@ -1,64 +1,54 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/appdata.dart';
+import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:ntp/ntp.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class ConversationScreen extends StatefulWidget {
-  final String recipientName;
-  final String chatRoomID;
+  final ChatroomData chatroomData;
 
-  const ConversationScreen(this.recipientName, this.chatRoomID);
+  const ConversationScreen(this.chatroomData);
 
   @override
-  _ConversationScreenState createState() => _ConversationScreenState(recipientName);
+  _ConversationScreenState createState() => _ConversationScreenState();
 }
 
 class _ConversationScreenState extends State<ConversationScreen> {
-  final String recipientName;
   final messageController = TextEditingController();
-  Stream chatMessagesStream;
-
-  DatabaseService _databaseService = new DatabaseService();
-
-  _ConversationScreenState(this.recipientName);
-
-  void initChatMessageStream() async {
-    await _databaseService.getConversationMessages(widget.chatRoomID).then((val) {
-      chatMessagesStream = val;
-    });
-  }
+  late Stream<List<ChatMessage>> chatMessagesStream = DatabaseService.streamChatMessages(widget.chatroomData.chatroomId);
 
   Widget messageList() {
-    return StreamBuilder(
+    return StreamBuilder<List<ChatMessage>>(
         stream: chatMessagesStream,
-        builder: (context, snapshot) {
-          return snapshot.hasData
+        builder: (context, asyncSnap) {
+          //todo: add more cases (i.e. show an error msg if an error occurs)
+          if (asyncSnap.connectionState != ConnectionState.active) {
+            return Loading();
+          }
+
+          List<ChatMessage>? messages = asyncSnap.data;
+
+          return messages != null && messages.isNotEmpty
               ? ListView.builder(
                   shrinkWrap: true,
-                  itemCount: snapshot.data.docs.length,
+                  itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    return MessageTile(snapshot.data.docs[index].get('message'), snapshot.data.docs[index].get('sendBy'));
+                    return MessageTile(messages[index]);
                   })
               : Container();
         });
   }
 
   sendMessage(String message) async {
-    if (message != null) {
-      Map<String, dynamic> messageMap = {
-        'message': message,
-        'sendBy': UserInformations.userFirstName,
-        'time': await NTP.now(),
-      };
-      _databaseService.addConversationMessage(widget.chatRoomID, messageMap);
-    }
-  }
-
-  @override
-  void initState() {
-    initChatMessageStream();
-    super.initState();
+    DatabaseService.addChatMessage(widget.chatroomData,
+        ChatMessage(Uuid().v1(), message: message, authorId: Provider.of<UserData?>(context, listen: false)!.uid as String, time: Timestamp.now()));
   }
 
   @override
@@ -66,7 +56,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
-        title: Text(recipientName),
+        title: Text(widget.chatroomData.name),
       ),
       body: Container(
         child: Column(
@@ -97,15 +87,15 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 }
 
+//todo: separate every widget in its own file, for organization purposes
 class MessageTile extends StatelessWidget {
-  final String message;
-  final String sender;
+  final ChatMessage chatMessage;
 
-  const MessageTile(this.message, this.sender);
+  const MessageTile(this.chatMessage);
 
   @override
   Widget build(BuildContext context) {
-    bool isUser = sender == UserInformations.userFirstName;
+    bool isUser = chatMessage.authorId == Provider.of<UserData?>(context)!.uid as String;
 
     return Container(
       padding: EdgeInsets.only(left: isUser ? 0 : 24, right: !isUser ? 0 : 24),
@@ -123,7 +113,7 @@ class MessageTile extends StatelessWidget {
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0), bottomRight: Radius.circular(30.0)),
                 color: Theme.of(context).secondaryHeaderColor,
               ),
-        child: Text(message),
+        child: Text(chatMessage.message),
       ),
     );
   }

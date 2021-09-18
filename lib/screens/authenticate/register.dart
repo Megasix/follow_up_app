@@ -3,56 +3,45 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/features/apple.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
 import 'package:follow_up_app/shared/features/twitter.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared_functions.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:follow_up_app/shared/shared.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 import '../../main.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;
 
-  Register({this.toggleView});
+  Register({required this.toggleView});
 
   @override
   _RegisterState createState() => _RegisterState();
 }
 
 class _RegisterState extends State<Register> {
-  final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormBuilderState>();
   final PageController _pageController = PageController(initialPage: 0);
 
 // text field state
-  Timestamp birthDate;
-  String country;
-  String firstName;
-  String lastName;
+  Timestamp birthDate = Timestamp.now();
+  String country = '';
+  String firstName = '';
+  String lastName = '';
   String email = '';
-  String phoneNumber;
+  String phoneNumber = '';
   String password = '';
   String error = '';
 
   bool loading = false;
   Alignment childAlignement = Alignment.center;
-
-  @override
-  _RegisterState() {
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (bool visible) {
-        setState(() {
-          childAlignement = visible ? Alignment.topCenter : Alignment.center;
-        });
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +57,6 @@ class _RegisterState extends State<Register> {
 
     final countriesOptions = ['Canada', 'France'];
     final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
-
-    bool lightThemeEnabled = getTheme();
 
     return loading
         ? Loading()
@@ -89,13 +76,12 @@ class _RegisterState extends State<Register> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Padding(
-                      padding:
-                          EdgeInsets.only(top: 40.0 * heightRatio, bottom: 30.0 * heightRatio, left: 20.0 * widthRatio, right: 20.0 * widthRatio),
+                      padding: EdgeInsets.only(top: 40.0 * heightRatio, bottom: 30.0 * heightRatio, left: 20.0 * widthRatio, right: 20.0 * widthRatio),
                       child: AspectRatio(
                         aspectRatio: contextAspectRatio,
                         child: Image(
                           image: AssetImage(
-                            "assets/images/${lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                            "assets/images/${Shared.lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
                           ),
                         ),
                       ),
@@ -143,8 +129,8 @@ class _RegisterState extends State<Register> {
                                                     child: Text('$country'),
                                                   ))
                                               .toList(),
-                                          onChanged: (val) {
-                                            setState(() => country = val);
+                                          onChanged: (String? val) {
+                                            setState(() => country = val as String);
                                           },
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
@@ -158,17 +144,17 @@ class _RegisterState extends State<Register> {
                                           decoration: textInputDecoration.copyWith(hintText: 'Date of Birth'),
                                           validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
                                           onChanged: (val) {
-                                            setState(() => birthDate = Timestamp.fromDate(val));
+                                            setState(() => birthDate = Timestamp.fromDate(val as DateTime));
                                           },
                                         ),
                                         SizedBox(height: 50.0 * heightRatio),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
-                                          child: RaisedButton(
+                                          child: ElevatedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-                                                if (_formKey.currentState.validate()) {
+                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                                 }
                                               }),
@@ -180,20 +166,20 @@ class _RegisterState extends State<Register> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             GoogleSignInButton(onPressed: () async {
-                                              await _authService.signInWithGoogle();
+                                              await AuthService.signInWithGoogle();
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             FacebookSignInButton(onPressed: () async {
-                                              await _authService.signInWithFacebook();
+                                              await AuthService.signInWithFacebook();
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             TwitterSignInButton(onPressed: () async {}),
                                             SizedBox(width: sameTypeVerticalPadding),
-                                            AppleSignInButton(onPressed: () async {}, darkMode: !lightThemeEnabled),
+                                            AppleSignInButton(onPressed: () async {}, darkMode: Shared.lightThemeEnabled),
                                           ],
                                         ),
                                         SizedBox(height: generalVerticalPadding),
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Already have an account ? Login'),
                                           onPressed: () {
                                             widget.toggleView();
@@ -226,7 +212,7 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.minLength(context, 2),
                                           ]),
                                           onChanged: (val) {
-                                            setState(() => firstName = val);
+                                            setState(() => firstName = val as String);
                                           },
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
@@ -240,23 +226,23 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.minLength(context, 2),
                                           ]),
                                           onChanged: (val) {
-                                            setState(() => lastName = val);
+                                            setState(() => lastName = val as String);
                                           },
                                         ),
                                         Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
-                                          child: RaisedButton(
+                                          child: ElevatedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-                                                if (_formKey.currentState.validate()) {
+                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                                 }
                                               }),
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
                                             _pageController.animateToPage(0, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -289,7 +275,7 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.email(context),
                                           ]),
                                           onChanged: (val) {
-                                            setState(() => email = val);
+                                            setState(() => email = val as String);
                                           },
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
@@ -302,23 +288,23 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.maxLength(context, 10),
                                           ]),
                                           onChanged: (val) {
-                                            setState(() => phoneNumber = val);
+                                            setState(() => phoneNumber = val as String);
                                           },
                                         ),
                                         Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
-                                          child: RaisedButton(
+                                          child: ElevatedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-                                                if (_formKey.currentState.validate()) {
+                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                                 }
                                               }),
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
                                             _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -348,8 +334,7 @@ class _RegisterState extends State<Register> {
                                           title: RichText(
                                             text: TextSpan(
                                               children: [
-                                                TextSpan(
-                                                    text: 'I have read and agree to the ', style: TextStyle(color: Theme.of(context).accentColor)),
+                                                TextSpan(text: 'I have read and agree to the ', style: TextStyle(color: Theme.of(context).accentColor)),
                                                 TextSpan(
                                                     text: 'Terms and Conditions',
                                                     style: TextStyle(color: Colors.blue),
@@ -366,23 +351,22 @@ class _RegisterState extends State<Register> {
                                               ],
                                             ),
                                           ),
-                                          validator: FormBuilderValidators.equal(context, true,
-                                              errorText: 'You must accept terms and conditions to continue'),
+                                          validator: FormBuilderValidators.equal(context, true, errorText: 'You must accept terms and conditions to continue'),
                                         ),
                                         Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
-                                          child: RaisedButton(
+                                          child: ElevatedButton(
                                               child: Text('Continue', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-                                                if (_formKey.currentState.validate()) {
+                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   _pageController.animateToPage(4, duration: Duration(milliseconds: 400), curve: Curves.ease);
                                                 }
                                               }),
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
                                             _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
@@ -417,30 +401,38 @@ class _RegisterState extends State<Register> {
                                             FormBuilderValidators.minLength(context, 5),
                                           ]),
                                           onChanged: (val) {
-                                            setState(() => password = val);
+                                            setState(() => password = val as String);
                                           },
                                         ),
                                         Spacer(),
                                         SizedBox(
                                           width: contextWidth,
                                           height: 40.0,
-                                          child: RaisedButton(
+                                          child: ElevatedButton(
                                               child: Text('Register', style: TextStyle(color: Colors.white)),
                                               onPressed: () async {
-                                                if (_formKey.currentState.validate()) {
+                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
                                                   setState(() => loading = true);
-                                                  dynamic result = await _authService.registerWithEmailAndPassword(
-                                                      firstName, lastName, country, email, phoneNumber, birthDate, password);
-                                                  if (result == null)
-                                                    setState(() {
-                                                      error = 'There was an error using these credential please retry';
-                                                      loading = false;
-                                                    });
+
+                                                  await AuthService.registerWithEmailAndPassword(
+                                                      password,
+                                                      UserData(Uuid().v4(),
+                                                          firstName: firstName,
+                                                          lastName: lastName,
+                                                          email: email,
+                                                          country: country,
+                                                          phoneNumber: phoneNumber,
+                                                          birthDate: birthDate));
+
+                                                  setState(() {
+                                                    error = 'There was an error using these credential please retry';
+                                                    loading = false;
+                                                  });
                                                 }
                                               }),
                                         ),
                                         SizedBox(height: sameTypeVerticalPadding),
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Go Back'),
                                           onPressed: () {
                                             _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);

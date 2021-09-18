@@ -4,11 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/models/rides.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/constants.dart';
+import 'package:follow_up_app/shared/appdata.dart';
+import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
+import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
+import 'package:provider/provider.dart';
 
 class Statistics extends StatefulWidget {
   @override
@@ -17,39 +23,37 @@ class Statistics extends StatefulWidget {
 
 class _StatisticsState extends State<Statistics> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final DatabaseService _databaseService =
-      new DatabaseService(email: UserInformations.userEmail);
 
-  QuerySnapshot rideSnapshot;
-
-  void initRideStream() async {
-    await _databaseService
-        .getRides()
-        .then((value) => setState(() => rideSnapshot = value));
-  }
+  //todo: check if late is the right way to do this
+  late Future<List<RideData>> _ridesFuture = DatabaseService.getRides(Provider.of<UserData?>(context)!.uid as String);
 
   Widget rideList() {
-    return rideSnapshot != null
-        ? ListView.builder(
-            itemCount: rideSnapshot.docs.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RideTile(
-                  date: rideSnapshot.docs[index].get('date'),
-                  duration: rideSnapshot.docs[index].get('duration'),
-                  polylines: rideSnapshot.docs[index].get('polyline'),
-                ),
-              );
-            },
-          )
-        : Container();
-  }
+    return FutureBuilder<List<RideData>?>(
+        future: _ridesFuture,
+        builder: (context, asyncSnap) {
+          //todo: add more cases (i.e. show an error msg if an error occurs)
+          if (asyncSnap.connectionState != ConnectionState.done) {
+            return Loading();
+          }
 
-  @override
-  void initState() {
-    initRideStream();
-    super.initState();
+          List<RideData>? rides = asyncSnap.data;
+
+          return rides != null && rides.isNotEmpty
+              ? ListView.builder(
+                  itemCount: rides.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: RideTile(
+                        date: rides[index].date as Timestamp,
+                        duration: rides[index].duration as Duration,
+                        polylines: rides[index].polylines as String,
+                      ),
+                    );
+                  },
+                )
+              : Container();
+        });
   }
 
   @override
@@ -70,14 +74,9 @@ class _StatisticsState extends State<Statistics> {
         elevation: 0.0,
       ),
       body: Container(
-        padding: EdgeInsets.only(
-            top: 50.0 * heightRatio,
-            bottom: 30.0 * heightRatio,
-            left: 25.0 * widthRatio,
-            right: 25.0 * widthRatio),
+        padding: EdgeInsets.only(top: 50.0 * heightRatio, bottom: 30.0 * heightRatio, left: 25.0 * widthRatio, right: 25.0 * widthRatio),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
           color: Theme.of(context).backgroundColor,
         ),
         child: rideList(),
@@ -86,12 +85,13 @@ class _StatisticsState extends State<Statistics> {
   }
 }
 
+//todo: separate every widget in its own file, for organization purposes
 class RideTile extends StatelessWidget {
   final Timestamp date;
-  final String duration;
+  final Duration duration;
   final String polylines;
 
-  const RideTile({this.date, this.duration, this.polylines});
+  const RideTile({required this.date, required this.duration, required this.polylines});
 
   @override
   Widget build(BuildContext context) {
@@ -114,18 +114,10 @@ class RideTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                    (date.toDate().day.toString() +
-                        " / " +
-                        date.toDate().month.toString() +
-                        " / " +
-                        date.toDate().year.toString()),
-                    style:
-                        TextStyle(color: Theme.of(context).textSelectionColor)),
+                Text((date.toDate().day.toString() + " / " + date.toDate().month.toString() + " / " + date.toDate().year.toString()),
+                    style: TextStyle(color: Theme.of(context).textSelectionColor)),
                 Spacer(),
-                Text(("Duration : " + duration),
-                    style:
-                        TextStyle(color: Theme.of(context).textSelectionColor))
+                Text(("Duration : " + duration.toString()), style: TextStyle(color: Theme.of(context).textSelectionColor))
               ],
             ),
             SizedBox(height: 5.0),
@@ -138,14 +130,14 @@ class RideTile extends StatelessWidget {
 }
 
 class MapWidget extends StatelessWidget {
-  GoogleMapController _controller;
+  late GoogleMapController _controller;
   bool isMapCreated = false;
   final String polyline;
 
   MapWidget(this.polyline);
 
   changeMapMode() {
-    if (getTheme())
+    if (Shared.getTheme())
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -170,11 +162,7 @@ class MapWidget extends StatelessWidget {
       if (point.longitude < minLong) minLong = point.longitude;
       if (point.longitude > maxLong) maxLong = point.longitude;
     });
-    _controller.moveCamera(CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-            southwest: LatLng(minLat, minLong),
-            northeast: LatLng(maxLat, maxLong)),
-        20));
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), 20));
   }
 
   @override
@@ -195,8 +183,7 @@ class MapWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(25.0),
           child: AbsorbPointer(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                  target: LatLng(45.503995, -73.593681), zoom: 10),
+              initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
               myLocationEnabled: false,
               tiltGesturesEnabled: false,
               compassEnabled: false,
@@ -204,11 +191,7 @@ class MapWidget extends StatelessWidget {
               zoomGesturesEnabled: false,
               zoomControlsEnabled: false,
               polylines: {
-                Polyline(
-                    polylineId: const PolylineId('trajet'),
-                    color: Theme.of(context).buttonColor,
-                    width: 4,
-                    points: polylines),
+                Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: polylines),
               },
               //polylines
               onMapCreated: (GoogleMapController controller) {
@@ -230,7 +213,7 @@ List<LatLng> decodePolylines(String polyline) {
   List<List<num>> pointsNum = decodePolyline(polyline);
   if (pointsNum.length != null)
     for (int i = 0; i < pointsNum.length; i++) {
-      LatLng point = LatLng(pointsNum[i][0], pointsNum[i][1]);
+      LatLng point = LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
       points.add(point);
     }
   points.removeAt(0);

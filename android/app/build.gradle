@@ -21,12 +21,50 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def keyProperties = new Properties()
+def keyPropertiesFile = rootProject.file('key.properties')
+if (keyPropertiesFile.exists()) {
+    keyPropertiesFile.withReader('UTF-8') { reader ->
+        keyProperties.load(reader)
+    }
+}
+
+def debugStorePassword = keyProperties.getProperty('debug.storePassword')
+if (debugStorePassword == null) {
+    throw new GradleException("Debug store password not found!")
+}
+
+def debugKeyPassword = keyProperties.getProperty('debug.keyPassword')
+if (debugKeyPassword == null) {
+    throw new GradleException("Debug key password not found!")
+}
+
+def debugKeyAlias = keyProperties.getProperty('debug.keyAlias')
+if (debugKeyAlias == null) {
+    throw new GradleException("Debug key alias not found!")
+}
+
+def debugStorefile = rootProject.file(keyProperties.getProperty('debug.storefile'))
+if (!debugStorefile.exists()) {
+    throw new GradleException("Debug key store file not found!")
+}
+
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
     compileSdkVersion 29
+
+    signingConfigs {
+        debug {
+            storeFile debugStorefile
+            storePassword debugStorePassword
+            keyAlias debugKeyAlias
+            keyPassword debugKeyPassword
+        }
+    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -39,13 +77,17 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "ca.qc.followup.follow_up_app"
-        minSdkVersion 21
-        targetSdkVersion 28
+        minSdkVersion 23
+        targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
@@ -62,5 +104,3 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation platform('com.google.firebase:firebase-bom:26.5.0')
 }
-
-apply plugin: 'com.google.gms.google-services'
