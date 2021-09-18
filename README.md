@@ -10,12 +10,16 @@ The tracking app that enhance your skills
 
 ### Dependencies
 
-* Flutter 2.0.6
-* OS : Windows 10 / MacOS 10.14 or better (/!\ M1 chip mac aren't supported yet)
+
+* Flutter 2.5.0
+* OS : Windows 10 / MacOS 10.14 or better (/!\ M1 chip mac are supported with specific build configuration)
+* To build this app you will also need keystore passwords and the autorisation of the Follow Up Team
+
 
 ### Installing
 
 (Recommanded)
+Flutter :
 * [for windows](https://flutter.dev/docs/get-started/install/windows)
 * [for mac](https://flutter.dev/docs/get-started/install/macos)
 
@@ -34,16 +38,30 @@ for [cloning the repository](https://docs.github.com/en/github/creating-cloning-
     ```
     flutter run
     ```
-    
-* How to run the program on Mac :
-  * On simulator :
-    * Open ios Simulator
-    * Launch any iphone (minimal ios version : 9.0)
-    * Type in terminal (at the root of the project):
+
+   * On physical device :
+     * Plug your device in your pc
+     * Locate your device in the build config
+     * Type in terminal (at the root of the project):
     
     ```
     flutter run
     ```
+    
+* How to run the program on Mac :
+  * On simulator :
+    * The ios simulator is not configured yet
+
+  * On physical device :
+    * Plug your device in your Mac
+    * open xCode and launch the Runner (/follow_up_app/ios)
+    * Prepare for the build, do all [Apple Developer steps](https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices) if not done yet
+    * Type in terminal (at the root of the project):
+    
+    ```
+    flutter run
+    ```  
+    * For more info : [Build and release an iOS app](https://flutter.dev/docs/deployment/ios)
 
 ## Help
 
@@ -56,8 +74,12 @@ Contributors names and contact info
 * Barry Lawson  
     Github : [@Megasix](https://github.com/Megasix).
     
-* Olivier Déry-Prévost
+* Olivier Déry-Prévost  
     Github : [@olivier123456](https://github.com/olivier123456).
+    
+* Augusto Mota-Pinheiro  
+    Github : [@AugustDG](https://github.com/AugustDG).
+
 
 ## Version History
 
