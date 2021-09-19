@@ -1,22 +1,38 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
-//TODO: REFACTOR THIS WHOOOOOOOLE THING
-
 class AuthService {
   static final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-//todo: fix the delay between the app opening and the user being signed in automatically (because of the fetching delay)
-// auth change user stream
-  static Stream<UserData?> get user {
-    return _firebaseAuth.authStateChanges().asyncMap<UserData?>((User? user) => user == null ? Future.value(null) : DatabaseService.getUserById(user.uid));
+  static StreamController<UserData?> controller = StreamController<UserData?>();
+
+  // auth change user data stream
+  static Stream<UserData?> signedInUser = controller.stream;
+
+  // auth change user stream, just to check if user is signed in
+  static Stream<User?> get userStream => _firebaseAuth.authStateChanges();
+
+  // initializes the service
+  static void init() {
+    _firebaseAuth.userChanges().listen(_refreshUserData);
+  }
+
+  //refreshes all user data and adds it to the stream (in the future can be used to make sure the user data on our end is up to date)
+  static void _refreshUserData(User? user) async {
+    print(user?.uid);
+    if (user == null) {
+      controller.add(null);
+      return;
+    }
+
+    //always gets the most up to date user data, responding to whatever auth changes happen
+    final UserData? userData = await DatabaseService.getUserById(user.uid);
+    controller.add(userData);
   }
 
   // Sign out from all providers.
@@ -24,94 +40,111 @@ class AuthService {
     _firebaseAuth.signOut();
   }
 
-// sign-in with email & password
-  static Future signInWithEmailAndPassword(String email, String password) async {
+  // register with email & password
+  static Future registerWithEmailAndPassword(UserData userData, String password) async {
     try {
-      UserCredential result = await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-      User? user = result.user;
-      UserData? userData = await DatabaseService.getUserById(user!.uid);
-      return userData;
-    } catch (error) {
-      print(error.toString());
-      return null;
+      await _firebaseAuth.createUserWithEmailAndPassword(password: password, email: userData.email as String);
+
+      //TODO: check if the user registered successfully
+
+      //registers the user in the database
+      await DatabaseService.updateUser(userData);
+    } on FirebaseAuthException catch (exception) {
+      switch (exception.code) {
+        //TODO: add more cases
+      }
     }
   }
 
-// register with email & password
-  static Future<UserData> registerWithEmailAndPassword(String password, UserData userData) async {
-    UserCredential result = await _firebaseAuth.createUserWithEmailAndPassword(password: password, email: userData.email as String);
-
-    //todo: check if the user registered successfully
-
-    //create a new document for the user with the uid
-    await DatabaseService.updateUser(userData);
-    return userData;
+  // sign-in with email & password
+  static Future<UserCredential?> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+    } on FirebaseAuthException catch (exception) {
+      switch (exception.code) {
+        //TODO: add more cases
+      }
+    }
   }
 
-  static Future<UserData?> signInWithGoogle() async {
+  // sign-in with google
+  static Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignIn _googleSignIn = GoogleSignIn();
     final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+
     if (googleSignInAccount == null) return null; //user cancelled sign-in
 
-    //todo: check how this works
-    final methods = await _firebaseAuth.fetchSignInMethodsForEmail(googleSignInAccount.email);
-
-    // Signs in with the GoogleSignIn account and returns Google Auth credentials
+    // Signs in with a Google account and returns Google Auth credentials
     final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
     final AuthCredential googleCredential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
       idToken: googleSignInAuthentication.idToken,
     );
 
-    final UserCredential authResult = await _firebaseAuth.signInWithCredential(googleCredential);
-    final User googleSignedUser = authResult.user as User;
+    try {
+      // Signs in with Google Auth credentials and gets Firebase Auth user
+      final UserCredential googleUserCredential = await _firebaseAuth.signInWithCredential(googleCredential);
+      final User googleSignedUser = googleUserCredential.user as User;
 
-    // Won't be null since we're signing in with a Google account
-    final firstName = googleSignedUser.displayName!.split(" ")[0];
-    final lastName = googleSignedUser.displayName!.split(" ")[1];
+      // Won't be null since we're signing in with a Google account
+      final firstName = googleSignedUser.displayName!.split(" ")[0];
+      final lastName = googleSignedUser.displayName!.split(" ")[1];
 
-    UserData userData = UserData(
-      googleSignedUser.uid,
-      firstName: firstName,
-      lastName: lastName,
-      email: googleSignedUser.email,
-      phoneNumber: googleSignedUser.phoneNumber,
-      profilePictureUrl: googleSignedUser.photoURL,
+      final UserData userData = UserData(
+        googleSignedUser.uid,
+        firstName: firstName,
+        lastName: lastName,
+        email: googleSignedUser.email,
+        phoneNumber: googleSignedUser.phoneNumber,
+        profilePictureUrl: googleSignedUser.photoURL,
+      );
+
+      await DatabaseService.updateUser(userData);
+
+      return googleUserCredential;
+    } on FirebaseAuthException catch (exception) {
+      switch (exception.code) {
+        //TODO: add more cases
+      }
+    }
+  }
+
+  static Future<UserCredential?> signInWithFacebook() async {
+    final LoginResult result = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile', 'user_friends'],
+        loginBehavior: LoginBehavior.nativeWithFallback); // by default we request the email, the public profile and user friends
+    if (result.status != LoginStatus.success) return null;
+
+    // Signs in with a Facebook account and returns Facebook Auth credentials
+    final AccessToken? accessToken = result.accessToken;
+    final OAuthCredential authCredential = FacebookAuthProvider.credential(
+      accessToken!.token,
     );
 
-    await DatabaseService.updateUser(userData);
-
-    print('signInWithGoogle succeeded: ${userData.uid}');
-
-    return userData;
-  }
-
-  static Future<String?> signInWithFacebook() async {
     try {
-      final LoginResult result = await FacebookAuth.instance.login(); // by default we request the email and the public profile
-      if (result.status == LoginStatus.success) {
-        // you are logged
-        final AccessToken? accessToken = result.accessToken;
-        final OAuthCredential credential = FacebookAuthProvider.credential(
-          accessToken!.token,
-        );
-        final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
-        final User? user = authResult.user;
-        if (user != null) {
-          return '(user);';
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      // handle the FirebaseAuthException
-    } finally {}
-    return null;
-  }
+      // Signs in with Facebook Auth credentials and gets Firebase Auth user
+      final UserCredential facebookUserCredential = await FirebaseAuth.instance.signInWithCredential(authCredential);
+      final User facebookSignedUser = facebookUserCredential.user as User;
+      // Won't be null since we're signing in with a Google account
+      final firstName = facebookSignedUser.displayName!.split(" ")[0];
+      final lastName = facebookSignedUser.displayName!.split(" ")[1];
 
-// sign out
-  Future signOut() async {
-    await _firebaseAuth.signOut();
-    await _googleSignIn.signOut();
-    Shared.saveUserLoggedInSharedPreference(false);
-    Shared.saveUserEmailSharedPreference('');
-    Shared.saveUserNameSharedPreference('');
+      final UserData userData = UserData(
+        facebookSignedUser.uid,
+        firstName: firstName,
+        lastName: lastName,
+        email: facebookSignedUser.email,
+        phoneNumber: facebookSignedUser.phoneNumber,
+        profilePictureUrl: facebookSignedUser.photoURL,
+      );
+
+      await DatabaseService.updateUser(userData);
+
+      return facebookUserCredential;
+    } on FirebaseAuthException catch (exception) {
+      switch (exception.code) {
+        //TODO: add more cases
+      }
+    }
   }
 }

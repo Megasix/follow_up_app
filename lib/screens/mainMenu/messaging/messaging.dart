@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/chat.dart';
 import 'package:follow_up_app/models/user.dart';
@@ -6,7 +5,6 @@ import 'package:follow_up_app/screens/mainMenu/messaging/conversation.dart';
 import 'package:follow_up_app/screens/mainMenu/messaging/user_research.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:provider/provider.dart';
 
 class Messaging extends StatefulWidget {
