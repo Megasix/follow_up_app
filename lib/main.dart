@@ -1,8 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
+//import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:follow_up_app/screens/wrapper.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
@@ -32,11 +33,14 @@ class MyApp extends StatelessWidget {
 
           if (snapshot.connectionState != ConnectionState.done) return Loading();
 
+          AuthService.init();
+
           //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
-          //todo: get final user object from Firestore, so that it can be consumed by other widgets
-          return StreamProvider<UserData?>.value(
-            value: AuthService.user,
-            initialData: null,
+          return MultiProvider(
+            providers: [
+              StreamProvider<User?>.value(value: AuthService.userStream, initialData: null),
+              StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
+            ],
             child: GetMaterialApp(
               theme: lightThemeConstant,
               darkTheme: darkThemeConstant,

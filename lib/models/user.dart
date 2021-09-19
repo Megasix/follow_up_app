@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/services/database.dart';
 
 //class containing general user data
 class UserData {
@@ -27,7 +27,7 @@ class UserData {
             phoneNumber: map?['phoneNumber'],
             birthDate: map?['birthDate'],
             profilePictureUrl: map?['profilePictureUrl'],
-            activeChatrooms: map?['activeChatrooms']);
+            activeChatrooms: (map?['activeChatrooms'] as List?)?.map((map) => DatabaseService.chatRoomCollection.doc(map.id)).toList() ?? []);
 
   Map<String, dynamic> toMap() => {
         'firstName': firstName,

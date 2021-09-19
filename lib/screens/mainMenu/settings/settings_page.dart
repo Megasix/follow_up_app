@@ -21,7 +21,7 @@ class SettingsPage extends StatelessWidget {
           context: context,
           builder: (context) {
             return Container(
-              padding: EdgeInsets.only(left: 10.0*widthRatio, top: 10.0*heightRatio, right: 10.0*widthRatio, bottom: 10.0*heightRatio),
+              padding: EdgeInsets.only(left: 10.0 * widthRatio, top: 10.0 * heightRatio, right: 10.0 * widthRatio, bottom: 10.0 * heightRatio),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -32,13 +32,13 @@ class SettingsPage extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(top: 50.0*heightRatio, left: 10.0*widthRatio, right: 10.0*widthRatio, bottom: 50.0*heightRatio),
+        padding: EdgeInsets.only(top: 50.0 * heightRatio, left: 10.0 * widthRatio, right: 10.0 * widthRatio, bottom: 50.0 * heightRatio),
         child: Column(
           children: <Widget>[
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0*heightRatio, left: 5.0*widthRatio, right: 5.0*widthRatio, bottom: 10.0*heightRatio),
+                padding: EdgeInsets.only(top: 10.0 * heightRatio, left: 5.0 * widthRatio, right: 5.0 * widthRatio, bottom: 10.0 * heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
@@ -58,7 +58,7 @@ class SettingsPage extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.account_circle),
-                            SizedBox(width: 8.0*widthRatio),
+                            SizedBox(width: 8.0 * widthRatio),
                             Text('Edit profile'),
                             Spacer(),
                             Icon(
@@ -72,7 +72,7 @@ class SettingsPage extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.poll),
-                            SizedBox(width: 8.0*widthRatio),
+                            SizedBox(width: 8.0 * widthRatio),
                             Text('Unit type'),
                             Spacer(),
                             Icon(
@@ -103,7 +103,7 @@ class SettingsPage extends StatelessWidget {
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0*heightRatio, left: 5.0*widthRatio, right: 5.0*widthRatio, bottom: 10.0*heightRatio),
+                padding: EdgeInsets.only(top: 10.0 * heightRatio, left: 5.0 * widthRatio, right: 5.0 * widthRatio, bottom: 10.0 * heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
@@ -125,7 +125,7 @@ class SettingsPage extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Icon(Icons.settings_display),
-                            SizedBox(width: 8.0*widthRatio),
+                            SizedBox(width: 8.0 * widthRatio),
                             Text('Display'),
                             Spacer(),
                             Icon(
@@ -143,8 +143,8 @@ class SettingsPage extends StatelessWidget {
               width: contextWidth,
               height: 20.0,
               child: FlatButton(
-                onPressed: () async {
-                  await _authService.signOut();
+                onPressed: () {
+                  AuthService.signOutAll();
                 },
                 child: Text('Sign Out'),
               ),
