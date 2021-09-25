@@ -422,11 +422,6 @@ class _RegisterState extends State<Register> {
                                                         birthDate: birthDate),
                                                     password,
                                                   );
-
-                                                  setState(() {
-                                                    error = 'There was an error using these credential please retry';
-                                                    loading = false;
-                                                  });
                                                 }
                                               }),
                                         ),

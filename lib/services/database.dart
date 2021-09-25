@@ -87,7 +87,7 @@ class DatabaseService {
   }
 
   static Future<UserData?> getUserById(String userId) {
-    return usersCollection.doc(userId).get().then<UserData>((docSnap) => docSnap.data() as UserData);
+    return usersCollection.doc(userId).get().then<UserData?>((docSnap) => docSnap.data());
   }
 
   static Future<List<ChatroomData>> getChatRoomsByMemberId(String userId) {
