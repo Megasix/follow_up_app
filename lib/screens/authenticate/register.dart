@@ -164,11 +164,11 @@ class _RegisterState extends State<Register> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             GoogleSignInButton(onPressed: () async {
-                                              await AuthService.signInWithGoogle();
+                                              await AuthService.signInWithGoogle(context);
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             FacebookSignInButton(onPressed: () async {
-                                              await AuthService.signInWithFacebook();
+                                              await AuthService.signInWithFacebook(context);
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             TwitterSignInButton(onPressed: () async {}),
@@ -413,6 +413,7 @@ class _RegisterState extends State<Register> {
                                                   setState(() => loading = true);
 
                                                   await AuthService.registerWithEmailAndPassword(
+                                                    context,
                                                     UserData(Uuid().v4(),
                                                         firstName: firstName,
                                                         lastName: lastName,
