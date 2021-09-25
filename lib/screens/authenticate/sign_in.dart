@@ -124,7 +124,7 @@ class _SignInState extends State<SignIn> {
                                   child: Text('Sign In', style: TextStyle(color: Colors.white)),
                                   onPressed: () async {
                                     setState(() => loading = true);
-                                    dynamic result = await AuthService.signInWithEmailAndPassword(email, password);
+                                    dynamic result = await AuthService.signInWithEmailAndPassword(context, email, password);
                                     if (result == null)
                                       setState(() {
                                         error = 'There was an error using these credential please retry';
@@ -143,11 +143,11 @@ class _SignInState extends State<SignIn> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 GoogleSignInButton(onPressed: () async {
-                                  await AuthService.signInWithGoogle();
+                                  await AuthService.signInWithGoogle(context);
                                 }),
                                 SizedBox(width: sameTypeVerticalPadding),
                                 FacebookSignInButton(onPressed: () async {
-                                  await AuthService.signInWithFacebook();
+                                  await AuthService.signInWithFacebook(context);
                                 }),
                                 SizedBox(width: sameTypeVerticalPadding),
                                 TwitterSignInButton(onPressed: () async {}),

@@ -5,6 +5,7 @@ import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/snackbar.dart';
 import 'package:provider/provider.dart';
 import 'messaging/messaging.dart';
 

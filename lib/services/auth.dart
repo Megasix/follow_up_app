@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/shared/snackbar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
@@ -41,7 +43,7 @@ class AuthService {
   }
 
   // register with email & password
-  static Future registerWithEmailAndPassword(UserData userData, String password) async {
+  static Future registerWithEmailAndPassword(BuildContext context, UserData userData, String password) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(password: password, email: userData.email as String);
 
@@ -50,6 +52,7 @@ class AuthService {
       //registers the user in the database
       await DatabaseService.updateUser(userData);
     } on FirebaseAuthException catch (exception) {
+      CustomSnackbar.showBar(context, exception.message as String);
       switch (exception.code) {
         //TODO: add more cases
       }
@@ -57,10 +60,11 @@ class AuthService {
   }
 
   // sign-in with email & password
-  static Future<UserCredential?> signInWithEmailAndPassword(String email, String password) async {
+  static Future<UserCredential?> signInWithEmailAndPassword(BuildContext context, String email, String password) async {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (exception) {
+      CustomSnackbar.showBar(context, exception.message as String);
       switch (exception.code) {
         //TODO: add more cases
       }
@@ -68,7 +72,7 @@ class AuthService {
   }
 
   // sign-in with google
-  static Future<UserCredential?> signInWithGoogle() async {
+  static Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     final GoogleSignIn _googleSignIn = GoogleSignIn();
     final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
@@ -103,13 +107,14 @@ class AuthService {
 
       return googleUserCredential;
     } on FirebaseAuthException catch (exception) {
+      CustomSnackbar.showBar(context, exception.message as String);
       switch (exception.code) {
         //TODO: add more cases
       }
     }
   }
 
-  static Future<UserCredential?> signInWithFacebook() async {
+  static Future<UserCredential?> signInWithFacebook(BuildContext context) async {
     final LoginResult result = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile', 'user_friends'],
         loginBehavior: LoginBehavior.nativeWithFallback); // by default we request the email, the public profile and user friends
@@ -142,6 +147,7 @@ class AuthService {
 
       return facebookUserCredential;
     } on FirebaseAuthException catch (exception) {
+      CustomSnackbar.showBar(context, exception.message as String);
       switch (exception.code) {
         //TODO: add more cases
       }
