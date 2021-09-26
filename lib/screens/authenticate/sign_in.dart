@@ -129,7 +129,7 @@ class _SignInState extends State<SignIn> {
                                       onPressed: () async {
                                         setState(() => loading = true);
                                         dynamic result = await AuthService
-                                            .signInWithEmailAndPassword(
+                                            .signInWithEmailAndPassword(context, 
                                                 email, password);
                                         if (result == null)
                                           setState(() {
@@ -148,10 +148,10 @@ class _SignInState extends State<SignIn> {
                                   mainAxisSize: MainAxisSize.max,
                                   children: <Widget>[
                                     GoogleSignInButton(onPressed: () async {
-                                      await AuthService.signInWithGoogle();
+                                      await AuthService.signInWithGoogle(context);
                                     }),
                                     FacebookSignInButton(onPressed: () async {
-                                      await AuthService.signInWithFacebook();
+                                      await AuthService.signInWithFacebook(context);
                                     }),
                                     TwitterSignInButton(onPressed: () async {}),
                                     AppleSignInButton(
@@ -159,13 +159,14 @@ class _SignInState extends State<SignIn> {
                                         darkMode: !Shared.lightThemeEnabled),
                                   ],
                                 ),
-
+                                
                                 TextButton(
                                   child: Text('CREATE A FREE ACCOUNT'),
                                   onPressed: () {
                                     widget.toggleView();
                                   },
                                 ),
+
                               ],
                             ),
                           ),

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -15,7 +14,6 @@ import 'package:follow_up_app/shared/shared.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
-import '../../main.dart';
 
 class Register extends StatefulWidget {
   final Function toggleView;
@@ -166,11 +164,11 @@ class _RegisterState extends State<Register> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             GoogleSignInButton(onPressed: () async {
-                                              await AuthService.signInWithGoogle();
+                                              await AuthService.signInWithGoogle(context);
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             FacebookSignInButton(onPressed: () async {
-                                              await AuthService.signInWithFacebook();
+                                              await AuthService.signInWithFacebook(context);
                                             }),
                                             SizedBox(width: sameTypeVerticalPadding),
                                             TwitterSignInButton(onPressed: () async {}),
@@ -415,19 +413,16 @@ class _RegisterState extends State<Register> {
                                                   setState(() => loading = true);
 
                                                   await AuthService.registerWithEmailAndPassword(
-                                                      password,
-                                                      UserData(Uuid().v4(),
-                                                          firstName: firstName,
-                                                          lastName: lastName,
-                                                          email: email,
-                                                          country: country,
-                                                          phoneNumber: phoneNumber,
-                                                          birthDate: birthDate));
-
-                                                  setState(() {
-                                                    error = 'There was an error using these credential please retry';
-                                                    loading = false;
-                                                  });
+                                                    context,
+                                                    UserData(Uuid().v4(),
+                                                        firstName: firstName,
+                                                        lastName: lastName,
+                                                        email: email,
+                                                        country: country,
+                                                        phoneNumber: phoneNumber,
+                                                        birthDate: birthDate),
+                                                    password,
+                                                  );
                                                 }
                                               }),
                                         ),
