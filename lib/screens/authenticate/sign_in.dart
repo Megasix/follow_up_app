@@ -33,145 +33,150 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    //default gap between two elements
-    const _referenceHeight = 820.5714285714286;
-    const _referenceWidth = 411.42857142857144;
-    final double contextHeight = MediaQuery.of(context).size.height;
-    final double contextWidth = MediaQuery.of(context).size.width;
-    final double contextAspectRatio = MediaQuery.of(context).devicePixelRatio;
-    var sameTypeVerticalPadding = 10.0 * contextHeight / _referenceHeight;
-    var generalVerticalPadding = 30.0 * contextHeight / _referenceHeight;
-    var heightRatio = contextHeight / _referenceHeight;
-    var widthRatio = contextWidth / _referenceWidth;
-
     return loading
         ? Loading()
-        : Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: AnimatedContainer(
-              duration: Duration(milliseconds: 400),
-              curve: Curves.easeOut,
-              alignment: childAlignement,
-              color: Theme.of(context).secondaryHeaderColor,
-              width: double.infinity,
-              height: double.infinity,
-              child: FormBuilder(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.always,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 350.0 * heightRatio,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 75.0 * heightRatio, bottom: 50.0 * heightRatio, left: 50.0 * widthRatio, right: 50.0 * widthRatio),
-                        child: AspectRatio(
-                          aspectRatio: contextAspectRatio,
-                          child: Image(
-                            image: AssetImage(
-                              "assets/images/${Shared.lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+        : LayoutBuilder(builder: (context, constraints) {
+            return Scaffold(
+              resizeToAvoidBottomInset: false,
+              body: AnimatedContainer(
+                duration: Duration(milliseconds: 400),
+                curve: Curves.easeOut,
+                alignment: childAlignement,
+                color: Theme.of(context).secondaryHeaderColor,
+                width: double.infinity,
+                height: double.infinity,
+                child: FormBuilder(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.always,
+                  child: Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: 75.0, bottom: 50.0, left: 50.0, right: 50.0),
+                          child: AspectRatio(
+                            aspectRatio:
+                                MediaQuery.of(context).devicePixelRatio,
+                            child: Image(
+                              image: AssetImage(
+                                "assets/images/${Shared.lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.only(top: 40.0 * heightRatio, right: 40.0 * widthRatio, left: 40.0 * widthRatio),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(50.0),
-                            topRight: Radius.circular(50.0),
-                          ),
-                          color: Theme.of(context).backgroundColor,
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            FormBuilderTextField(
-                              name: 'Account Email',
-                              decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
-                              keyboardType: TextInputType.text,
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.required(context),
-                                FormBuilderValidators.email(context),
-                              ]),
-                              onChanged: (val) {
-                                setState(() => email = val as String);
-                              },
+                        Expanded(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 25.0, horizontal: 40.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(50.0),
+                                topRight: Radius.circular(50.0),
+                              ),
+                              color: Theme.of(context).backgroundColor,
                             ),
-                            SizedBox(height: sameTypeVerticalPadding),
-                            // password field
-                            FormBuilderTextField(
-                              name: 'Password',
-                              decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                              obscureText: true,
-                              keyboardType: TextInputType.text,
-                              validator: FormBuilderValidators.compose([
-                                FormBuilderValidators.required(context),
-                                FormBuilderValidators.maxLength(context, 20),
-                                FormBuilderValidators.minLength(context, 5),
-                              ]),
-                              onChanged: (val) {
-                                setState(() => password = val as String);
-                              },
-                            ),
-                            SizedBox(height: generalVerticalPadding),
-
-                            SizedBox(
-                              width: contextWidth,
-                              height: 40.0,
-                              child: ElevatedButton(
-                                  child: Text('Sign In', style: TextStyle(color: Colors.white)),
-                                  onPressed: () async {
-                                    setState(() => loading = true);
-                                    dynamic result = await AuthService.signInWithEmailAndPassword(context, email, password);
-                                    if (result == null)
-                                      setState(() {
-                                        error = 'There was an error using these credential please retry';
-                                        loading = false;
-                                      });
-                                  }),
-                            ),
-
-                            SizedBox(height: generalVerticalPadding),
-
-                            Text('OR SIGN IN WITH'),
-
-                            SizedBox(height: generalVerticalPadding),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.max,
                               children: <Widget>[
-                                GoogleSignInButton(onPressed: () async {
-                                  await AuthService.signInWithGoogle(context);
-                                }),
-                                SizedBox(width: sameTypeVerticalPadding),
-                                FacebookSignInButton(onPressed: () async {
-                                  await AuthService.signInWithFacebook(context);
-                                }),
-                                SizedBox(width: sameTypeVerticalPadding),
-                                TwitterSignInButton(onPressed: () async {}),
-                                SizedBox(width: sameTypeVerticalPadding),
-                                AppleSignInButton(onPressed: () async {}, darkMode: !Shared.lightThemeEnabled),
+                                // email field
+                                FormBuilderTextField(
+                                  name: 'Account Email',
+                                  decoration: textInputDecoration.copyWith(
+                                      hintText: 'Account Email'),
+                                  keyboardType: TextInputType.text,
+                                  validator: FormBuilderValidators.compose([
+                                    FormBuilderValidators.required(context),
+                                    FormBuilderValidators.email(context),
+                                  ]),
+                                  onChanged: (val) {
+                                    setState(() => email = val as String);
+                                  },
+                                ),
+
+                                // password field
+                                FormBuilderTextField(
+                                  name: 'Password',
+                                  decoration: textInputDecoration.copyWith(
+                                      hintText: 'Password'),
+                                  obscureText: true,
+                                  keyboardType: TextInputType.text,
+                                  validator: FormBuilderValidators.compose([
+                                    FormBuilderValidators.required(context),
+                                    FormBuilderValidators.maxLength(
+                                        context, 20),
+                                    FormBuilderValidators.minLength(
+                                        context, 5),
+                                  ]),
+                                  onChanged: (val) {
+                                    setState(
+                                        () => password = val as String);
+                                  },
+                                ),
+
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 40.0,
+                                  child: ElevatedButton(
+                                      child: Text('Sign In',
+                                          style: TextStyle(
+                                              color: Colors.white)),
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Theme.of(context)
+                                            .secondaryHeaderColor,
+                                      ),
+                                      onPressed: () async {
+                                        setState(() => loading = true);
+                                        dynamic result = await AuthService
+                                            .signInWithEmailAndPassword(context, 
+                                                email, password);
+                                        if (result == null)
+                                          setState(() {
+                                            error =
+                                                'There was an error using these credential please retry';
+                                            loading = false;
+                                          });
+                                      }),
+                                ),
+
+                                Text('OR SIGN IN WITH'),
+
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    GoogleSignInButton(onPressed: () async {
+                                      await AuthService.signInWithGoogle(context);
+                                    }),
+                                    FacebookSignInButton(onPressed: () async {
+                                      await AuthService.signInWithFacebook(context);
+                                    }),
+                                    TwitterSignInButton(onPressed: () async {}),
+                                    AppleSignInButton(
+                                        onPressed: () async {},
+                                        darkMode: !Shared.lightThemeEnabled),
+                                  ],
+                                ),
+                                
+                                TextButton(
+                                  child: Text('CREATE A FREE ACCOUNT'),
+                                  onPressed: () {
+                                    widget.toggleView();
+                                  },
+                                ),
+
                               ],
                             ),
-
-                            SizedBox(height: generalVerticalPadding),
-
-                            TextButton(
-                              child: Text('CREATE A FREE ACCOUNT'),
-                              onPressed: () {
-                                widget.toggleView();
-                              },
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          );
+            );
+          });
   }
 }
