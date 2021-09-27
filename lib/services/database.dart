@@ -78,12 +78,8 @@ class DatabaseService {
     return sortedNameList;
   }
 
-  static Future<List<UserData>> getUsersByFirstName(String name) {
-    return usersCollection.where('firstName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
-  }
-
-  static Future<List<UserData>> getUsersByLastName(String name) async {
-    return await usersCollection.where('lastName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
+  static Future<List<UserData>> getUsersBySchool(String schoolId) {
+    return usersCollection.where('schoolId', isEqualTo: schoolId).get().then<List<UserData>>(_usersFromSnapshot);
   }
 
   static Future<UserData?> getUserById(String userId) {
