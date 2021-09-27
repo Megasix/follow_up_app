@@ -7,59 +7,46 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/wrapper.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
-import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  AuthService.init();
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final Future<FirebaseApp> _initializationFuture = Firebase.initializeApp();
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _initializationFuture,
-        builder: (context, snapshot) {
-          // Check for errors
-          if (snapshot.hasError)
-            return Container(
-              child: Text('Erreur dans l\'initialisation de Firebase...'),
-            );
-
-          if (snapshot.connectionState != ConnectionState.done) return Loading();
-
-          AuthService.init();
-
-          //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
-          return MultiProvider(
-            providers: [
-              StreamProvider<User?>.value(value: AuthService.userStream, initialData: null),
-              StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
-            ],
-            child: GetMaterialApp(
-              theme: lightThemeConstant,
-              darkTheme: darkThemeConstant,
-              themeMode: ThemeMode.system,
-              localizationsDelegates: [
-                //AppLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              supportedLocales: [
-                const Locale('en', 'US'),
-                const Locale('en', 'CA'),
-                const Locale('fr', 'CA'),
-                const Locale('fr', 'FR'),
-              ],
-              home: Wrapper(),
-            ),
-          );
-        });
+    //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
+    return MultiProvider(
+      providers: [
+        StreamProvider<User?>.value(value: AuthService.userStream, initialData: null),
+        StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
+      ],
+      child: GetMaterialApp(
+        theme: lightThemeConstant,
+        darkTheme: darkThemeConstant,
+        themeMode: ThemeMode.system,
+        localizationsDelegates: [
+          //AppLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en', 'US'),
+          const Locale('en', 'CA'),
+          const Locale('fr', 'CA'),
+          const Locale('fr', 'FR'),
+        ],
+        home: Wrapper(),
+      ),
+    );
   }
 }
