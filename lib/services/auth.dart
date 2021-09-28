@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/snackbar.dart';
@@ -112,8 +113,10 @@ class AuthService {
       final firstName = googleSignedUser.displayName!.split(" ")[0];
       final lastName = googleSignedUser.displayName!.split(" ")[1];
 
+      //TODO: get the user's school id (if student) or teacher id (if teacher) from the user
       final UserData userData = UserData(
         googleSignedUser.uid,
+        UserType.STUDENT,
         firstName: firstName,
         lastName: lastName,
         email: googleSignedUser.email,
@@ -152,8 +155,10 @@ class AuthService {
       final firstName = facebookSignedUser.displayName!.split(" ")[0];
       final lastName = facebookSignedUser.displayName!.split(" ")[1];
 
+      //TODO: get the user's school id (if student) or teacher id (if teacher) from the user
       final UserData userData = UserData(
         facebookSignedUser.uid,
+        UserType.STUDENT,
         firstName: firstName,
         lastName: lastName,
         email: facebookSignedUser.email,

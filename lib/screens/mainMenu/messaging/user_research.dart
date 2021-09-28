@@ -18,12 +18,12 @@ class UserResearch extends StatefulWidget {
 class _UserResearchState extends State<UserResearch> {
   String search = '';
 
-  late Future<List<ChatUserData>> _searchUsers = DatabaseService.getUsersByName(search);
+  late Future<List<ChatUserData>> _searchUsers = DatabaseService.getStudentsByName(search);
 
   Widget searchListByName() {
     return search.isNotEmpty
         ? FutureBuilder<List<ChatUserData>>(
-            future: DatabaseService.getUsersByName(search),
+            future: DatabaseService.getStudentsByName(search),
             builder: (context, asyncSnap) {
               //todo: add more cases (i.e. show an error msg if an error occurs)
               if (asyncSnap.connectionState != ConnectionState.done) {

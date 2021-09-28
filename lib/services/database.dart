@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 
@@ -77,12 +78,23 @@ class DatabaseService {
     return schoolsCollection.doc(schoolId).get().then<SchoolData?>((snap) => snap.data());
   }
 
-  static Future<List<ChatUserData>> getUsersByName(String name) async {
+  static Future<List<ChatUserData>> getStudentsByName(String name) async {
     //todo: test if a string is considered an array by Firestore
-    var firstNameList =
-        await usersCollection.orderBy('firstName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
-    var lastNameList =
-        await usersCollection.orderBy('lastName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var firstNameList = await usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .orderBy('firstName')
+        .startAt([name])
+        .endAt([name + '\uf8ff'])
+        .get()
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+
+    var lastNameList = await usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .orderBy('lastName')
+        .startAt([name])
+        .endAt([name + '\uf8ff'])
+        .get()
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
     var sortedNameList = firstNameList.followedBy(lastNameList).toList();
 
     //todo: also check if this is functioning properly
@@ -90,8 +102,20 @@ class DatabaseService {
     return sortedNameList;
   }
 
-  static Future<List<UserData>> getUsersBySchool(String schoolId) {
-    return usersCollection.where('schoolId', isEqualTo: schoolId).get().then<List<UserData>>(_usersFromSnapshot);
+  static Future<List<UserData>> getStudentsBySchool(String schoolId) {
+    return usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .get()
+        .then<List<UserData>>(_studentsFromSnapshot);
+  }
+
+  static Future<List<UserData>> getInstructorsBySchool(String schoolId) {
+    return usersCollection
+        .where('type', isEqualTo: UserType.INSTRUCTOR.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .get()
+        .then<List<UserData>>(_studentsFromSnapshot);
   }
 
   static Future<UserData?> getUserById(String userId) {
@@ -153,7 +177,7 @@ class DatabaseService {
   //CONVERTERS
   //
 
-  static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
+  static List<UserData> _studentsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
     return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as UserData).toList();
   }
 

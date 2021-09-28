@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/services/database.dart';
 
 //class containing general user data
 class UserData {
   String uid;
+  UserType type;
 
-  String? firstName;
-  String? lastName;
+  String firstName;
+  String lastName;
   String? country;
   String? email;
   String? phoneNumber;
@@ -17,11 +19,19 @@ class UserData {
   List<DocumentReference<ChatroomData>>? activeChatrooms;
 
   //uid is separated because it's metadata and not directly user data
-  UserData(this.uid,
-      {this.firstName, this.lastName, this.schoolId, this.country, this.email, this.phoneNumber, this.birthDate, this.profilePictureUrl, this.activeChatrooms});
+  UserData(this.uid, this.type,
+      {required this.firstName,
+      required this.lastName,
+      this.schoolId,
+      this.country,
+      this.email,
+      this.phoneNumber,
+      this.birthDate,
+      this.profilePictureUrl,
+      this.activeChatrooms});
 
   UserData.fromMap(String id, Map<String, dynamic>? map)
-      : this(id,
+      : this(id, UserType.values[map?['type'] ?? 0],
             firstName: map?['firstName'],
             lastName: map?['lastName'],
             schoolId: map?['schoolId'],
@@ -33,6 +43,7 @@ class UserData {
             activeChatrooms: (map?['activeChatrooms'] as List?)?.map((map) => DatabaseService.chatRoomCollection.doc(map.id)).toList() ?? []);
 
   Map<String, dynamic> toMap() => {
+        'type': type.index,
         'firstName': firstName,
         'lastName': lastName,
         'schoolId': schoolId,
