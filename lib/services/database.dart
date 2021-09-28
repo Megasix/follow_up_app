@@ -9,6 +9,10 @@ class DatabaseService {
       .collection('users')
       .withConverter<UserData>(fromFirestore: (snap, opt) => UserData.fromMap(snap.id, snap.data()), toFirestore: (user, opt) => user.toMap());
 
+  static final CollectionReference<SchoolData> schoolsCollection = FirebaseFirestore.instance
+      .collection('schools')
+      .withConverter<SchoolData>(fromFirestore: (snap, opt) => SchoolData.fromMap(snap.id, snap.data()), toFirestore: (school, opt) => school.toMap());
+
   static final CollectionReference<RideData> ridesCollection = FirebaseFirestore.instance
       .collection('rides')
       .withConverter<RideData>(fromFirestore: (snap, opt) => RideData.fromMap(snap.id, snap.data()), toFirestore: (ride, opt) => ride.toMap());
@@ -18,11 +22,15 @@ class DatabaseService {
       .withConverter<ChatroomData>(fromFirestore: (snap, opt) => ChatroomData.fromMap(snap.data()), toFirestore: (chatroom, opt) => chatroom.toMap());
 
   //
-  //UPDATERS
+  // UPDATERS
   //
 
   static Future<void> updateUser(UserData data) {
     return usersCollection.doc(data.uid).set(data, SetOptions(merge: true));
+  }
+
+  static Future<void> updateSchool(SchoolData schoolData) async {
+    return schoolsCollection.doc(schoolData.uid).set(schoolData, SetOptions(merge: true));
   }
 
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
@@ -64,6 +72,10 @@ class DatabaseService {
   //
   // FETCHERS
   //
+
+  static Future<SchoolData?> getSchoolById(String schoolId) async {
+    return schoolsCollection.doc(schoolId).get().then<SchoolData?>((snap) => snap.data());
+  }
 
   static Future<List<ChatUserData>> getUsersByName(String name) async {
     //todo: test if a string is considered an array by Firestore

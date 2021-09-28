@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/snackbar.dart';
@@ -11,10 +12,14 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 class AuthService {
   static final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  static StreamController<UserData?> controller = StreamController<UserData?>();
+  static StreamController<UserData?> userDataController = StreamController<UserData?>();
+  static StreamController<SchoolData?> schoolDataController = StreamController<SchoolData?>();
 
   // auth change user data stream
-  static Stream<UserData?> signedInUser = controller.stream;
+  static Stream<UserData?> signedInUser = userDataController.stream;
+
+  // auth change user data stream
+  static Stream<SchoolData?> signedInSchool = schoolDataController.stream;
 
   // auth change user stream, just to check if user is signed in
   static Stream<User?> get userStream => _firebaseAuth.authStateChanges();
@@ -27,14 +32,27 @@ class AuthService {
   //refreshes all user data and adds it to the stream (in the future can be used to make sure the user data on our end is up to date)
   static void _refreshUserData(User? user) async {
     print(user?.uid);
-    if (user == null) {
-      controller.add(null);
-      return;
-    }
 
-    //always gets the most up to date user data, responding to whatever auth changes happen
-    final UserData? userData = await DatabaseService.getUserById(user.uid);
-    controller.add(userData);
+    //if we're on the web, we're only dealing with schools
+    if (kIsWeb) {
+      if (user == null) {
+        userDataController.add(null);
+        return;
+      }
+
+      //always gets the most up to date user data, responding to whatever auth changes happen
+      final SchoolData? schoolData = await DatabaseService.getSchoolById(user.uid);
+      schoolDataController.add(schoolData);
+    } else {
+      if (user == null) {
+        userDataController.add(null);
+        return;
+      }
+
+      //always gets the most up to date user data, responding to whatever auth changes happen
+      final UserData? userData = await DatabaseService.getUserById(user.uid);
+      userDataController.add(userData);
+    }
   }
 
   // Sign out from all providers.
