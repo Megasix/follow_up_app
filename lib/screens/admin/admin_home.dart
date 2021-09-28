@@ -73,10 +73,10 @@ class _AdminHomeState extends State<AdminHome> {
                     return matchingUsers == null || matchingUsers.isEmpty
                         ? Center(child: Text('No ${_isShowingStudents ? 'Students' : 'Instructors'} to show...'))
                         : GridView.builder(
-                            itemCount: matchingUsers?.length,
+                            itemCount: matchingUsers.length,
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 400, mainAxisSpacing: 12, crossAxisSpacing: 12),
                             itemBuilder: (context, index) {
-                              return StudentCard(userData: matchingUsers![index]);
+                              return StudentCard(userData: matchingUsers[index]);
                             });
                   }),
             ),
