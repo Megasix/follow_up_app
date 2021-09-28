@@ -156,17 +156,20 @@ class DatabaseService {
         .map<List<ChatMessage>>(_chatMessagesFromSnapshot);
   }
 
-  static Stream<List<ChatroomData>> streamChatroomsByMemberId(String userId) {
-    return chatRoomCollection.where('members', arrayContains: userId).snapshots().map<List<ChatroomData>>(_chatroomsFromSnapshot);
-  }
-
   //get all chatrooms the signed in user has
-  static Stream<List<ChatroomData>> streamChatrooms(UserData userData) {
-    var stuff = chatRoomCollection
+  static Stream<List<ChatroomData>> streamStudentChatrooms(UserData userData) {
+    return chatRoomCollection
         .where('members', arrayContains: ChatUserData.fromUserData(userData).toMap())
         .snapshots()
         .map<List<ChatroomData>>(_chatroomsFromSnapshot);
-    return stuff;
+  }
+
+//get all chatrooms the signed in school has
+  static Stream<List<ChatroomData>> streamSchoolChatrooms(SchoolData schoolData) {
+    return chatRoomCollection
+        .where('members', arrayContains: ChatUserData.fromSchoolData(schoolData).toMap())
+        .snapshots()
+        .map<List<ChatroomData>>(_chatroomsFromSnapshot);
   }
 
   Stream<List<RideData>> streamRides(String userId) {

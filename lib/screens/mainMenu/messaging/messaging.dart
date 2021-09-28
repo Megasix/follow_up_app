@@ -15,7 +15,7 @@ class Messaging extends StatefulWidget {
 class _MessagingState extends State<Messaging> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamChatrooms(Provider.of<UserData?>(context, listen: false)!);
+  late Stream<List<ChatroomData>> chatRoomStream = DatabaseService.streamStudentChatrooms(Provider.of<UserData?>(context, listen: false)!);
 
   Widget chatRoomList() {
     return StreamBuilder<List<ChatroomData>>(
