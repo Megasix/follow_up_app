@@ -1,5 +1,7 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:async/async.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:follow_up_app/models/chat.dart';
 import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/rides.dart';
@@ -180,17 +182,25 @@ class DatabaseService {
 
   //get all students related to the signed in school
   static Stream<List<UserData>> streamSchoolStudents(String schoolId) {
-    return usersCollection.where('schoolId', isEqualTo: schoolId).snapshots().map<List<UserData>>(_usersFromSnapshot);
+    return usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .snapshots()
+        .map<List<UserData>>(_usersFromSnapshot);
   }
 
   //get all instructors related to the signed in school
   static Stream<List<UserData>> streamSchoolInstructors(String schoolId) {
-    final Stream<List<UserData>> activeInstructors = usersCollection.where('schoolId', isEqualTo: schoolId).snapshots().map<List<UserData>>(_usersFromSnapshot);
+    final Stream<List<UserData>> activeInstructors = usersCollection
+        .where('type', isEqualTo: UserType.INSTRUCTOR.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .snapshots()
+        .map<List<UserData>>(_usersFromSnapshot);
 
     final Stream<List<UserData>> inactiveInstructors =
         schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').snapshots().map<List<UserData>>(_usersFromSnapshotMap);
 
-    return StreamGroup.merge([activeInstructors, inactiveInstructors]);
+    return activeInstructors.mergeWith([inactiveInstructors]);
   }
 
   Stream<List<RideData>> streamRides(String userId) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/gen/assets.gen.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
 import 'package:follow_up_app/screens/admin/_modules/student_card.dart';
@@ -64,9 +65,10 @@ class _AdminHomeState extends State<AdminHome> {
                 ],
               ),
             ),
-            body: Container(
+            body: Padding(
               padding: const EdgeInsets.all(12),
               child: StreamBuilder<List<UserData>>(
+                  key: UniqueKey(),
                   initialData: null,
                   stream: _isShowingStudents ? _schoolStudents(schoolData.uid) : _schoolInstructors(schoolData.uid),
                   builder: (context, asyncSnap) {
@@ -82,7 +84,9 @@ class _AdminHomeState extends State<AdminHome> {
                             itemCount: matchingUsers.length,
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 400, mainAxisSpacing: 12, crossAxisSpacing: 12),
                             itemBuilder: (context, index) {
-                              return _isShowingStudents ? StudentCard(userData: matchingUsers[index]) : InstructorCard(userData: matchingUsers[index]);
+                              return _isShowingStudents
+                                  ? StudentCard(key: ValueKey(index), userData: matchingUsers[index])
+                                  : InstructorCard(key: ValueKey(index), userData: matchingUsers[index]);
                             });
                   }),
             ),

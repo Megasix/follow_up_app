@@ -7,7 +7,6 @@ class Loading extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        color: Theme.of(context).backgroundColor,
         child: Center(
           child: SpinKitChasingDots(
             color: Theme.of(context).secondaryHeaderColor,
