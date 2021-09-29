@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:follow_up_app/gen/assets.gen.dart';
 import 'package:follow_up_app/models/user.dart';
+import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
 import 'package:follow_up_app/screens/admin/_modules/student_card.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/loading.dart';
+import 'package:follow_up_app/shared/page_routes.dart';
 import 'package:provider/provider.dart';
 
 class AdminHome extends StatefulWidget {
@@ -18,11 +19,15 @@ class AdminHome extends StatefulWidget {
 class _AdminHomeState extends State<AdminHome> {
   bool _isShowingStudents = true;
 
+  void _showCreateInstructor() {
+    Navigator.push(context, Routes().instructorEditorPage);
+  }
+
   @override
   Widget build(BuildContext context) {
     final SchoolData? schoolData = Provider.of<SchoolData?>(context); //the signed in school
-    Future<List<UserData>> _schoolStudents(String id) => DatabaseService.getStudentsBySchool(id);
-    Future<List<UserData>> _schoolInstructors(String id) => DatabaseService.getInstructorsBySchool(id);
+    Stream<List<UserData>> _schoolStudents(String id) => DatabaseService.streamSchoolStudents(id);
+    Stream<List<UserData>> _schoolInstructors(String id) => DatabaseService.streamSchoolInstructors(id);
 
     return schoolData == null
         ? Loading()
@@ -30,7 +35,7 @@ class _AdminHomeState extends State<AdminHome> {
             appBar: AppBar(
               title: Text('${schoolData.name} - ${_isShowingStudents ? 'Students' : 'Instructors'}'),
               actions: [
-                if (!_isShowingStudents) IconButton(onPressed: () {}, icon: Icon(Icons.plus_one_rounded)), //to add a new instructor
+                if (!_isShowingStudents) IconButton(onPressed: () => _showCreateInstructor(), icon: Icon(Icons.plus_one_rounded)), //to add a new instructor
                 IconButton(onPressed: () => AuthService.signOutAll(), icon: Icon(Icons.logout_rounded)), //to sign out
               ],
             ),
@@ -61,10 +66,11 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             body: Container(
               padding: const EdgeInsets.all(12),
-              child: FutureBuilder<List<UserData>>(
-                  future: _isShowingStudents ? _schoolStudents(schoolData.uid) : _schoolInstructors(schoolData.uid),
+              child: StreamBuilder<List<UserData>>(
+                  initialData: null,
+                  stream: _isShowingStudents ? _schoolStudents(schoolData.uid) : _schoolInstructors(schoolData.uid),
                   builder: (context, asyncSnap) {
-                    if (asyncSnap.connectionState != ConnectionState.done) {
+                    if (asyncSnap.connectionState != ConnectionState.active) {
                       return Loading();
                     }
 
@@ -76,7 +82,7 @@ class _AdminHomeState extends State<AdminHome> {
                             itemCount: matchingUsers.length,
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 400, mainAxisSpacing: 12, crossAxisSpacing: 12),
                             itemBuilder: (context, index) {
-                              return StudentCard(userData: matchingUsers[index]);
+                              return _isShowingStudents ? StudentCard(userData: matchingUsers[index]) : InstructorCard(userData: matchingUsers[index]);
                             });
                   }),
             ),

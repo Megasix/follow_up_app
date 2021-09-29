@@ -79,14 +79,11 @@ class AuthService {
   }
 
   // sign-in with email & password
-  static Future<UserCredential?> signInWithEmailAndPassword(BuildContext context, String email, String password) async {
+  static Future signInWithEmailAndPassword(BuildContext context, String email, String password) async {
     try {
-      return _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+      await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (exception) {
       CustomSnackbar.showBar(context, exception.message as String);
-      switch (exception.code) {
-        //TODO: add more cases
-      }
     }
   }
 

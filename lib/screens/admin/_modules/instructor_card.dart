@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:intl/intl.dart';
 
-class StudentCard extends StatelessWidget {
-  StudentCard({Key? key, required this.userData}) : super(key: key);
+class InstructorCard extends StatelessWidget {
+  InstructorCard({Key? key, required this.userData}) : super(key: key);
 
   final UserData userData;
 
@@ -42,14 +42,27 @@ class StudentCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 6),
-                    Text(userData.email as String, style: Theme.of(context).textTheme.headline6!),
-                    Divider(height: 16, thickness: 2, endIndent: MediaQuery.of(context).size.width / 10),
+                    Text(userData.email != null && userData.email!.isNotEmpty ? userData.email as String : 'No Email #',
+                        style: Theme.of(context).textTheme.headline6!),
+                    Divider(height: 16, thickness: 2, endIndent: 200),
                     Text(userData.phoneNumber != null && userData.phoneNumber!.isNotEmpty ? userData.phoneNumber as String : 'No Phone #',
                         style: Theme.of(context).textTheme.headline6!),
-                    SizedBox(height: 5),
+                    SizedBox(height: 6),
                     Text(userData.birthDate == null ? 'No Birthday' : DateFormat('yyyy-MM-dd').format(userData.birthDate!.toDate()),
                         style: Theme.of(context).textTheme.headline6!),
+                    Divider(height: 16, thickness: 2, endIndent: 200),
                     Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Has Registered?', style: Theme.of(context).textTheme.headline6!),
+                          Checkbox(value: userData.isActive, onChanged: null),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
                       child: Align(
                           alignment: Alignment.bottomLeft,
                           child:

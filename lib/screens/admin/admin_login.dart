@@ -38,15 +38,15 @@ class _AdminLoginState extends State<AdminLogin> {
   }
 
   //when we request sign in
-  onCredSubmit(context) async {
+  _onCredSubmit(context) async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
-      await requestSignIn(context);
+      await _requestSignIn(context);
     }
   }
 
   //request token from Firebase Auth
-  requestSignIn(context) async {
+  _requestSignIn(context) async {
     await AuthService.signInWithEmailAndPassword(context, username, password);
 
     setState(() => _isLoading = false);
@@ -83,7 +83,7 @@ class _AdminLoginState extends State<AdminLogin> {
                     Tooltip(
                       message: 'Password used to sign into the Admin Dashboard',
                       child: TextFormField(
-                        onFieldSubmitted: (val) => onCredSubmit(context),
+                        onFieldSubmitted: (val) => _onCredSubmit(context),
                         onChanged: (val) => onPassChanged(val),
                         validator: (val) => validatePass(val),
                         decoration: const InputDecoration(
@@ -94,7 +94,7 @@ class _AdminLoginState extends State<AdminLogin> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () => onCredSubmit(context),
+                      onPressed: () => _onCredSubmit(context),
                       child: Text(
                         'Sign In',
                       ),

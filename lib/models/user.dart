@@ -8,6 +8,9 @@ class UserData {
   String uid;
   UserType type;
 
+  bool isActive;
+  String? activationCode;
+
   String firstName;
   String lastName;
   String? country;
@@ -19,18 +22,32 @@ class UserData {
 
   //uid is separated because it's metadata and not directly user data
   UserData(this.uid, this.type,
-      {required this.firstName, required this.lastName, this.schoolId, this.country, this.email, this.phoneNumber, this.birthDate, this.profilePictureUrl});
+      {required this.firstName,
+      required this.lastName,
+      this.schoolId,
+      this.country,
+      this.email,
+      this.phoneNumber,
+      this.birthDate,
+      this.profilePictureUrl,
+      this.activationCode,
+      this.isActive = false});
 
   UserData.fromMap(String id, Map<String, dynamic>? map)
-      : this(id, UserType.values[map?['type'] ?? 0],
-            firstName: map?['firstName'],
-            lastName: map?['lastName'],
-            schoolId: map?['schoolId'],
-            country: map?['country'],
-            email: map?['email'],
-            phoneNumber: map?['phoneNumber'],
-            birthDate: map?['birthDate'],
-            profilePictureUrl: map?['profilePictureUrl']);
+      : this(
+          id,
+          UserType.values[map?['type'] ?? 0],
+          firstName: map?['firstName'],
+          lastName: map?['lastName'],
+          schoolId: map?['schoolId'],
+          country: map?['country'],
+          email: map?['email'],
+          phoneNumber: map?['phoneNumber'],
+          birthDate: map?['birthDate'],
+          profilePictureUrl: map?['profilePictureUrl'],
+          isActive: map?['isActive'] ?? false,
+          activationCode: map?['activationCode'],
+        );
 
   Map<String, dynamic> toMap() => {
         'type': type.index,
@@ -41,7 +58,9 @@ class UserData {
         'email': email,
         'phoneNumber': phoneNumber,
         'birthDate': birthDate,
-        'profilePictureUrl': profilePictureUrl
+        'profilePictureUrl': profilePictureUrl,
+        'isActive': isActive,
+        'activationCode': activationCode
       };
 }
 
