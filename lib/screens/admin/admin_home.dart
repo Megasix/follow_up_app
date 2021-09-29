@@ -8,6 +8,7 @@ import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/page_routes.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class AdminHome extends StatefulWidget {
@@ -55,7 +56,10 @@ class _AdminHomeState extends State<AdminHome> {
               child: Column(
                 children: <Widget>[
                   //Drawer's Header
-                  DrawerHeader(child: const SizedBox(width: 150), decoration: BoxDecoration(image: DecorationImage(image: Assets.images.followUpLogo01))),
+                  DrawerHeader(
+                      child: const SizedBox(width: 150),
+                      decoration:
+                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.darkFollowUpLogo01 : Assets.images.followUpLogo01))),
 
                   //Rest of Drawer's Info
                   const SizedBox(height: 5),
