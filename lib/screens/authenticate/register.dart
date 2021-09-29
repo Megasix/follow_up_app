@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
@@ -414,7 +415,7 @@ class _RegisterState extends State<Register> {
 
                                                   await AuthService.registerWithEmailAndPassword(
                                                     context,
-                                                    UserData(Uuid().v4(),
+                                                    UserData(Uuid().v4(), UserType.STUDENT,
                                                         firstName: firstName,
                                                         lastName: lastName,
                                                         email: email,

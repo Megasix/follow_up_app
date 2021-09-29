@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:follow_up_app/models/chat.dart';
+import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 
@@ -8,6 +12,10 @@ class DatabaseService {
   static final CollectionReference<UserData> usersCollection = FirebaseFirestore.instance
       .collection('users')
       .withConverter<UserData>(fromFirestore: (snap, opt) => UserData.fromMap(snap.id, snap.data()), toFirestore: (user, opt) => user.toMap());
+
+  static final CollectionReference<SchoolData> schoolsCollection = FirebaseFirestore.instance
+      .collection('schools')
+      .withConverter<SchoolData>(fromFirestore: (snap, opt) => SchoolData.fromMap(snap.id, snap.data()), toFirestore: (school, opt) => school.toMap());
 
   static final CollectionReference<RideData> ridesCollection = FirebaseFirestore.instance
       .collection('rides')
@@ -18,11 +26,20 @@ class DatabaseService {
       .withConverter<ChatroomData>(fromFirestore: (snap, opt) => ChatroomData.fromMap(snap.data()), toFirestore: (chatroom, opt) => chatroom.toMap());
 
   //
-  //UPDATERS
+  // UPDATERS
   //
 
   static Future<void> updateUser(UserData data) {
     return usersCollection.doc(data.uid).set(data, SetOptions(merge: true));
+  }
+
+  static Future<void> updateSchool(SchoolData schoolData) async {
+    return schoolsCollection.doc(schoolData.uid).set(schoolData, SetOptions(merge: true));
+  }
+
+  static Future<void> addInactiveInstructor(String schoolId, UserData data) {
+    return schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').doc(data.uid).set(data.toMap());
+    ;
   }
 
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
@@ -65,12 +82,27 @@ class DatabaseService {
   // FETCHERS
   //
 
-  static Future<List<ChatUserData>> getUsersByName(String name) async {
+  static Future<SchoolData?> getSchoolById(String schoolId) async {
+    return schoolsCollection.doc(schoolId).get().then<SchoolData?>((snap) => snap.data());
+  }
+
+  static Future<List<ChatUserData>> getStudentsByName(String name) async {
     //todo: test if a string is considered an array by Firestore
-    var firstNameList =
-        await usersCollection.orderBy('firstName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
-    var lastNameList =
-        await usersCollection.orderBy('lastName').startAt([name]).endAt([name + '\uf8ff']).get().then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+    var firstNameList = await usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .orderBy('firstName')
+        .startAt([name])
+        .endAt([name + '\uf8ff'])
+        .get()
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+
+    var lastNameList = await usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .orderBy('lastName')
+        .startAt([name])
+        .endAt([name + '\uf8ff'])
+        .get()
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
     var sortedNameList = firstNameList.followedBy(lastNameList).toList();
 
     //todo: also check if this is functioning properly
@@ -78,12 +110,20 @@ class DatabaseService {
     return sortedNameList;
   }
 
-  static Future<List<UserData>> getUsersByFirstName(String name) {
-    return usersCollection.where('firstName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
+  static Future<List<UserData>> getStudentsBySchool(String schoolId) {
+    return usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .get()
+        .then<List<UserData>>(_usersFromSnapshot);
   }
 
-  static Future<List<UserData>> getUsersByLastName(String name) async {
-    return await usersCollection.where('lastName', isEqualTo: name).get().then<List<UserData>>(_usersFromSnapshot);
+  static Future<List<UserData>> getInstructorsBySchool(String schoolId) {
+    return usersCollection
+        .where('type', isEqualTo: UserType.INSTRUCTOR.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .get()
+        .then<List<UserData>>(_usersFromSnapshot);
   }
 
   static Future<UserData?> getUserById(String userId) {
@@ -124,17 +164,43 @@ class DatabaseService {
         .map<List<ChatMessage>>(_chatMessagesFromSnapshot);
   }
 
-  static Stream<List<ChatroomData>> streamChatroomsByMemberId(String userId) {
-    return chatRoomCollection.where('members', arrayContains: userId).snapshots().map<List<ChatroomData>>(_chatroomsFromSnapshot);
-  }
-
   //get all chatrooms the signed in user has
-  static Stream<List<ChatroomData>> streamChatrooms(UserData userData) {
-    var stuff = chatRoomCollection
+  static Stream<List<ChatroomData>> streamStudentChatrooms(UserData userData) {
+    return chatRoomCollection
         .where('members', arrayContains: ChatUserData.fromUserData(userData).toMap())
         .snapshots()
         .map<List<ChatroomData>>(_chatroomsFromSnapshot);
-    return stuff;
+  }
+
+//get all chatrooms the signed in school has
+  static Stream<List<ChatroomData>> streamSchoolChatrooms(SchoolData schoolData) {
+    return chatRoomCollection
+        .where('members', arrayContains: ChatUserData.fromSchoolData(schoolData).toMap())
+        .snapshots()
+        .map<List<ChatroomData>>(_chatroomsFromSnapshot);
+  }
+
+  //get all students related to the signed in school
+  static Stream<List<UserData>> streamSchoolStudents(String schoolId) {
+    return usersCollection
+        .where('type', isEqualTo: UserType.STUDENT.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .snapshots()
+        .map<List<UserData>>(_usersFromSnapshot);
+  }
+
+  //get all instructors related to the signed in school
+  static Stream<List<UserData>> streamSchoolInstructors(String schoolId) {
+    final Stream<List<UserData>> activeInstructors = usersCollection
+        .where('type', isEqualTo: UserType.INSTRUCTOR.index)
+        .where('schoolId', isEqualTo: schoolId)
+        .snapshots()
+        .map<List<UserData>>(_usersFromSnapshot);
+
+    final Stream<List<UserData>> inactiveInstructors =
+        schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').snapshots().map<List<UserData>>(_usersFromSnapshotMap);
+
+    return activeInstructors.mergeWith([inactiveInstructors]);
   }
 
   Stream<List<RideData>> streamRides(String userId) {
@@ -147,6 +213,10 @@ class DatabaseService {
 
   static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
     return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as UserData).toList();
+  }
+
+  static List<UserData> _usersFromSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => UserData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
   }
 
   static List<ChatUserData> _chatUsersFromUsersSnapshot(QuerySnapshot<Object?> querySnapshot) {

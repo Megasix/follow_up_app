@@ -63,8 +63,10 @@ class ChatUserData {
       : this(map?['uid'], firstName: map?['firstName'], lastName: map?['lastName'], email: map?['email'], profilePictureUrl: map?['profilePictureUrl']);
 
   ChatUserData.fromUserData(UserData userData)
-      : this(userData.uid as String,
-            firstName: userData.firstName, lastName: userData.lastName, email: userData.email, profilePictureUrl: userData.profilePictureUrl);
+      : this(userData.uid, firstName: userData.firstName, lastName: userData.lastName, email: userData.email, profilePictureUrl: userData.profilePictureUrl);
+
+  ChatUserData.fromSchoolData(SchoolData schoolData)
+      : this(schoolData.uid, firstName: schoolData.name, lastName: '', email: schoolData.email, profilePictureUrl: schoolData.schoolPictureUrl);
 
   Map<String, dynamic> toMap() => {'uid': uid, 'firstName': firstName, 'lastName': lastName, 'email': email, 'profilePictureUrl': profilePictureUrl};
 }
