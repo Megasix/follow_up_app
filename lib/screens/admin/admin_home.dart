@@ -59,7 +59,7 @@ class _AdminHomeState extends State<AdminHome> {
                   DrawerHeader(
                       child: const SizedBox(width: 150),
                       decoration:
-                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.darkFollowUpLogo01 : Assets.images.followUpLogo01))),
+                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01))),
 
                   //Rest of Drawer's Info
                   const SizedBox(height: 5),
