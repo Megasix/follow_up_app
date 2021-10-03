@@ -42,7 +42,6 @@ class _SignInState extends State<SignIn> {
                 duration: Duration(milliseconds: 400),
                 curve: Curves.easeOut,
                 alignment: childAlignement,
-                color: Theme.of(context).secondaryHeaderColor,
                 width: double.infinity,
                 height: double.infinity,
                 child: FormBuilder(
@@ -55,7 +54,8 @@ class _SignInState extends State<SignIn> {
                         padding: const EdgeInsets.only(top: 75.0, bottom: 75.0, left: 50.0, right: 50.0),
                         child: Image(
                           image: AssetImage(
-                            "assets/images/${Shared.lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
+                            //to do
+                            "assets/images/${ThemeMode.system != ThemeMode.dark ? "Dark_" : ""}Follow_Up_logo-01.png",
                           ),
                         ),
                       ),
