@@ -33,8 +33,8 @@ class MyApp extends StatelessWidget {
             : StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
       ],
       child: GetMaterialApp(
-        theme: lightThemeConstant,
-        darkTheme: darkThemeConstant,
+        theme: AppTheme.lightTheme(),
+        darkTheme: AppTheme.darkTheme(),
         themeMode: ThemeMode.system,
         localizationsDelegates: [
           //AppLocalizations.delegate,
