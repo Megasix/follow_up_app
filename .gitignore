@@ -4,6 +4,7 @@
 .dart_tool/
 .packages
 build/
+
 # If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
 
@@ -21,5 +22,6 @@ doc/api/
 *.js.map
 
 .idea
+.firebase
 .flutter-plugins
 .flutter-plugins-dependencies
