@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/authenticate/register.dart';
 import 'package:follow_up_app/screens/authenticate/sign_in.dart';
+import 'package:follow_up_app/screens/authenticate/welcome.dart';
 
 class Authenticate extends StatefulWidget {
   @override
@@ -16,6 +17,6 @@ class _AuthenticateState extends State<Authenticate> {
 
   @override
   Widget build(BuildContext context) {
-    return showSignIn ? SignIn(toggleView: toggleView) : Register(toggleView: toggleView);
+    return Welcome();
   }
 }

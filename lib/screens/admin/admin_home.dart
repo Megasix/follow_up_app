@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/gen/assets.gen.dart';
-import 'package:follow_up_app/models/enums.dart';
+import 'package:follow_up_app/generated/assets.gen.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
 import 'package:follow_up_app/screens/admin/_modules/student_card.dart';

@@ -19,6 +19,13 @@ final lightThemeConstant = ThemeData(
   splashColor: Colors.grey,
 );
 
+ButtonStyle lightLoginButtonStyle = ButtonStyle(
+  foregroundColor: MaterialStateProperty.all(Colors.yellow[700]),
+  overlayColor: MaterialStateProperty.all(Colors.yellow[700]!.withOpacity(0.5)),
+  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(width: 2, color: Colors.yellow[700]!))),
+);
+
 //////////////////
 /// Dark theme ///
 //////////////////
@@ -41,4 +48,11 @@ SnackBarThemeData darkSnackBarTheme = SnackBarThemeData(
   actionTextColor: Colors.grey[700],
   backgroundColor: Color(0xFFFFAA33),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
+);
+
+ButtonStyle darkLoginButtonStyle = ButtonStyle(
+  foregroundColor: MaterialStateProperty.all(Colors.yellow[700]),
+  overlayColor: MaterialStateProperty.all(Colors.yellow[700]!.withOpacity(0.5)),
+  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(width: 2, color: Colors.yellow[700]!))),
 );

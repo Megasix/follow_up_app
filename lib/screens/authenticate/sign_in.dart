@@ -33,6 +33,11 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    return loading ? Loading() : Scaffold();
+  }
+
+  /* @override
+  Widget build(BuildContext context) {
     return loading
         ? Loading()
         : LayoutBuilder(builder: (context, constraints) {
@@ -47,7 +52,7 @@ class _SignInState extends State<SignIn> {
                 height: double.infinity,
                 child: FormBuilder(
                   key: _formKey,
-                  autovalidateMode: AutovalidateMode.always,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
@@ -158,5 +163,5 @@ class _SignInState extends State<SignIn> {
               ),
             );
           });
-  }
+  } */
 }
