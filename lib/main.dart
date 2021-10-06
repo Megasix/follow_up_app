@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
 //import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -16,6 +17,8 @@ void main() async {
   await Firebase.initializeApp();
 
   AuthService.init();
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   runApp(MyApp());
 }

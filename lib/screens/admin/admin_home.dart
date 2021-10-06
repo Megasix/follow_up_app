@@ -56,10 +56,9 @@ class _AdminHomeState extends State<AdminHome> {
                 children: <Widget>[
                   //Drawer's Header
                   DrawerHeader(
-                      child: const SizedBox(width: 150),
-                      decoration:
-                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01))),
-
+                    child: const SizedBox(width: 150),
+                    decoration: BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01)),
+                  ),
                   //Rest of Drawer's Info
                   const SizedBox(height: 5),
                   Text('SCHOOL ID', style: Theme.of(context).textTheme.headline6),

@@ -58,7 +58,7 @@ class MapWidget extends StatelessWidget {
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (Shared.getTheme())
+    if (!Get.isDarkMode)
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
