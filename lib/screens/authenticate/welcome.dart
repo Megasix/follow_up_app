@@ -69,7 +69,7 @@ class _WelcomeState extends State<Welcome> {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 35),
+              padding: const EdgeInsets.all(35),
               sliver: SliverFillRemaining(
                 hasScrollBody: false,
                 child: SizedBox(
@@ -85,29 +85,25 @@ class _WelcomeState extends State<Welcome> {
                       Text('To continue, please select your account type :)', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
                       Spacer(),
                       SizedBox(
-                        height: 150,
+                        height: 250,
                         width: MediaQuery.of(context).size.width * 0.85,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Expanded(
-                              child: SizedBox(
-                                child: TextButton(
-                                  style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                  onPressed: () {print("student");},
-                                  child: Text('Student'),
-                                ),
+                              child: TextButton(
+                                style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
+                                onPressed: () {},
+                                child: Text('Student'),
                               ),
                             ),
                             SizedBox(width: 25),
                             Expanded(
-                              child: SizedBox(
-                                child: TextButton(
-                                  style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                  onPressed: () {print("instructor");},
-                                  child: Text('Instructor'),
-                                ),
+                              child: TextButton(
+                                style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
+                                onPressed: () {},
+                                child: Text('Instructor'),
                               ),
                             ),
                           ],
