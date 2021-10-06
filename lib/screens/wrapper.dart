@@ -8,6 +8,8 @@ import 'package:follow_up_app/screens/mainMenu/main_menu.dart';
 import 'package:follow_up_app/services/localisation.dart';
 import 'package:provider/provider.dart';
 
+import 'authenticate/welcome.dart';
+
 class Wrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,6 @@ class Wrapper extends StatelessWidget {
       Localisation.getPermission();
       return MainMenu();
     } else
-      return Authenticate();
+      return Welcome();
   }
 }

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:follow_up_app/generated/assets.gen.dart';
+import 'package:follow_up_app/models/enums.dart';
+import 'package:follow_up_app/shared/page_routes.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -17,17 +19,24 @@ class Welcome extends StatefulWidget {
 class _WelcomeState extends State<Welcome> {
   final ScrollController _controller = ScrollController();
 
+  void _toggleUserType(UserType type) {
+    Navigator.push(context, Routes().authPage(type));
+  }
+
   bool _onEndScroll(ScrollEndNotification notif) {
-    final scrollDistance = MediaQuery.of(context).size.height + 100;
+    final scrollDistance = MediaQuery.of(context).size.height + 70; //this offset must be equal to total vertical padding of the page
     final double scrollDelta = _controller.offset / scrollDistance;
     double snapOffset = 0;
+
+    print(_controller.offset);
+    print(scrollDelta);
 
     if (_controller.offset > 0 && _controller.offset < scrollDistance) {
       if (_controller.position.userScrollDirection == ScrollDirection.reverse)
         snapOffset = scrollDelta > 0.15 ? scrollDistance : 0;
       else if (_controller.position.userScrollDirection == ScrollDirection.forward) snapOffset = scrollDelta < 0.7 ? 0 : scrollDistance;
 
-      Future.microtask(() => _controller.animateTo(snapOffset, duration: Duration(milliseconds: 200), curve: Curves.easeInOut));
+      Future.microtask(() => _controller.animateTo(snapOffset, duration: Duration(milliseconds: 200), curve: Curves.easeInOutCubic));
     }
 
     return false;
@@ -51,7 +60,7 @@ class _WelcomeState extends State<Welcome> {
                 collapseMode: CollapseMode.parallax,
                 centerTitle: true,
                 title: Padding(
-                  padding: const EdgeInsets.only(bottom: 15),
+                  padding: const EdgeInsets.only(bottom: 5),
                   child: Transform.rotate(angle: pi, child: Lottie.asset(Assets.lottie.arrowLight, height: 55)),
                 ),
                 background: Container(
@@ -77,7 +86,6 @@ class _WelcomeState extends State<Welcome> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      SizedBox(height: 100),
                       Spacer(),
                       Lottie.asset(Assets.lottie.carVrooming, height: 200),
                       Text('WELCOME TO\nFOLLOW UP', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline4),
@@ -85,7 +93,7 @@ class _WelcomeState extends State<Welcome> {
                       Text('To continue, please select your account type :)', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
                       Spacer(),
                       SizedBox(
-                        height: 250,
+                        height: 150,
                         width: MediaQuery.of(context).size.width * 0.85,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -94,16 +102,16 @@ class _WelcomeState extends State<Welcome> {
                             Expanded(
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () {},
-                                child: Text('Student'),
+                                onPressed: () => _toggleUserType(UserType.STUDENT),
+                                child: Text('Student', style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                             SizedBox(width: 25),
                             Expanded(
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () {},
-                                child: Text('Instructor'),
+                                onPressed: () => _toggleUserType(UserType.INSTRUCTOR),
+                                child: Text('Instructor', style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                           ],
