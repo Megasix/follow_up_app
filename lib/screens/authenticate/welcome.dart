@@ -69,7 +69,7 @@ class _WelcomeState extends State<Welcome> {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.all(35),
+              padding: const EdgeInsets.symmetric(horizontal: 35),
               sliver: SliverFillRemaining(
                 hasScrollBody: false,
                 child: SizedBox(
@@ -85,25 +85,29 @@ class _WelcomeState extends State<Welcome> {
                       Text('To continue, please select your account type :)', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
                       Spacer(),
                       SizedBox(
-                        height: 250,
+                        height: 150,
                         width: MediaQuery.of(context).size.width * 0.85,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
                             Expanded(
-                              child: TextButton(
-                                style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () {},
-                                child: Text('Student'),
+                              child: SizedBox(
+                                child: TextButton(
+                                  style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
+                                  onPressed: () {print("student");},
+                                  child: Text('Student'),
+                                ),
                               ),
                             ),
                             SizedBox(width: 25),
                             Expanded(
-                              child: TextButton(
-                                style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () {},
-                                child: Text('Instructor'),
+                              child: SizedBox(
+                                child: TextButton(
+                                  style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
+                                  onPressed: () {print("instructor");},
+                                  child: Text('Instructor'),
+                                ),
                               ),
                             ),
                           ],
