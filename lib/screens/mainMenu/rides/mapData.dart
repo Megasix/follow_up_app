@@ -99,7 +99,6 @@ class _MapData extends State<Map> {
 
   Future<bool> _willPopCallback() async {
     listePositionNum.removeAt(0);
-    print("avant");
     try {
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
@@ -110,11 +109,9 @@ class _MapData extends State<Map> {
             date: myTimeStamp,
             polylines: encodePolyline(listePositionNum),
           ));
-      print("check");
     } on Exception catch (e) {
       print(e.toString());
     }
-    print("pass");
     ;
 
     accelerometerSubscription.cancel();
