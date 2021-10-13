@@ -24,7 +24,11 @@ class Wrapper extends StatelessWidget {
     // return MainMenu or Authenticate widget
     if (user != null) {
       Localisation.getPermission();
-      return MainMenu();
+      try {
+        return MainMenu();
+      } on Exception catch (e) {
+        return Authenticate();
+      }
     } else
       return Authenticate();
   }
