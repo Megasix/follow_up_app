@@ -1,24 +1,24 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/extensions.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
-import 'package:follow_up_app/shared/features/apple.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
-import 'package:follow_up_app/shared/features/twitter.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:uuid/uuid.dart';
 
+//TODO: refocus correct text fields when submitted
+//TODO: keep keyboard afloat when submitting through the keyboard
 class Register extends StatefulWidget {
   final UserType userType;
   final Function toggleAuth;
@@ -30,10 +30,13 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  final _formKey = GlobalKey<FormState>();
-  final ValueNotifier<bool> _isFormValid = ValueNotifier<bool>(false);
+  static const double INDICATOR_SPACE = 90;
 
-  bool loading = false;
+  final _formKey = GlobalKey<FormState>();
+  final ValueNotifier<NextButtonState> _nextButtState = ValueNotifier<NextButtonState>(NextButtonState.NEXT);
+  final PageController _pageController = PageController(viewportFraction: 1.2, initialPage: 0);
+
+  bool _loading = false;
 
 // text field state
   Timestamp birthDate = Timestamp.now();
@@ -41,11 +44,50 @@ class _RegisterState extends State<Register> {
   String lastName = '';
   String email = '';
   String password = '';
-  String phoneNumber = '';
+  String schoolCode = '';
+  String activationCode = '';
+
+  void _setButtonState(int page) {
+    print(page);
+    _nextButtState.value = page == 3 ? NextButtonState.DONE : NextButtonState.NEXT;
+  }
+
+  void _submitForm() {
+    if (_pageController.page != 3) {
+      final int pageNumb = _pageController.page!.floor() + 1;
+      _pageController.animateToPage(pageNumb, duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuart);
+      _setButtonState(pageNumb);
+    } else {
+      //TODO: verify school code and activation code! (for G and F logins as well!)
+      UserData userData = UserData(
+        Uuid().v4(),
+        UserType.STUDENT,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        schoolId: schoolCode,
+        activationCode: activationCode,
+      );
+
+      AuthService.registerWithEmailAndPassword(context, userData, password);
+      setState(() => _loading = true);
+    }
+  }
+
+  void _goBack() {
+    if (_pageController.page != 0) {
+      final int pageNumb = _pageController.page!.floor() - 1;
+      _pageController.animateToPage(pageNumb, duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuart);
+      _setButtonState(pageNumb);
+    } else {
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return loading
+    final _pageWidthFactor = 1 / _pageController.viewportFraction;
+    return _loading
         ? Loading()
         : PhysicalModel(
             color: Colors.black.withOpacity(0.5),
@@ -63,8 +105,8 @@ class _RegisterState extends State<Register> {
                       backgroundColor: Colors.yellow[700],
                       radius: 30,
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back, color: Get.isDarkMode ? Colors.black : Colors.white),
-                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
+                        onPressed: () => _goBack(),
                       ),
                     ),
                     CircleAvatar(
@@ -75,126 +117,260 @@ class _RegisterState extends State<Register> {
                         onPressed: () => widget.toggleAuth(),
                       ),
                     ),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _isFormValid,
-                      builder: (context, isValid, child) {
-                        return AnimatedScale(
-                          duration: const Duration(milliseconds: 250),
-                          scale: isValid ? 1 : 0,
-                          curve: Curves.easeInOutQuart,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.yellow[900],
-                            radius: 30,
-                            child: IconButton(
-                              icon: Icon(Icons.check_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
-                              onPressed: () {},
-                            ),
+                    ValueListenableBuilder<NextButtonState>(
+                      valueListenable: _nextButtState,
+                      builder: (context, state, child) => CircleAvatar(
+                        backgroundColor: Colors.yellow[900],
+                        radius: 30,
+                        child: IconButton(
+                          icon: Stack(
+                            children: [
+                              AnimatedScale(
+                                  duration: const Duration(milliseconds: 100),
+                                  scale: state == NextButtonState.DONE ? 1.0 : 0.0,
+                                  child: Icon(Icons.check_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                              AnimatedScale(
+                                duration: const Duration(milliseconds: 100),
+                                scale: state == NextButtonState.DONE ? 0.0 : 1.0,
+                                child: Transform.rotate(angle: pi, child: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                              )
+                            ],
                           ),
-                        );
-                      },
+                          onPressed: () => _submitForm(),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              body: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  onChanged: () => _isFormValid.value = _formKey.currentState!.validate(),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverFillRemaining(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SizedBox(height: 40),
-                            Text('REGISTER', style: Theme.of(context).textTheme.headline3),
-                            SizedBox(height: 20),
-                            Text('Welcome ${widget.userType.stringify()}!', style: Theme.of(context).textTheme.headline4),
-                            Spacer(flex: 1),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('First Name', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: textInputDecoration,
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                            ),
-                            SizedBox(height: 15),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Last Name', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: textInputDecoration,
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                            ),
-                            SizedBox(height: 15),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Phone Number', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: textInputDecoration,
-                              inputFormatters: [],
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.match(context, '^(1-)?\d{3}-\d{3}-\d{4}\$')]),
-                            ),
-                            Divider(height: 40, thickness: 2, indent: 100, endIndent: 100),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Email', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: false,
-                              enableSuggestions: true,
-                              autocorrect: true,
-                              decoration: textInputDecoration,
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.email(context), FormBuilderValidators.required(context)]),
-                            ),
-                            SizedBox(height: 25),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Password', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: true,
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              decoration: textInputDecoration,
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.minLength(context, 6)]),
-                            ),
-                            Divider(height: 40, thickness: 2, indent: 100, endIndent: 100),
-                            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Activation Code', style: Theme.of(context).textTheme.headline5)),
-                            SizedBox(height: 5),
-                            TextFormField(
-                              style: Theme.of(context).textTheme.headline5,
-                              cursorColor: Colors.yellow[900],
-                              obscureText: false,
-                              enableSuggestions: true,
-                              autocorrect: true,
-                              decoration: textInputDecoration,
-                              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                            ),
-                            Spacer(flex: 2),
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.always,
+                      child: PageView.custom(
+                        physics: NeverScrollableScrollPhysics(),
+                        controller: _pageController,
+                        childrenDelegate: SliverChildListDelegate.fixed(
+                          [
+                            _buildInfo(_pageWidthFactor),
+                            _buildPersonalForm(_pageWidthFactor),
+                            _buildCredentialsForm(_pageWidthFactor),
+                            _buildSchoolForm(_pageWidthFactor),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20, bottom: INDICATOR_SPACE),
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      count: 4,
+                      effect: WormEffect(
+                        activeDotColor: Colors.yellow[700]!,
+                        dotColor: Colors.grey[300]!,
+                        dotHeight: 10,
+                        dotWidth: 10,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
+  }
+
+  Widget _buildInfo(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 40),
+            Text('REGISTER', style: Theme.of(context).textTheme.headline3),
+            SizedBox(height: 20),
+            Text('Welcome ${widget.userType.stringify()}!', style: Theme.of(context).textTheme.headline4),
+            Spacer(),
+            FacebookSignInButton(
+              onPressed: () => setState(() {
+                _loading = true;
+                AuthService.signInWithFacebook(context);
+              }),
+            ),
+            SizedBox(height: 10),
+            GoogleSignInButton(
+              onPressed: () => setState(() {
+                _loading = true;
+                AuthService.signInWithGoogle(context);
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPersonalForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 40),
+            Text('First things first...', style: Theme.of(context).textTheme.headline4),
+            Spacer(),
+            Padding(padding: const EdgeInsets.only(right: 15), child: Text('First Name', style: Theme.of(context).textTheme.headline5)),
+            SizedBox(height: 5),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: false,
+              enableSuggestions: true,
+              autocorrect: true,
+              initialValue: firstName,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              onChanged: (value) {
+                setState(() => firstName = value);
+              },
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+            ),
+            SizedBox(height: 15),
+            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Last Name', style: Theme.of(context).textTheme.headline5)),
+            SizedBox(height: 5),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: false,
+              enableSuggestions: true,
+              autocorrect: true,
+              initialValue: lastName,
+              textInputAction: TextInputAction.next,
+              onChanged: (value) {
+                setState(() => lastName = value);
+              },
+              onFieldSubmitted: (_) {
+                _submitForm();
+              },
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCredentialsForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 40),
+            Text('Some login info...', style: Theme.of(context).textTheme.headline4),
+            Spacer(),
+            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Email', style: Theme.of(context).textTheme.headline5)),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: false,
+              enableSuggestions: true,
+              autocorrect: true,
+              initialValue: email,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              onChanged: (value) {
+                setState(() => email = value);
+              },
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.email(context), FormBuilderValidators.required(context)]),
+            ),
+            SizedBox(height: 15),
+            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Password', style: Theme.of(context).textTheme.headline5)),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              initialValue: password,
+              textInputAction: TextInputAction.next,
+              onChanged: (value) {
+                setState(() => password = value);
+              },
+              onFieldSubmitted: (_) => _submitForm(),
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.minLength(context, 6)]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSchoolForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 40),
+            Text('Your codes!', style: Theme.of(context).textTheme.headline4),
+            Spacer(),
+            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('School Code', style: Theme.of(context).textTheme.headline5)),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: false,
+              enableSuggestions: true,
+              autocorrect: true,
+              initialValue: schoolCode,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              onChanged: (value) {
+                setState(() => schoolCode = value);
+              },
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+            ),
+            SizedBox(height: 15),
+            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Activation Code', style: Theme.of(context).textTheme.headline5)),
+            TextFormField(
+              style: Theme.of(context).textTheme.headline5,
+              cursorColor: Colors.yellow[900],
+              obscureText: false,
+              enableSuggestions: true,
+              autocorrect: true,
+              initialValue: activationCode,
+              textInputAction: TextInputAction.done,
+              onChanged: (value) {
+                setState(() => activationCode = value);
+              },
+              onFieldSubmitted: (_) => _submitForm(),
+              decoration: textInputDecoration,
+              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

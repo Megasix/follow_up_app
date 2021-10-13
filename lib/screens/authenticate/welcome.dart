@@ -52,7 +52,7 @@ class _WelcomeState extends State<Welcome> {
           slivers: <Widget>[
             SliverAppBar(
               backgroundColor: Get.isDarkMode ? Colors.black54 : Colors.yellow[700],
-              expandedHeight: MediaQuery.of(context).size.height,
+              expandedHeight: Get.height,
               pinned: false,
               collapsedHeight: 0,
               toolbarHeight: 0,
@@ -87,10 +87,10 @@ class _WelcomeState extends State<Welcome> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Spacer(),
-                      Lottie.asset(Assets.lottie.carVrooming, height: 200),
-                      Text('WELCOME TO\nFOLLOW UP', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline4),
+                      Lottie.asset(Assets.lottie.carVrooming, height: Get.height * 0.3),
+                      Text('WELCOME TO\nFOLLOW UP', textAlign: TextAlign.center, style: Get.textTheme.headline4),
                       SizedBox(height: 15),
-                      Text('To continue, please select your account type :)', textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6),
+                      Text('To continue, please select your account type :)', textAlign: TextAlign.center, style: Get.textTheme.headline6),
                       Spacer(),
                       SizedBox(
                         height: 150,
@@ -103,7 +103,7 @@ class _WelcomeState extends State<Welcome> {
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
                                 onPressed: () => _toggleUserType(UserType.STUDENT),
-                                child: Text('Student', style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.yellow[700])),
+                                child: Text('Student', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                             SizedBox(width: 25),
@@ -111,7 +111,7 @@ class _WelcomeState extends State<Welcome> {
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
                                 onPressed: () => _toggleUserType(UserType.INSTRUCTOR),
-                                child: Text('Instructor', style: Theme.of(context).textTheme.headline5!.copyWith(color: Colors.yellow[700])),
+                                child: Text('Instructor', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                           ],
