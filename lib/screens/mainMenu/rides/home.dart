@@ -3,13 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
@@ -19,7 +16,10 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late AnimationController _animationController;
+
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -29,17 +29,34 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
   @override
   void initState() {
     _getUserLocation();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 75.0),
-      child: Container(
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
+        elevation: 0,
+        leading: TextButton.icon(
+            onPressed: _openDrawer,
+            icon: AnimatedIcon(
+              icon: AnimatedIcons.menu_arrow,
+              progress: _animationController,
+            ),
+            label: Text("")),
+      ),
+      body: Container(
         padding: EdgeInsets.only(top: 50.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
