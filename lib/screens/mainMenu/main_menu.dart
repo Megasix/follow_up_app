@@ -15,8 +15,11 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
     Statistics(),
@@ -29,6 +32,7 @@ class _MainMenuState extends State<MainMenu> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     UserData? user = Provider.of<UserData?>(context);
@@ -36,6 +40,7 @@ class _MainMenuState extends State<MainMenu> {
     return user == null
         ? Loading()
         : Scaffold(
+            key: _scaffoldKey,
             resizeToAvoidBottomInset: false,
             body: Container(
               color: Theme.of(context).secondaryHeaderColor,
