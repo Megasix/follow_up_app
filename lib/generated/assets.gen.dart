@@ -3,6 +3,8 @@
 ///  FlutterGen
 /// *****************************************************
 
+// ignore_for_file: directives_ordering
+
 import 'package:flutter/widgets.dart';
 
 class $AssetsGoogleMapsThemesGen {
@@ -39,12 +41,21 @@ class $AssetsImagesGen {
       const AssetGenImage('assets/images/google-logo.png');
 }
 
+class $AssetsLottieGen {
+  const $AssetsLottieGen();
+
+  String get arrowDark => 'assets/lottie/arrow_dark.json';
+  String get arrowLight => 'assets/lottie/arrow_light.json';
+  String get carVrooming => 'assets/lottie/car_vrooming.json';
+}
+
 class Assets {
   Assets._();
 
   static const $AssetsGoogleMapsThemesGen googleMapsThemes =
       $AssetsGoogleMapsThemesGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsLottieGen lottie = $AssetsLottieGen();
 }
 
 class AssetGenImage extends AssetImage {

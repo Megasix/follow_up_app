@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/gen/assets.gen.dart';
-import 'package:follow_up_app/models/enums.dart';
+import 'package:follow_up_app/generated/assets.gen.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
 import 'package:follow_up_app/screens/admin/_modules/student_card.dart';
@@ -57,10 +56,9 @@ class _AdminHomeState extends State<AdminHome> {
                 children: <Widget>[
                   //Drawer's Header
                   DrawerHeader(
-                      child: const SizedBox(width: 150),
-                      decoration:
-                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01))),
-
+                    child: const SizedBox(width: 150),
+                    decoration: BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01)),
+                  ),
                   //Rest of Drawer's Info
                   const SizedBox(height: 5),
                   Text('SCHOOL ID', style: Theme.of(context).textTheme.headline6),

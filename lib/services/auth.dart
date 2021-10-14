@@ -64,12 +64,13 @@ class AuthService {
   // register with email & password
   static Future registerWithEmailAndPassword(BuildContext context, UserData userData, String password) async {
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(password: password, email: userData.email as String);
+      UserCredential userCred = await _firebaseAuth.createUserWithEmailAndPassword(password: password, email: userData.email as String);
 
-      //TODO: check if the user registered successfully
-
-      //registers the user in the database
-      await DatabaseService.updateUser(userData);
+      //registers the user in the database if authentication is successful
+      if (userCred.user != null) {
+        userData.uid = userCred.user!.uid;
+        await DatabaseService.updateUser(userData);
+      }
     } on FirebaseAuthException catch (exception) {
       CustomSnackbar.showBar(context, exception.message as String);
       switch (exception.code) {

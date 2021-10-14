@@ -3,12 +3,12 @@ import 'package:follow_up_app/shared/sizeable_button.dart';
 
 //TODO: implement dark theme
 /// A sign in button that matches Google's design guidelines.
-class GoogleSignInButton extends StatelessWidget {
+class EmailSignInButton extends StatelessWidget {
   final VoidCallback onPressed;
-  final Color mainColor = Color(0xff4285F4);
+  final Color mainColor = Colors.red;
 
   /// Creates a new button.
-  GoogleSignInButton({
+  EmailSignInButton({
     required this.onPressed,
   });
 
@@ -21,15 +21,13 @@ class GoogleSignInButton extends StatelessWidget {
       buttonColor: Colors.white,
       children: <Widget>[
         SizedBox(width: 10),
-        Image(
-          image: AssetImage(
-            "assets/images/google-logo.png",
-          ),
-          height: 35,
-          width: 35,
+        Icon(
+          Icons.email,
+          color: mainColor,
+          size: 35,
         ),
         SizedBox(width: 10),
-        Text('Sign in with Google', style: TextStyle(color: mainColor))
+        Text('Sign in with Email', style: TextStyle(color: mainColor))
       ],
     );
   }

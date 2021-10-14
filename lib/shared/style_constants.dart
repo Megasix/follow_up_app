@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
-const textInputDecoration = InputDecoration(
-  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blueGrey, width: 2.0)),
+final textInputDecoration = InputDecoration(
+  filled: true,
+  fillColor: Colors.yellow[200]!.withOpacity(0.3),
+  floatingLabelBehavior: FloatingLabelBehavior.always,
+  contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+  enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 2, color: Colors.yellow[700]!), borderRadius: BorderRadius.circular(25)),
+  focusedBorder: OutlineInputBorder(borderSide: BorderSide(width: 4, color: Colors.yellow[700]!), borderRadius: BorderRadius.circular(25)),
+  errorBorder: OutlineInputBorder(borderSide: BorderSide(width: 4, color: Colors.red[700]!), borderRadius: BorderRadius.circular(25)),
+  focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(width: 4, color: Colors.red[700]!), borderRadius: BorderRadius.circular(25)),
 );
 
 //////////////////
@@ -17,6 +24,13 @@ final lightThemeConstant = ThemeData(
   brightness: Brightness.light,
   accentColor: Colors.grey[400],
   splashColor: Colors.grey,
+);
+
+ButtonStyle lightLoginButtonStyle = ButtonStyle(
+  foregroundColor: MaterialStateProperty.all(Colors.yellow[700]),
+  overlayColor: MaterialStateProperty.all(Colors.yellow[700]!.withOpacity(0.5)),
+  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(width: 3, color: Colors.yellow[700]!))),
 );
 
 //////////////////
@@ -41,4 +55,11 @@ SnackBarThemeData darkSnackBarTheme = SnackBarThemeData(
   actionTextColor: Colors.grey[700],
   backgroundColor: Color(0xFFFFAA33),
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
+);
+
+ButtonStyle darkLoginButtonStyle = ButtonStyle(
+  foregroundColor: MaterialStateProperty.all(Colors.yellow[700]),
+  overlayColor: MaterialStateProperty.all(Colors.yellow[700]!.withOpacity(0.5)),
+  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(width: 3, color: Colors.yellow[700]!))),
 );

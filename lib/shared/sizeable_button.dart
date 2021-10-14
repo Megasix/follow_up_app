@@ -4,13 +4,14 @@ import 'package:get/get.dart';
 class SizeableButton extends StatelessWidget {
   final bool centered;
   final double borderRadius;
+  final double buttonBorderWidth;
   final double buttonPadding;
 
   final VoidCallback? onPressed;
 
-  Color buttonColor = Get.theme.buttonColor;
-  Color buttonBorderColor = Get.theme.accentColor;
-  Color overlayColor = Get.theme.splashColor;
+  final Color buttonColor;
+  final Color buttonBorderColor;
+  final Color overlayColor;
 
   final List<Widget> children;
 
@@ -20,7 +21,8 @@ class SizeableButton extends StatelessWidget {
     this.buttonBorderColor = Colors.transparent,
     this.overlayColor = Colors.transparent,
     this.children = const [],
-    this.borderRadius = 3.0,
+    this.borderRadius = 50.0,
+    this.buttonBorderWidth = 2.0,
     this.centered = true,
     this.buttonPadding = 3.0,
   });
@@ -29,39 +31,22 @@ class SizeableButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.minWidth == 0) {
-          children.add(SizedBox.shrink());
-        } else {
-          if (centered) {
-            children.insert(0, Spacer());
-          }
-          children.add(Spacer());
-        }
-
-        BorderSide bs = buttonBorderColor != Colors.transparent
-            ? BorderSide(
-                color: buttonBorderColor,
-              )
-            : BorderSide.none;
-
-        return ButtonTheme(
-          height: 40.0,
-          minWidth: 40.0,
-          padding: EdgeInsets.all(buttonPadding),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius),
-            side: bs,
+        return TextButton(
+          onPressed: onPressed,
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(buttonColor),
+            overlayColor: MaterialStateProperty.all(overlayColor),
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(borderRadius),
+                side: BorderSide(color: buttonBorderColor, width: buttonBorderWidth),
+              ),
+            ),
           ),
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(buttonColor),
-              overlayColor: MaterialStateProperty.all(overlayColor),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: children,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: children,
           ),
         );
       },
