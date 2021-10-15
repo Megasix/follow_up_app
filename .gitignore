@@ -25,3 +25,4 @@ doc/api/
 .firebase
 .flutter-plugins
 .flutter-plugins-dependencies
+ios/Runner/AppDelegate.swift
