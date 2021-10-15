@@ -5,9 +5,11 @@ import 'package:follow_up_app/screens/admin/admin_home.dart';
 import 'package:follow_up_app/screens/admin/admin_login.dart';
 import 'package:follow_up_app/screens/mainMenu/main_menu.dart';
 import 'package:follow_up_app/services/localisation.dart';
+import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+import 'authenticate/authenticate.dart';
 import 'authenticate/welcome.dart';
 
 class Wrapper extends StatelessWidget {
@@ -30,7 +32,7 @@ class Wrapper extends StatelessWidget {
       try {
         return MainMenu();
       } on Exception catch (e) {
-        return Authenticate();
+        return Loading();;//Authenticate();
       }
     } else
       return Welcome();

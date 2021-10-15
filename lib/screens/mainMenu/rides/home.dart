@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Home extends StatefulWidget {
