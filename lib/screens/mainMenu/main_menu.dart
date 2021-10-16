@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/home.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
-import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/snackbar.dart';
 import 'package:provider/provider.dart';
 import 'messaging/messaging.dart';
 
@@ -48,17 +46,6 @@ class _MainMenuState extends State<MainMenu> {
               height: double.infinity,
               child: _widgetOptions.elementAt(_selectedIndex),
             ),
-            floatingActionButton: CircleAvatar(
-              radius: 30,
-              backgroundColor: Theme.of(context).accentColor,
-              child: IconButton(
-                iconSize: 30,
-                color: Colors.white,
-                alignment: Alignment.center,
-                icon: Icon(Icons.exit_to_app_rounded),
-                onPressed: () => AuthService.signOutAll(),
-              ),
-            ),
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
@@ -77,9 +64,6 @@ class _MainMenuState extends State<MainMenu> {
               currentIndex: _selectedIndex,
               selectedItemColor: Theme.of(context).buttonColor,
               onTap: _onItemTapped,
-            ),
-            drawer: Drawer(
-              child: SettingsPage(),
             ),
           );
   }

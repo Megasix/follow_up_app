@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
+import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late AnimationController _animationController;
+  bool _isDrawerOpen = false;
+  bool isPlaying = false;
 
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
@@ -33,6 +36,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _scaffoldKey.currentState?.openDrawer();
   }
 
+  void _handleOnPressed() {
+    setState(() {
+      isPlaying = !isPlaying;
+      isPlaying
+          ? _animationController.forward()
+          : _animationController.reverse();
+    });
+  }
+
   @override
   void initState() {
     _getUserLocation();
@@ -44,28 +56,52 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
+      backgroundColor: Theme.of(context).secondaryHeaderColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         elevation: 0,
         leading: TextButton.icon(
-            onPressed: _openDrawer,
+            onPressed: () {
+              if (!_isDrawerOpen) {
+                _openDrawer();
+              } else {
+                Navigator.pop(context);
+              }
+              setState(() {
+                _isDrawerOpen = !_isDrawerOpen;
+              });
+              _handleOnPressed();
+            },
             icon: AnimatedIcon(
               icon: AnimatedIcons.menu_arrow,
+              color: Colors.white,
               progress: _animationController,
             ),
             label: Text("")),
       ),
-      body: Container(
-        padding: EdgeInsets.only(top: 50.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(50.0),
-            topRight: Radius.circular(50.0),
-          ),
-          color: Theme.of(context).scaffoldBackgroundColor,
+      body: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Colors.transparent,
+        drawer: Drawer(
+          child: SettingsPage(),
         ),
-        child: MapWidget(),
+        onDrawerChanged: (onDrawerChanged){
+          debugPrint('onDrawerChanged? $onDrawerChanged');
+          // onDrawerChanged is called on changes in drawer direction
+          // true - gesture that the Drawer is being opened
+          // false - gesture that the Drawer is being closed
+          onDrawerChanged
+              ? _animationController.forward()
+              : _animationController.reverse();
+        },
+        body: Container(
+          padding: EdgeInsets.only(top: 50.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+            color: Theme.of(context).backgroundColor,
+          ),
+          child: MapWidget(),
+        ),
       ),
     );
   }

@@ -23,8 +23,9 @@ class SettingsPage extends StatelessWidget {
     }
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 50, horizontal: 10),
+        padding: EdgeInsets.symmetric(vertical: 25, horizontal: 10),
         child: Column(
           children: [
             Column(
