@@ -23,3 +23,6 @@ doc/api/
 .idea
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Protect the API Keys to be shown
+ios/Runner/AppDelegate.swift
