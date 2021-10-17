@@ -41,7 +41,7 @@ class _InstructorCreatorState extends State<InstructorCreator> {
   void _submitInstructor() async {
     UserData newInstructor = new UserData(Uuid().v4(), UserType.INSTRUCTOR, activationCode: code, firstName: firstName, lastName: lastName);
 
-    await DatabaseService.addInactiveInstructor(Provider.of<SchoolData>(context, listen: false).uid, newInstructor);
+    await DatabaseService.addInactiveUser(Provider.of<SchoolData>(context, listen: false).uid, newInstructor);
 
     CustomSnackbar.showBar(context, newInstructor.firstName + ' ' + newInstructor.lastName + ' has been added to the database.');
 

@@ -37,8 +37,8 @@ class DatabaseService {
     return schoolsCollection.doc(schoolData.uid).set(schoolData, SetOptions(merge: true));
   }
 
-  static Future<void> addInactiveInstructor(String schoolId, UserData data) {
-    return schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').doc(data.uid).set(data.toMap());
+  static Future<void> addInactiveUser(String schoolId, UserData data) {
+    return schoolsCollection.doc(schoolId).collection('school.inactive').doc(data.uid).set(data.toMap());
     ;
   }
 
@@ -197,8 +197,12 @@ class DatabaseService {
         .snapshots()
         .map<List<UserData>>(_usersFromSnapshot);
 
-    final Stream<List<UserData>> inactiveInstructors =
-        schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').snapshots().map<List<UserData>>(_usersFromSnapshotMap);
+    final Stream<List<UserData>> inactiveInstructors = schoolsCollection
+        .doc(schoolId)
+        .collection('school.inactive')
+        .where('type', isEqualTo: UserType.INSTRUCTOR.index)
+        .snapshots()
+        .map<List<UserData>>(_usersFromSnapshotMap);
 
     return activeInstructors.mergeWith([inactiveInstructors]);
   }
