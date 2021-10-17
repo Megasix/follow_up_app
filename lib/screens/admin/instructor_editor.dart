@@ -39,7 +39,8 @@ class _InstructorCreatorState extends State<InstructorCreator> {
   }
 
   void _submitInstructor() async {
-    UserData newInstructor = new UserData(Uuid().v4(), UserType.INSTRUCTOR, activationCode: code, firstName: firstName, lastName: lastName);
+    UserData newInstructor = new UserData(Uuid().v4(), UserType.INSTRUCTOR,
+        activationCode: code, schoolId: Provider.of<SchoolData>(context, listen: false).displayId, firstName: firstName, lastName: lastName);
 
     await DatabaseService.addInactiveUser(Provider.of<SchoolData>(context, listen: false).uid, newInstructor);
 
