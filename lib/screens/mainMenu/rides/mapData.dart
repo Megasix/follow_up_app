@@ -185,11 +185,27 @@ class _MapData extends State<Map> {
                       ),
                       color: Colors.blueGrey,
                       borderRadius: radius),
-                  child: Center(
-                    child: Text(
-                      "Statistiques",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Text(
+                          "Statistiques",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton(
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.red),
+                            child: Text("Exit"),
+                            onPressed: _willPopCallback,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 body: Center(
