@@ -9,28 +9,26 @@ class UserData {
   UserType type;
 
   bool isActive;
-  String? activationCode;
+  String activationCode;
+  String schoolCode;
 
   String firstName;
   String lastName;
-  String? country;
   String? email;
   String? phoneNumber;
   Timestamp? birthDate;
   String? profilePictureUrl;
-  String? schoolId;
 
   //uid is separated because it's metadata and not directly user data
   UserData(this.uid, this.type,
       {required this.firstName,
       required this.lastName,
-      this.schoolId,
-      this.country,
+      required this.schoolCode,
+      required this.activationCode,
       this.email,
       this.phoneNumber,
       this.birthDate,
       this.profilePictureUrl,
-      this.activationCode,
       this.isActive = false});
 
   UserData.fromMap(String id, Map<String, dynamic>? map)
@@ -39,8 +37,7 @@ class UserData {
           UserType.values[map?['type'] ?? 0],
           firstName: map?['firstName'],
           lastName: map?['lastName'],
-          schoolId: map?['schoolId'],
-          country: map?['country'],
+          schoolCode: map?['schoolCode'],
           email: map?['email'],
           phoneNumber: map?['phoneNumber'],
           birthDate: map?['birthDate'],
@@ -53,8 +50,7 @@ class UserData {
         'type': type.index,
         'firstName': firstName,
         'lastName': lastName,
-        'schoolId': schoolId,
-        'country': country,
+        'schoolCode': schoolCode,
         'email': email,
         'phoneNumber': phoneNumber,
         'birthDate': birthDate,
@@ -66,7 +62,7 @@ class UserData {
 
 class SchoolData {
   String uid;
-  String? displayId;
+  String displayCode;
 
   String name;
   String email;
@@ -75,10 +71,10 @@ class SchoolData {
   String? schoolPictureUrl;
 // mic was here but wasn't sure if it was needed
 
-  SchoolData(this.uid, {this.displayId, required this.name, required this.email, this.phoneNumber, this.address});
+  SchoolData(this.uid, {required this.displayCode, required this.name, required this.email, this.phoneNumber, this.address});
 
   SchoolData.fromMap(String id, Map<String, dynamic>? map)
-      : this(id, displayId: map?['displayId'], name: map?['name'], email: map?['email'], phoneNumber: map?['phoneNumber'], address: map?['address']);
+      : this(id, displayCode: map?['displayCode'], name: map?['name'], email: map?['email'], phoneNumber: map?['phoneNumber'], address: map?['address']);
 
-  Map<String, dynamic> toMap() => {'displayId': displayId, 'name': name, 'email': email, 'phoneNumber': phoneNumber, 'address': address};
+  Map<String, dynamic> toMap() => {'displayCode': displayCode, 'name': name, 'email': email, 'phoneNumber': phoneNumber, 'address': address};
 }

@@ -37,11 +37,6 @@ class DatabaseService {
     return schoolsCollection.doc(schoolData.uid).set(schoolData, SetOptions(merge: true));
   }
 
-  static Future<void> addInactiveInstructor(String schoolId, UserData data) {
-    return schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').doc(data.uid).set(data.toMap());
-    ;
-  }
-
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
     //uploads the new chatroom to the chatroom collection
     DocumentReference<ChatroomData> chatroomDocRef = chatRoomCollection.doc(chatroomData.chatroomId);
@@ -75,7 +70,15 @@ class DatabaseService {
   }
 
   static Future<void> addRide(String userId, RideData rideData) {
-    return ridesCollection.doc(userId).collection('user.rides').doc(rideData.rideId).set(rideData.toMap());
+    return usersCollection.doc(userId).collection('user.rides').doc(rideData.rideId).set(rideData.toMap());
+  }
+
+  //
+  // DELETERS
+  //
+
+  static Future<void> deleteUser(String userId) {
+    return usersCollection.doc(userId).delete();
   }
 
   //
@@ -94,7 +97,7 @@ class DatabaseService {
         .startAt([name])
         .endAt([name + '\uf8ff'])
         .get()
-        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshotMap);
 
     var lastNameList = await usersCollection
         .where('type', isEqualTo: UserType.STUDENT.index)
@@ -102,7 +105,7 @@ class DatabaseService {
         .startAt([name])
         .endAt([name + '\uf8ff'])
         .get()
-        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshot);
+        .then<List<ChatUserData>>(_chatUsersFromUsersSnapshotMap);
     var sortedNameList = firstNameList.followedBy(lastNameList).toList();
 
     //todo: also check if this is functioning properly
@@ -144,11 +147,33 @@ class DatabaseService {
         .collection('chatroom.chats')
         .orderBy('time', descending: false)
         .get()
-        .then<List<ChatMessage>>(_chatMessagesFromSnapshot);
+        .then<List<ChatMessage>>(_chatMessagesFromSnapshotMap);
   }
 
   static Future<List<RideData>> getRides(String userId) {
-    return ridesCollection.doc(userId).collection('user.rides').orderBy('date', descending: false).get().then<List<RideData>>(_ridesFromSnapshot);
+    return usersCollection.doc(userId).collection('user.rides').orderBy('date', descending: false).get().then<List<RideData>>(_ridesFromSnapshotMap);
+  }
+
+  //
+  // CHECKERS
+  //
+
+  static Future<String?> isSchoolCodeValid(String schoolCode) async {
+    final QuerySnapshot querySnap = await schoolsCollection.where('displayId', isEqualTo: schoolCode).get();
+    if (querySnap.size > 0)
+      return querySnap.docs.first.id;
+    else
+      return null;
+  }
+
+  static Future<UserData?> isActivationCodeValid(String activationCode) async {
+    final QuerySnapshot<UserData> querySnap =
+        await usersCollection.where('activationCode', isEqualTo: activationCode).where('isActive', isEqualTo: false).get();
+
+    if (querySnap.size > 0)
+      return querySnap.docs.first.data();
+    else
+      return null;
   }
 
   //
@@ -161,7 +186,7 @@ class DatabaseService {
         .collection('chatroom.chats')
         .orderBy('time', descending: false)
         .snapshots()
-        .map<List<ChatMessage>>(_chatMessagesFromSnapshot);
+        .map<List<ChatMessage>>(_chatMessagesFromSnapshotMap);
   }
 
   //get all chatrooms the signed in user has
@@ -191,47 +216,48 @@ class DatabaseService {
 
   //get all instructors related to the signed in school
   static Stream<List<UserData>> streamSchoolInstructors(String schoolId) {
-    final Stream<List<UserData>> activeInstructors = usersCollection
+    return usersCollection
         .where('type', isEqualTo: UserType.INSTRUCTOR.index)
         .where('schoolId', isEqualTo: schoolId)
         .snapshots()
         .map<List<UserData>>(_usersFromSnapshot);
-
-    final Stream<List<UserData>> inactiveInstructors =
-        schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').snapshots().map<List<UserData>>(_usersFromSnapshotMap);
-
-    return activeInstructors.mergeWith([inactiveInstructors]);
   }
 
   Stream<List<RideData>> streamRides(String userId) {
-    return usersCollection.doc(userId).collection('user.rides').snapshots().map(_ridesFromSnapshot);
+    return usersCollection.doc(userId).collection('user.rides').snapshots().map(_ridesFromSnapshotMap);
   }
 
   //
-  //CONVERTERS
+  // CONVERTERS
+  // functions that contain "Map" at the end convert maps to objects, contrary to the ones that don't;
+  // they're mainly used for subcollections, where the automatic converters don't apply
   //
 
   static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
     return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as UserData).toList();
   }
 
-  static List<UserData> _usersFromSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => UserData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
-  }
-
-  static List<ChatUserData> _chatUsersFromUsersSnapshot(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => ChatUserData.fromUserData(queryDocSnap.data() as UserData)).toList();
-  }
-
   static List<ChatroomData> _chatroomsFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
     return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as ChatroomData).toList();
   }
 
-  static List<ChatMessage> _chatMessagesFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
-    return querySnapshot.docs.map((queryDocSnap) => ChatMessage.fromMap(queryDocSnap.data() as Map<String, dynamic>?)).toList();
+  static List<RideData> _ridesFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => queryDocSnap.data() as RideData).toList();
   }
 
-  static List<RideData> _ridesFromSnapshot(QuerySnapshot<Object?> snapshot) {
-    return snapshot.docs.map((queryDocSnap) => queryDocSnap.data() as RideData).toList();
+  static List<ChatUserData> _chatUsersFromUsersSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => ChatUserData.fromUserData(queryDocSnap.data() as UserData)).toList();
+  }
+
+  static List<UserData> _usersFromSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => UserData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
+  }
+
+  static List<ChatMessage> _chatMessagesFromSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => ChatMessage.fromMap(queryDocSnap.data() as Map<String, dynamic>)).toList();
+  }
+
+  static List<RideData> _ridesFromSnapshotMap(QuerySnapshot<Object?> querySnapshot) {
+    return querySnapshot.docs.map((queryDocSnap) => RideData.fromMap(queryDocSnap.id, queryDocSnap.data() as Map<String, dynamic>)).toList();
   }
 }

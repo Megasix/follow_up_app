@@ -24,6 +24,7 @@ final lightThemeConstant = ThemeData(
   brightness: Brightness.light,
   accentColor: Colors.grey[400],
   splashColor: Colors.grey,
+  fontFamily: 'Poppins',
 );
 
 ButtonStyle lightLoginButtonStyle = ButtonStyle(
@@ -47,6 +48,7 @@ final darkThemeConstant = ThemeData(
   brightness: Brightness.dark,
   accentColor: Colors.grey[600],
   splashColor: Colors.grey,
+  fontFamily: 'Poppins',
 );
 
 SnackBarThemeData darkSnackBarTheme = SnackBarThemeData(

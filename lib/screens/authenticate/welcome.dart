@@ -19,12 +19,12 @@ class Welcome extends StatefulWidget {
 class _WelcomeState extends State<Welcome> {
   final ScrollController _controller = ScrollController();
 
-  void _toggleUserType(UserType type) {
-    Navigator.push(context, Routes().authPage(type));
+  void _toggleUserType(bool showSignIn) {
+    Navigator.push(context, Routes.authPage(showSignIn));
   }
 
   bool _onEndScroll(ScrollEndNotification notif) {
-    final scrollDistance = MediaQuery.of(context).size.height + 70; //this offset must be equal to total vertical padding of the page
+    final scrollDistance = Get.height + 70; //this offset must be equal to total vertical padding of the page
     final double scrollDelta = _controller.offset / scrollDistance;
     double snapOffset = 0;
 
@@ -45,13 +45,14 @@ class _WelcomeState extends State<Welcome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Get.theme.backgroundColor,
       body: NotificationListener<ScrollEndNotification>(
         onNotification: _onEndScroll,
         child: CustomScrollView(
           controller: _controller,
           slivers: <Widget>[
             SliverAppBar(
-              backgroundColor: Get.isDarkMode ? Colors.black54 : Colors.yellow[700],
+              backgroundColor: Colors.black54,
               expandedHeight: Get.height,
               pinned: false,
               collapsedHeight: 0,
@@ -82,7 +83,7 @@ class _WelcomeState extends State<Welcome> {
               sliver: SliverFillRemaining(
                 hasScrollBody: false,
                 child: SizedBox(
-                  height: MediaQuery.of(context).size.height,
+                  height: Get.height,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -94,7 +95,7 @@ class _WelcomeState extends State<Welcome> {
                       Spacer(),
                       SizedBox(
                         height: 150,
-                        width: MediaQuery.of(context).size.width * 0.85,
+                        width: Get.width * 0.85,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,21 +103,22 @@ class _WelcomeState extends State<Welcome> {
                             Expanded(
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () => _toggleUserType(UserType.STUDENT),
-                                child: Text('Student', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
+                                onPressed: () => _toggleUserType(true),
+                                child: Text('SIGN IN', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                             SizedBox(width: 25),
                             Expanded(
                               child: TextButton(
                                 style: Get.isDarkMode ? darkLoginButtonStyle : lightLoginButtonStyle,
-                                onPressed: () => _toggleUserType(UserType.INSTRUCTOR),
-                                child: Text('Instructor', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
+                                onPressed: () => _toggleUserType(false),
+                                child: Text('REGISTER', style: Get.textTheme.headline5!.copyWith(color: Colors.yellow[700])),
                               ),
                             ),
                           ],
                         ),
-                      )
+                      ),
+                      SizedBox(height: 20),
                     ],
                   ),
                 ),

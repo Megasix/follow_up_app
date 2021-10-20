@@ -8,9 +8,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
+import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/extensions.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
+import 'package:follow_up_app/shared/page_routes.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
@@ -20,17 +22,20 @@ import 'package:uuid/uuid.dart';
 //TODO: refocus correct text fields when submitted
 //TODO: keep keyboard afloat when submitting through the keyboard
 class Register extends StatefulWidget {
-  final UserType userType;
   final Function toggleAuth;
 
-  Register({required this.userType, required this.toggleAuth});
+  Register({required this.toggleAuth});
 
   @override
   _RegisterState createState() => _RegisterState();
 }
 
 class _RegisterState extends State<Register> {
+  static const double H_PADDING = 15.0;
+  static const double INITIAL_H_SPACE = 40;
   static const double INDICATOR_SPACE = 90;
+  static const double FIELD_SPACE = 10;
+  static const int PAGE_COUNT = 3;
 
   final _formKey = GlobalKey<FormState>();
   final ValueNotifier<NextButtonState> _nextButtState = ValueNotifier<NextButtonState>(NextButtonState.NEXT);
@@ -49,29 +54,38 @@ class _RegisterState extends State<Register> {
 
   void _setButtonState(int page) {
     print(page);
-    _nextButtState.value = page == 3 ? NextButtonState.DONE : NextButtonState.NEXT;
+    _nextButtState.value = page == PAGE_COUNT - 1 ? NextButtonState.DONE : NextButtonState.NEXT;
   }
 
-  void _submitForm() {
-    if (_pageController.page != 3) {
+  void _submitForm() async {
+    if (_pageController.page != PAGE_COUNT - 1) {
       final int pageNumb = _pageController.page!.floor() + 1;
       _pageController.animateToPage(pageNumb, duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuart);
       _setButtonState(pageNumb);
     } else {
-      //TODO: verify school code and activation code! (for G and F logins as well!)
-      UserData userData = UserData(
-        Uuid().v4(),
-        UserType.STUDENT,
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        schoolId: schoolCode,
-        activationCode: activationCode,
-      );
-
-      AuthService.registerWithEmailAndPassword(context, userData, password);
       setState(() => _loading = true);
+
+      if (!await AuthService.registerWithEmailAndPassword(context, email, password)) {
+        setState(() => _loading = false);
+      }
     }
+  }
+
+  void _socialRegister(SignInType signInType) async {
+    setState(() => _loading = true);
+    bool isSuccess = false;
+    switch (signInType) {
+      case SignInType.FACEBOOK:
+        isSuccess = await AuthService.signInWithFacebook(context);
+        break;
+      case SignInType.GOOGLE:
+        isSuccess = await AuthService.signInWithGoogle(context);
+        break;
+      default:
+    }
+
+    //there has been an error and we haven't been able to register, go back to the register page
+    if (!isSuccess) setState(() => _loading = false);
   }
 
   void _goBack() {
@@ -89,96 +103,91 @@ class _RegisterState extends State<Register> {
     final _pageWidthFactor = 1 / _pageController.viewportFraction;
     return _loading
         ? Loading()
-        : PhysicalModel(
-            color: Colors.black.withOpacity(0.5),
-            shape: BoxShape.rectangle,
-            elevation: 70,
-            child: Scaffold(
-              resizeToAvoidBottomInset: true,
-              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-              floatingActionButton: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.yellow[700],
-                      radius: 30,
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
-                        onPressed: () => _goBack(),
-                      ),
-                    ),
-                    CircleAvatar(
-                      backgroundColor: Colors.yellow[700],
-                      radius: 25,
-                      child: IconButton(
-                        icon: Icon(Icons.app_registration_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
-                        onPressed: () => widget.toggleAuth(),
-                      ),
-                    ),
-                    ValueListenableBuilder<NextButtonState>(
-                      valueListenable: _nextButtState,
-                      builder: (context, state, child) => CircleAvatar(
-                        backgroundColor: Colors.yellow[900],
-                        radius: 30,
-                        child: IconButton(
-                          icon: Stack(
-                            children: [
-                              AnimatedScale(
-                                  duration: const Duration(milliseconds: 100),
-                                  scale: state == NextButtonState.DONE ? 1.0 : 0.0,
-                                  child: Icon(Icons.check_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
-                              AnimatedScale(
-                                duration: const Duration(milliseconds: 100),
-                                scale: state == NextButtonState.DONE ? 0.0 : 1.0,
-                                child: Transform.rotate(angle: pi, child: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
-                              )
-                            ],
-                          ),
-                          onPressed: () => _submitForm(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
+        : Scaffold(
+            backgroundColor: Get.theme.backgroundColor,
+            resizeToAvoidBottomInset: true,
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Form(
-                      key: _formKey,
-                      autovalidateMode: AutovalidateMode.always,
-                      child: PageView.custom(
-                        physics: NeverScrollableScrollPhysics(),
-                        controller: _pageController,
-                        childrenDelegate: SliverChildListDelegate.fixed(
-                          [
-                            _buildInfo(_pageWidthFactor),
-                            _buildPersonalForm(_pageWidthFactor),
-                            _buildCredentialsForm(_pageWidthFactor),
-                            _buildSchoolForm(_pageWidthFactor),
-                          ],
-                        ),
-                      ),
+                  CircleAvatar(
+                    backgroundColor: Colors.yellow[700],
+                    radius: 30,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
+                      onPressed: () => _goBack(),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20, bottom: INDICATOR_SPACE),
-                    child: SmoothPageIndicator(
-                      controller: _pageController,
-                      count: 4,
-                      effect: WormEffect(
-                        activeDotColor: Colors.yellow[700]!,
-                        dotColor: Colors.grey[300]!,
-                        dotHeight: 10,
-                        dotWidth: 10,
+                  ValueListenableBuilder<NextButtonState>(
+                    valueListenable: _nextButtState,
+                    builder: (context, state, child) => CircleAvatar(
+                      backgroundColor: Colors.yellow[900],
+                      radius: 30,
+                      child: IconButton(
+                        icon: Stack(
+                          children: [
+                            AnimatedScale(
+                                duration: const Duration(milliseconds: 100),
+                                scale: state == NextButtonState.DONE ? 1.0 : 0.0,
+                                child: Icon(Icons.check_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                            AnimatedScale(
+                              duration: const Duration(milliseconds: 100),
+                              scale: state == NextButtonState.DONE ? 0.0 : 1.0,
+                              child: Transform.rotate(angle: pi, child: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                            )
+                          ],
+                        ),
+                        onPressed: () => _submitForm(),
                       ),
                     ),
                   ),
                 ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: SizedBox(
+                height: Get.height,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: H_PADDING),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Form(
+                          key: _formKey,
+                          child: PageView.custom(
+                            physics: NeverScrollableScrollPhysics(),
+                            controller: _pageController,
+                            childrenDelegate: SliverChildListDelegate.fixed(
+                              [
+                                _buildInfo(_pageWidthFactor),
+                                _buildPersonalForm(_pageWidthFactor),
+                                _buildCredentialsForm(_pageWidthFactor),
+                                //_buildSchoolForm(_pageWidthFactor),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20, bottom: INDICATOR_SPACE),
+                        child: SmoothPageIndicator(
+                          controller: _pageController,
+                          count: PAGE_COUNT,
+                          effect: WormEffect(
+                            activeDotColor: Colors.yellow[700]!,
+                            dotColor: Colors.grey[300]!,
+                            dotHeight: 10,
+                            dotWidth: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
@@ -187,32 +196,23 @@ class _RegisterState extends State<Register> {
   Widget _buildInfo(double _pageWidthFactor) {
     return FractionallySizedBox(
       widthFactor: _pageWidthFactor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40),
-            Text('REGISTER', style: Theme.of(context).textTheme.headline3),
-            SizedBox(height: 20),
-            Text('Welcome ${widget.userType.stringify()}!', style: Theme.of(context).textTheme.headline4),
-            Spacer(),
-            FacebookSignInButton(
-              onPressed: () => setState(() {
-                _loading = true;
-                AuthService.signInWithFacebook(context);
-              }),
-            ),
-            SizedBox(height: 10),
-            GoogleSignInButton(
-              onPressed: () => setState(() {
-                _loading = true;
-                AuthService.signInWithGoogle(context);
-              }),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('REGISTER', style: Get.textTheme.headline3),
+          SizedBox(height: INITIAL_H_SPACE / 2),
+          Text('Welcome!', style: Get.textTheme.headline4),
+          Spacer(),
+          FacebookSignInButton(
+            onPressed: () => _socialRegister(SignInType.FACEBOOK),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          GoogleSignInButton(
+            onPressed: () => _socialRegister(SignInType.GOOGLE),
+          ),
+        ],
       ),
     );
   }
@@ -220,54 +220,50 @@ class _RegisterState extends State<Register> {
   Widget _buildPersonalForm(double _pageWidthFactor) {
     return FractionallySizedBox(
       widthFactor: _pageWidthFactor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40),
-            Text('First things first...', style: Theme.of(context).textTheme.headline4),
-            Spacer(),
-            Padding(padding: const EdgeInsets.only(right: 15), child: Text('First Name', style: Theme.of(context).textTheme.headline5)),
-            SizedBox(height: 5),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: false,
-              enableSuggestions: true,
-              autocorrect: true,
-              initialValue: firstName,
-              autofocus: true,
-              textInputAction: TextInputAction.next,
-              onChanged: (value) {
-                setState(() => firstName = value);
-              },
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-            ),
-            SizedBox(height: 15),
-            Padding(padding: const EdgeInsets.only(right: 15), child: Text('Last Name', style: Theme.of(context).textTheme.headline5)),
-            SizedBox(height: 5),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: false,
-              enableSuggestions: true,
-              autocorrect: true,
-              initialValue: lastName,
-              textInputAction: TextInputAction.next,
-              onChanged: (value) {
-                setState(() => lastName = value);
-              },
-              onFieldSubmitted: (_) {
-                _submitForm();
-              },
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('First things first...', style: Get.textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15), child: Text('First Name', style: Get.textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: firstName,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => firstName = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15), child: Text('Last Name', style: Get.textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: lastName,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => lastName = value);
+            },
+            onFieldSubmitted: (_) {
+              _submitForm();
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+        ],
       ),
     );
   }
@@ -275,101 +271,99 @@ class _RegisterState extends State<Register> {
   Widget _buildCredentialsForm(double _pageWidthFactor) {
     return FractionallySizedBox(
       widthFactor: _pageWidthFactor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40),
-            Text('Some login info...', style: Theme.of(context).textTheme.headline4),
-            Spacer(),
-            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Email', style: Theme.of(context).textTheme.headline5)),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: false,
-              enableSuggestions: true,
-              autocorrect: true,
-              initialValue: email,
-              autofocus: true,
-              textInputAction: TextInputAction.next,
-              onChanged: (value) {
-                setState(() => email = value);
-              },
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.email(context), FormBuilderValidators.required(context)]),
-            ),
-            SizedBox(height: 15),
-            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Password', style: Theme.of(context).textTheme.headline5)),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: true,
-              enableSuggestions: false,
-              autocorrect: false,
-              initialValue: password,
-              textInputAction: TextInputAction.next,
-              onChanged: (value) {
-                setState(() => password = value);
-              },
-              onFieldSubmitted: (_) => _submitForm(),
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.minLength(context, 6)]),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('Some login info...', style: Theme.of(context).textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Email', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: email,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => email = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.email(context), FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Password', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            initialValue: password,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.done, //after this form is submitted, we're done!
+            onChanged: (value) {
+              setState(() => password = value);
+            },
+            onFieldSubmitted: (_) => _submitForm(),
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.minLength(context, 7)]),
+          ),
+        ],
       ),
     );
   }
 
+  //this is currently not in use, as we ask for the codes afterwards
   Widget _buildSchoolForm(double _pageWidthFactor) {
     return FractionallySizedBox(
       widthFactor: _pageWidthFactor,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 40),
-            Text('Your codes!', style: Theme.of(context).textTheme.headline4),
-            Spacer(),
-            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('School Code', style: Theme.of(context).textTheme.headline5)),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: false,
-              enableSuggestions: true,
-              autocorrect: true,
-              initialValue: schoolCode,
-              autofocus: true,
-              textInputAction: TextInputAction.next,
-              onChanged: (value) {
-                setState(() => schoolCode = value);
-              },
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-            ),
-            SizedBox(height: 15),
-            Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Activation Code', style: Theme.of(context).textTheme.headline5)),
-            TextFormField(
-              style: Theme.of(context).textTheme.headline5,
-              cursorColor: Colors.yellow[900],
-              obscureText: false,
-              enableSuggestions: true,
-              autocorrect: true,
-              initialValue: activationCode,
-              textInputAction: TextInputAction.done,
-              onChanged: (value) {
-                setState(() => activationCode = value);
-              },
-              onFieldSubmitted: (_) => _submitForm(),
-              decoration: textInputDecoration,
-              validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('Your codes!', style: Theme.of(context).textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('School Code', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: schoolCode,
+            autofocus: true,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => schoolCode = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Activation Code', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: activationCode,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.done,
+            onChanged: (value) {
+              setState(() => activationCode = value);
+            },
+            onFieldSubmitted: (_) => _submitForm(),
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+        ],
       ),
     );
   }

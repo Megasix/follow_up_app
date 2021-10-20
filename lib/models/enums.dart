@@ -8,3 +8,9 @@ enum NextButtonState {
   NEXT,
   DONE,
 }
+
+enum SignInType {
+  EMAIL,
+  GOOGLE,
+  FACEBOOK,
+}

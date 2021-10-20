@@ -39,6 +39,8 @@ class $AssetsImagesGen {
       const AssetGenImage('assets/images/flogo-HexRBG-Wht-100.png');
   AssetGenImage get googleLogo =>
       const AssetGenImage('assets/images/google-logo.png');
+  AssetGenImage get tileBackground =>
+      const AssetGenImage('assets/images/tile_background.png');
 }
 
 class $AssetsLottieGen {

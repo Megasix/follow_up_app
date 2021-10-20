@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/shared/sizeable_button.dart';
+import 'package:follow_up_app/shared/features/sizeable_button.dart';
+import 'package:get/get.dart';
 
 //TODO: implement dark theme
 /// A sign in button that matches Google's design guidelines.
@@ -18,7 +19,7 @@ class GoogleSignInButton extends StatelessWidget {
       onPressed: onPressed,
       buttonBorderColor: mainColor,
       overlayColor: mainColor.withOpacity(0.5),
-      buttonColor: Colors.white,
+      buttonColor: Get.theme.backgroundColor,
       children: <Widget>[
         SizedBox(width: 10),
         Image(

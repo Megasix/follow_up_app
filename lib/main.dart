@@ -30,10 +30,9 @@ class MyApp extends StatelessWidget {
     //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
     return MultiProvider(
       providers: [
-        StreamProvider<User?>.value(value: AuthService.userStream, initialData: null),
         kIsWeb
-            ? StreamProvider<SchoolData?>.value(value: AuthService.signedInSchool, initialData: null)
-            : StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
+            ? StreamProvider<SchoolData?>.value(value: AuthService.schoolUser, initialData: null)
+            : StreamProvider<UserData?>.value(value: AuthService.customUser, initialData: null)
       ],
       child: GetMaterialApp(
         theme: lightThemeConstant,

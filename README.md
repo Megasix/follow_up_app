@@ -11,9 +11,9 @@ The tracking app that enhance your skills
 ### Dependencies
 
 
-* Flutter 2.5.0
+* Flutter 2.5.2
 * OS : Windows 10 / MacOS 10.14 or better (/!\ M1 chip mac are supported with specific build configuration)
-* To build this app you will also need keystore passwords and the autorisation of the Follow Up Team
+* To build this app you will also need keystore passwords and the authorization of the Follow Up Team
 
 
 ### Installing
