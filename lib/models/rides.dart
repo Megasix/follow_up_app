@@ -5,18 +5,22 @@ class RideData {
 
   String? name;
   String? polylines;
-  Duration? duration;
+  String? duration;
   Timestamp? date;
 
   RideData(this.rideId, {this.name, this.duration, this.date, this.polylines});
 
   RideData.fromMap(String id, Map<String, dynamic>? map)
-      : this(id, name: map?['name'], duration: map?['duration'], date: map?['date'], polylines: map?['polylines']);
+      : this(id,
+            name: map?["name"],
+            duration: map?["duration"],
+            date: map?["date"],
+            polylines: map?["polylines"]);
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'polylines': polylines,
-        'duration': duration,
-        'date': date,
+        "name": name,
+        "polylines": polylines,
+        "duration": duration,
+        "date": date,
       };
 }
