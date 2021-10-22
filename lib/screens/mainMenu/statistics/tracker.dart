@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/shared/shared.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 
@@ -33,7 +34,7 @@ class MapWidget extends StatelessWidget {
   MapWidget(this.rideData);
 
   changeMapMode() {
-    if (Shared.getTheme())
+    if (!Get.isDarkMode)
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);

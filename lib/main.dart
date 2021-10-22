@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:follow_up_app/models/user.dart';
 //import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -17,6 +18,8 @@ void main() async {
 
   AuthService.init();
 
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
   runApp(MyApp());
 }
 
@@ -27,10 +30,9 @@ class MyApp extends StatelessWidget {
     //this user data instance is only for authentication purposes, its id (from Firebase Auth) is not equivalent to the actual user id on Firestore
     return MultiProvider(
       providers: [
-        StreamProvider<User?>.value(value: AuthService.userStream, initialData: null),
         kIsWeb
-            ? StreamProvider<SchoolData?>.value(value: AuthService.signedInSchool, initialData: null)
-            : StreamProvider<UserData?>.value(value: AuthService.signedInUser, initialData: null)
+            ? StreamProvider<SchoolData?>.value(value: AuthService.schoolUser, initialData: null)
+            : StreamProvider<UserData?>.value(value: AuthService.customUser, initialData: null)
       ],
       child: GetMaterialApp(
         theme: lightThemeConstant,

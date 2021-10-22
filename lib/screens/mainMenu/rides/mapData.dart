@@ -12,6 +12,7 @@ import 'package:follow_up_app/services/localisation.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:sensors/sensors.dart';
@@ -224,7 +225,7 @@ class bottomWidget extends StatelessWidget {
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (Shared.getTheme())
+    if (!Get.isDarkMode)
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);

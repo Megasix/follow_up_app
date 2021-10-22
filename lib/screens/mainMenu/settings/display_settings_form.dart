@@ -56,7 +56,6 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
                           setState(() {
                             _themeMode = value as ThemeMode;
                             Get.changeThemeMode(_themeMode);
-                            Shared.setTheme(_themeMode == ThemeMode.light);
                           });
                         },
                       ),
