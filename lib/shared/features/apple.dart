@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/shared/sizeable_button.dart';
+import 'package:follow_up_app/shared/features/sizeable_button.dart';
 
 /// A sign in button that matches Apple's design guidelines.
 class AppleSignInButton extends StatelessWidget {

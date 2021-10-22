@@ -37,10 +37,6 @@ class DatabaseService {
     return schoolsCollection.doc(schoolData.uid).set(schoolData, SetOptions(merge: true));
   }
 
-  static Future<void> addInactiveInstructor(String schoolId, UserData data) {
-    return schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').doc(data.uid).set(data.toMap());
-  }
-
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
     //uploads the new chatroom to the chatroom collection
     DocumentReference<ChatroomData> chatroomDocRef = chatRoomCollection.doc(chatroomData.chatroomId);
@@ -75,6 +71,14 @@ class DatabaseService {
 
   static Future<void> addRide(String userId, RideData rideData) {
     return usersCollection.doc(userId).collection('user.rides').doc(rideData.rideId).set(rideData.toMap());
+  }
+
+  //
+  // DELETERS
+  //
+
+  static Future<void> deleteUser(String userId) {
+    return usersCollection.doc(userId).delete();
   }
 
   //
@@ -151,6 +155,28 @@ class DatabaseService {
   }
 
   //
+  // CHECKERS
+  //
+
+  static Future<String?> isSchoolCodeValid(String schoolCode) async {
+    final QuerySnapshot querySnap = await schoolsCollection.where('displayId', isEqualTo: schoolCode).get();
+    if (querySnap.size > 0)
+      return querySnap.docs.first.id;
+    else
+      return null;
+  }
+
+  static Future<UserData?> isActivationCodeValid(String activationCode) async {
+    final QuerySnapshot<UserData> querySnap =
+        await usersCollection.where('activationCode', isEqualTo: activationCode).where('isActive', isEqualTo: false).get();
+
+    if (querySnap.size > 0)
+      return querySnap.docs.first.data();
+    else
+      return null;
+  }
+
+  //
   // STREAMERS (streams that require parameters)
   //
 
@@ -190,16 +216,11 @@ class DatabaseService {
 
   //get all instructors related to the signed in school
   static Stream<List<UserData>> streamSchoolInstructors(String schoolId) {
-    final Stream<List<UserData>> activeInstructors = usersCollection
+    return usersCollection
         .where('type', isEqualTo: UserType.INSTRUCTOR.index)
         .where('schoolId', isEqualTo: schoolId)
         .snapshots()
         .map<List<UserData>>(_usersFromSnapshot);
-
-    final Stream<List<UserData>> inactiveInstructors =
-        schoolsCollection.doc(schoolId).collection('school.inactiveInstructors').snapshots().map<List<UserData>>(_usersFromSnapshotMap);
-
-    return activeInstructors.mergeWith([inactiveInstructors]);
   }
 
   Stream<List<RideData>> streamRides(String userId) {
@@ -207,7 +228,9 @@ class DatabaseService {
   }
 
   //
-  //CONVERTERS
+  // CONVERTERS
+  // functions that contain "Map" at the end convert maps to objects, contrary to the ones that don't;
+  // they're mainly used for subcollections, where the automatic converters don't apply
   //
 
   static List<UserData> _usersFromSnapshot(QuerySnapshot<Object?> querySnapshot) {
