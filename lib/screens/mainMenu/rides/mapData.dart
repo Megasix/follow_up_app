@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/models/markers.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/acceleration.dart';
@@ -37,6 +38,7 @@ List<LatLng> listePosition = [];
 List<List<double>> listePositionNum = [[]];
 Position? _latLng;
 Completer<GoogleMapController> _controllerCam = Completer();
+List<MarkerData> listeMarkers = [];
 
 class Map extends StatefulWidget {
   @override
@@ -102,13 +104,12 @@ class _MapData extends State<Map> {
     try {
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
-          RideData(
-            Uuid().v4(),
-            name: DateTime.now().toString(),
-            duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
-            date: myTimeStamp,
-            polylines: encodePolyline(listePositionNum),
-          ));
+          RideData(Uuid().v4(),
+              name: DateTime.now().toString(),
+              duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
+              date: myTimeStamp,
+              polylines: encodePolyline(listePositionNum),
+              markersData: listeMarkers));
     } on Exception catch (e) {
       print(e.toString());
     }
