@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/models/markers.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/tracker.dart';
@@ -46,9 +47,7 @@ class _StatisticsState extends State<Statistics> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: RideTile(
-                        date: rides[index].date as Timestamp,
-                        duration: rides[index].duration as String,
-                        polylines: rides[index].polylines as String,
+                        rideData: rides[index],
                       ),
                     );
                   },
@@ -93,12 +92,9 @@ class _StatisticsState extends State<Statistics> {
 
 //todo: separate every widget in its own file, for organization purposes
 class RideTile extends StatelessWidget {
-  final Timestamp date;
-  final String duration;
-  final String polylines;
+  final RideData rideData;
 
-  const RideTile(
-      {required this.date, required this.duration, required this.polylines});
+  const RideTile({required this.rideData});
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +104,7 @@ class RideTile extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => RideMap(
-                      polyline: polylines,
+                      rideData: rideData,
                     )));
       },
       child: Container(
@@ -122,21 +118,21 @@ class RideTile extends StatelessWidget {
             Row(
               children: [
                 Text(
-                    (date.toDate().day.toString() +
+                    (rideData.date.toDate().day.toString() +
                         " / " +
-                        date.toDate().month.toString() +
+                        rideData.date.toDate().month.toString() +
                         " / " +
-                        date.toDate().year.toString()),
+                        rideData.date.toDate().year.toString()),
                     style:
                         TextStyle(color: Theme.of(context).textSelectionColor)),
                 Spacer(),
-                Text(("Duration : " + duration.toString()),
+                Text(("Duration : " + rideData.duration.toString()),
                     style:
                         TextStyle(color: Theme.of(context).textSelectionColor))
               ],
             ),
             SizedBox(height: 5.0),
-            MapWidget(polylines),
+            MapWidget(rideData),
           ],
         ),
       ),
@@ -147,9 +143,9 @@ class RideTile extends StatelessWidget {
 class MapWidget extends StatelessWidget {
   late GoogleMapController _controller;
   bool isMapCreated = false;
-  final String polyline;
+  final RideData rideData;
 
-  MapWidget(this.polyline);
+  MapWidget(this.rideData);
 
   changeMapMode() {
     if (Shared.getTheme())
@@ -186,7 +182,7 @@ class MapWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<LatLng> polylines = decodePolylines(polyline);
+    List<LatLng> polylines = decodePolylines(rideData.polylines);
 
     if (isMapCreated) {
       changeMapMode();

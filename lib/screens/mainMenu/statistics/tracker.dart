@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_up_app/main.dart';
+import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 
 class RideMap extends StatefulWidget {
-  final String polyline;
+  final RideData rideData;
 
-  const RideMap({Key? key, required this.polyline}) : super(key: key);
+  const RideMap({Key? key, required this.rideData}) : super(key: key);
 
   @override
-  _RideMapState createState() => _RideMapState(polyline);
+  _RideMapState createState() => _RideMapState();
 }
 
 class _RideMapState extends State<RideMap> {
-  final String polyline;
-
-  _RideMapState(this.polyline);
+  _RideMapState();
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: MapWidget(polyline),
+      child: MapWidget(widget.rideData),
     );
   }
 }
@@ -29,9 +28,9 @@ class _RideMapState extends State<RideMap> {
 class MapWidget extends StatelessWidget {
   late GoogleMapController _controller;
   bool isMapCreated = false;
-  final String polyline;
+  final RideData rideData;
 
-  MapWidget(this.polyline);
+  MapWidget(this.rideData);
 
   changeMapMode() {
     if (Shared.getTheme())
@@ -59,12 +58,16 @@ class MapWidget extends StatelessWidget {
       if (point.longitude < minLong) minLong = point.longitude;
       if (point.longitude > maxLong) maxLong = point.longitude;
     });
-    _controller.moveCamera(CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), 20));
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+            southwest: LatLng(minLat, minLong),
+            northeast: LatLng(maxLat, maxLong)),
+        20));
   }
 
   @override
   Widget build(BuildContext context) {
-    List<LatLng> polylines = decodePolylines(polyline);
+    List<LatLng> polylines = decodePolylines(rideData.polylines);
 
     if (isMapCreated) {
       changeMapMode();
@@ -78,26 +81,28 @@ class MapWidget extends StatelessWidget {
         height: 100.0,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(25.0),
-          child: AbsorbPointer(
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
-              myLocationEnabled: false,
-              tiltGesturesEnabled: false,
-              compassEnabled: false,
-              scrollGesturesEnabled: false,
-              zoomGesturesEnabled: false,
-              zoomControlsEnabled: false,
-              polylines: {
-                Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: polylines),
-              },
-              //polylines
-              onMapCreated: (GoogleMapController controller) {
-                isMapCreated = true;
-                _controller = controller;
-                _setMapFitToTour(polylines);
-                changeMapMode();
-              },
-            ),
+          child: GoogleMap(
+            markers: rideData.markersData
+                    ?.map((mark) => mark.toMarkerGoogle())
+                    .toSet() ??
+                Set(),
+            initialCameraPosition:
+                CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
+
+            polylines: {
+              Polyline(
+                  polylineId: const PolylineId('trajet'),
+                  color: Theme.of(context).buttonColor,
+                  width: 4,
+                  points: polylines),
+            },
+            //polylines
+            onMapCreated: (GoogleMapController controller) {
+              isMapCreated = true;
+              _controller = controller;
+              _setMapFitToTour(polylines);
+              changeMapMode();
+            },
           ),
         ),
       ),
@@ -110,7 +115,8 @@ List<LatLng> decodePolylines(String polyline) {
   List<List<num>> pointsNum = decodePolyline(polyline);
   if (pointsNum.length != null)
     for (int i = 0; i < pointsNum.length; i++) {
-      LatLng point = LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
+      LatLng point =
+          LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
       points.add(point);
     }
   points.removeAt(0);
