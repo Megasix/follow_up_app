@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +25,8 @@ class _StatisticsState extends State<Statistics> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   //todo: check if late is the right way to do this
-  late Future<List<RideData>> _ridesFuture = DatabaseService.getRides(Provider.of<UserData?>(context)!.uid as String);
+  late Future<List<RideData>> _ridesFuture = DatabaseService.getRides(
+      Provider.of<UserData?>(context, listen: false)!.uid);
 
   Widget rideList() {
     return FutureBuilder<List<RideData>?>(
@@ -38,6 +38,7 @@ class _StatisticsState extends State<Statistics> {
           }
 
           List<RideData>? rides = asyncSnap.data;
+          print(rides);
 
           return rides != null && rides.isNotEmpty
               ? ListView.builder(
@@ -47,7 +48,7 @@ class _StatisticsState extends State<Statistics> {
                       padding: const EdgeInsets.all(8.0),
                       child: RideTile(
                         date: rides[index].date as Timestamp,
-                        duration: rides[index].duration as Duration,
+                        duration: rides[index].duration as String,
                         polylines: rides[index].polylines as String,
                       ),
                     );
@@ -75,9 +76,14 @@ class _StatisticsState extends State<Statistics> {
         elevation: 0.0,
       ),
       body: Container(
-        padding: EdgeInsets.only(top: 50.0 * heightRatio, bottom: 30.0 * heightRatio, left: 25.0 * widthRatio, right: 25.0 * widthRatio),
+        padding: EdgeInsets.only(
+            top: 50.0 * heightRatio,
+            bottom: 30.0 * heightRatio,
+            left: 25.0 * widthRatio,
+            right: 25.0 * widthRatio),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
           color: Theme.of(context).backgroundColor,
         ),
         child: rideList(),
@@ -89,10 +95,11 @@ class _StatisticsState extends State<Statistics> {
 //todo: separate every widget in its own file, for organization purposes
 class RideTile extends StatelessWidget {
   final Timestamp date;
-  final Duration duration;
+  final String duration;
   final String polylines;
 
-  const RideTile({required this.date, required this.duration, required this.polylines});
+  const RideTile(
+      {required this.date, required this.duration, required this.polylines});
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +122,18 @@ class RideTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text((date.toDate().day.toString() + " / " + date.toDate().month.toString() + " / " + date.toDate().year.toString()),
-                    style: TextStyle(color: Theme.of(context).textSelectionColor)),
+                Text(
+                    (date.toDate().day.toString() +
+                        " / " +
+                        date.toDate().month.toString() +
+                        " / " +
+                        date.toDate().year.toString()),
+                    style:
+                        TextStyle(color: Theme.of(context).textSelectionColor)),
                 Spacer(),
-                Text(("Duration : " + duration.toString()), style: TextStyle(color: Theme.of(context).textSelectionColor))
+                Text(("Duration : " + duration.toString()),
+                    style:
+                        TextStyle(color: Theme.of(context).textSelectionColor))
               ],
             ),
             SizedBox(height: 5.0),
@@ -163,7 +178,11 @@ class MapWidget extends StatelessWidget {
       if (point.longitude < minLong) minLong = point.longitude;
       if (point.longitude > maxLong) maxLong = point.longitude;
     });
-    _controller.moveCamera(CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), 20));
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+            southwest: LatLng(minLat, minLong),
+            northeast: LatLng(maxLat, maxLong)),
+        20));
   }
 
   @override
@@ -184,7 +203,8 @@ class MapWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(25.0),
           child: AbsorbPointer(
             child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
+              initialCameraPosition: CameraPosition(
+                  target: LatLng(45.503995, -73.593681), zoom: 10),
               myLocationEnabled: false,
               tiltGesturesEnabled: false,
               compassEnabled: false,
@@ -192,7 +212,11 @@ class MapWidget extends StatelessWidget {
               zoomGesturesEnabled: false,
               zoomControlsEnabled: false,
               polylines: {
-                Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: polylines),
+                Polyline(
+                    polylineId: const PolylineId('trajet'),
+                    color: Theme.of(context).buttonColor,
+                    width: 4,
+                    points: polylines),
               },
               //polylines
               onMapCreated: (GoogleMapController controller) {
@@ -214,7 +238,8 @@ List<LatLng> decodePolylines(String polyline) {
   List<List<num>> pointsNum = decodePolyline(polyline);
   if (pointsNum.length != null)
     for (int i = 0; i < pointsNum.length; i++) {
-      LatLng point = LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
+      LatLng point =
+          LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
       points.add(point);
     }
   points.removeAt(0);
