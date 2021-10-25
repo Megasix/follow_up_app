@@ -51,7 +51,6 @@ class DatabaseService {
         .set(schoolData, SetOptions(merge: true));
   }
 
-
   static Future<void> addChatroom(String userId, ChatroomData chatroomData) async {
     //uploads the new chatroom to the chatroom collection
     DocumentReference<ChatroomData> chatroomDocRef =
