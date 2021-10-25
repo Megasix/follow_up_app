@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/models/markers.dart';
 import 'package:follow_up_app/models/rides.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/acceleration.dart';
@@ -11,6 +12,7 @@ import 'package:follow_up_app/services/localisation.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:sensors/sensors.dart';
@@ -37,6 +39,7 @@ List<LatLng> listePosition = [];
 List<List<double>> listePositionNum = [[]];
 Position? _latLng;
 Completer<GoogleMapController> _controllerCam = Completer();
+List<MarkerData> listeMarkers = [];
 
 class Map extends StatefulWidget {
   @override
@@ -47,7 +50,8 @@ class _MapData extends State<Map> {
   late StreamSubscription<Position> positionStream;
 
   void _getUserLocation() async {
-    var position = await GeolocatorPlatform.instance.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    var position = await GeolocatorPlatform.instance
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
       currentPostion = LatLng(position.latitude, position.longitude);
@@ -61,13 +65,15 @@ class _MapData extends State<Map> {
     timerSubscription = timerStream.listen((int newTick) {
       if (mounted)
         setState(() {
-          hoursStr = ((newTick / (60 * 60)) % 60).floor().toString().padLeft(2, '0');
+          hoursStr =
+              ((newTick / (60 * 60)) % 60).floor().toString().padLeft(2, '0');
           minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
           secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
         });
     });
     _getUserLocation();
-    accelerometerSubscription = userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+    accelerometerSubscription =
+        userAccelerometerEvents.listen((UserAccelerometerEvent event) {
       if (this.mounted)
         setState(() {
           x = event.x;
@@ -94,26 +100,30 @@ class _MapData extends State<Map> {
     });
   }
 
-  @override
-  void dispose() {
+  Future<bool> _willPopCallback() async {
     listePositionNum.removeAt(0);
-
-    DatabaseService.addRide(
-        Provider.of<UserData?>(context)!.uid as String,
-        RideData(
-          Uuid().v4(),
-          name: DateTime.now().toString(),
-          duration: Duration(seconds: DateTime.now().difference(now).inSeconds),
-          date: myTimeStamp,
-          polylines: encodePolyline(listePositionNum),
-        ));
+    try {
+      await DatabaseService.addRide(
+          Provider.of<UserData?>(context, listen: false)!.uid,
+          RideData(Uuid().v4(),
+              name: DateTime.now().toString(),
+              duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
+              date: myTimeStamp,
+              polylines: encodePolyline(listePositionNum),
+              markersData: listeMarkers));
+    } on Exception catch (e) {
+      print(e.toString());
+    }
+    ;
 
     accelerometerSubscription.cancel();
     positionStream.cancel();
     timerSubscription.cancel();
     listePosition = [];
     listePositionNum = [];
-    super.dispose();
+    Navigator.of(context).pop(true);
+    print("exit");
+    return true; // return true if the route to be popped
   }
 
   @override
@@ -122,62 +132,90 @@ class _MapData extends State<Map> {
       topLeft: Radius.circular(24.0),
       topRight: Radius.circular(24.0),
     );
-    return Scaffold(
-      body: _address == null || _vitesse == null || _accelerationVecteur == null
-          ? Loading()
-          : SlidingUpPanel(
-              color: Theme.of(context).secondaryHeaderColor,
-              maxHeight: MediaQuery.of(context).size.height / 3,
-              minHeight: 80,
-              panel: Center(
-                  child: Container(
-                color: Colors.transparent,
-                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                child: Column(
-                  children: [
-                    Text(
-                      _address,
-                      style: TextStyle(color: Theme.of(context).textSelectionColor),
-                    ),
-                    Text(
-                      "Vitesse: " + _vitesse.toString() + " km/h",
-                      style: TextStyle(color: Theme.of(context).textSelectionColor),
-                    ),
-                    Text(
-                      "Acceleration: " + _accelerationVecteur!.toStringAsPrecision(3) + " m/s²",
-                      style: TextStyle(color: Theme.of(context).textSelectionColor),
-                    ),
-                    Text(
-                      "Temps écoulé: " + "$hoursStr:$minutesStr:$secondsStr",
-                      style: TextStyle(color: Theme.of(context).textSelectionColor),
-                    ),
-                  ],
-                ),
-              )),
-              collapsed: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      colors: [
-                        Colors.orange,
-                        Colors.yellow,
-                      ],
-                    ),
-                    color: Colors.blueGrey,
-                    borderRadius: radius),
-                child: Center(
-                  child: Text(
-                    "Statistiques",
-                    style: TextStyle(color: Colors.white),
+    return WillPopScope(
+      onWillPop: _willPopCallback,
+      child: Scaffold(
+        body: _address == null ||
+                _vitesse == null ||
+                _accelerationVecteur == null
+            ? Loading()
+            : SlidingUpPanel(
+                color: Theme.of(context).secondaryHeaderColor,
+                maxHeight: MediaQuery.of(context).size.height / 3,
+                minHeight: 80,
+                panel: Center(
+                    child: Container(
+                  color: Colors.transparent,
+                  padding:
+                      EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        _address,
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
+                      Text(
+                        "Vitesse: " + _vitesse.toString() + " km/h",
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
+                      Text(
+                        "Acceleration: " +
+                            _accelerationVecteur!.toStringAsPrecision(3) +
+                            " m/s²",
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
+                      Text(
+                        "Temps écoulé: " + "$hoursStr:$minutesStr:$secondsStr",
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
+                    ],
+                  ),
+                )),
+                collapsed: Container(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Colors.orange,
+                          Colors.yellow,
+                        ],
+                      ),
+                      color: Colors.blueGrey,
+                      borderRadius: radius),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Text(
+                          "Statistiques",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton(
+                            style:
+                                ElevatedButton.styleFrom(primary: Colors.red),
+                            child: Text("Exit"),
+                            onPressed: _willPopCallback,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                body: Center(
+                  child: bottomWidget(),
+                ),
+                borderRadius: radius,
               ),
-              body: Center(
-                child: bottomWidget(),
-              ),
-              borderRadius: radius,
-            ),
+      ),
     );
   }
 }
@@ -187,7 +225,7 @@ class bottomWidget extends StatelessWidget {
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (Shared.getTheme())
+    if (!Get.isDarkMode)
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -213,7 +251,8 @@ class bottomWidget extends StatelessWidget {
             ? Loading()
             : Container(
                 child: GoogleMap(
-                  initialCameraPosition: CameraPosition(target: currentPostion!, zoom: 15),
+                  initialCameraPosition:
+                      CameraPosition(target: currentPostion!, zoom: 15),
                   myLocationEnabled: true,
                   tiltGesturesEnabled: true,
                   compassEnabled: true,
@@ -222,7 +261,11 @@ class bottomWidget extends StatelessWidget {
                   zoomControlsEnabled: false,
                   polylines: {
                     if (listePosition != null)
-                      Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: listePosition),
+                      Polyline(
+                          polylineId: const PolylineId('trajet'),
+                          color: Theme.of(context).buttonColor,
+                          width: 4,
+                          points: listePosition),
                   },
                   onMapCreated: (GoogleMapController controller) {
                     _controllerCam.complete(controller);
@@ -273,5 +316,6 @@ Stream<int> stopWatchStream() {
 
 Future<void> centerScreen(Position position) async {
   final GoogleMapController controller = await _controllerCam.future;
-  controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(position.latitude, position.longitude), zoom: 18.0)));
+  controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: LatLng(position.latitude, position.longitude), zoom: 18.0)));
 }

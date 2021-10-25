@@ -21,7 +21,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   void _getUserLocation() async {
-    var position = await GeolocatorPlatform.instance.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    var position = await GeolocatorPlatform.instance
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
       currentPostion = LatLng(position.latitude, position.longitude);
@@ -58,7 +59,7 @@ class MapWidget extends StatelessWidget {
   bool isMapCreated = false;
 
   changeMapMode() {
-    if (Shared.getTheme())
+    if (!Get.isDarkMode)
       getJsonMapData('assets/googleMapsThemes/light.json').then(setMapStyle);
     else
       getJsonMapData('assets/googleMapsThemes/dark.json').then(setMapStyle);
@@ -85,7 +86,10 @@ class MapWidget extends StatelessWidget {
             ? Loading()
             : GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Map()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          maintainState: false, builder: (context) => Map()));
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.only(
@@ -95,7 +99,8 @@ class MapWidget extends StatelessWidget {
                   child: AbsorbPointer(
                     absorbing: true,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(target: currentPostion!, zoom: 15),
+                      initialCameraPosition:
+                          CameraPosition(target: currentPostion!, zoom: 15),
                       myLocationEnabled: false,
                       tiltGesturesEnabled: false,
                       compassEnabled: false,

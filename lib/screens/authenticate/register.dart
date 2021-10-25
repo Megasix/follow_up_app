@@ -1,463 +1,370 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+
 import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
-import 'package:follow_up_app/shared/features/apple.dart';
+import 'package:follow_up_app/services/database.dart';
+import 'package:follow_up_app/shared/extensions.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
-import 'package:follow_up_app/shared/features/twitter.dart';
+import 'package:follow_up_app/shared/page_routes.dart';
+import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
+import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
+//TODO: refocus correct text fields when submitted
+//TODO: keep keyboard afloat when submitting through the keyboard
 class Register extends StatefulWidget {
-  final Function toggleView;
+  final Function toggleAuth;
 
-  Register({required this.toggleView});
+  Register({required this.toggleAuth});
 
   @override
   _RegisterState createState() => _RegisterState();
 }
 
 class _RegisterState extends State<Register> {
-  final _formKey = GlobalKey<FormBuilderState>();
-  final PageController _pageController = PageController(initialPage: 0);
+  static const double H_PADDING = 15.0;
+  static const double INITIAL_H_SPACE = 40;
+  static const double INDICATOR_SPACE = 90;
+  static const double FIELD_SPACE = 10;
+  static const int PAGE_COUNT = 3;
+
+  final _formKey = GlobalKey<FormState>();
+  final ValueNotifier<NextButtonState> _nextButtState = ValueNotifier<NextButtonState>(NextButtonState.NEXT);
+  final PageController _pageController = PageController(viewportFraction: 1.2, initialPage: 0);
+
+  bool _loading = false;
 
 // text field state
   Timestamp birthDate = Timestamp.now();
-  String country = '';
   String firstName = '';
   String lastName = '';
   String email = '';
-  String phoneNumber = '';
   String password = '';
-  String error = '';
+  String schoolCode = '';
+  String activationCode = '';
 
-  bool loading = false;
-  Alignment childAlignement = Alignment.center;
+  void _setButtonState(int page) {
+    print(page);
+    _nextButtState.value = page == PAGE_COUNT - 1 ? NextButtonState.DONE : NextButtonState.NEXT;
+  }
+
+  void _submitForm() async {
+    if (_pageController.page != PAGE_COUNT - 1) {
+      final int pageNumb = _pageController.page!.floor() + 1;
+      _pageController.animateToPage(pageNumb, duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuart);
+      _setButtonState(pageNumb);
+    } else {
+      setState(() => _loading = true);
+
+      if (!await AuthService.registerWithEmailAndPassword(context, email, password)) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  void _socialRegister(SignInType signInType) async {
+    setState(() => _loading = true);
+    bool isSuccess = false;
+    switch (signInType) {
+      case SignInType.FACEBOOK:
+        isSuccess = await AuthService.signInWithFacebook(context);
+        break;
+      case SignInType.GOOGLE:
+        isSuccess = await AuthService.signInWithGoogle(context);
+        break;
+      default:
+    }
+
+    //there has been an error and we haven't been able to register, go back to the register page
+    if (!isSuccess) setState(() => _loading = false);
+  }
+
+  void _goBack() {
+    if (_pageController.page != 0) {
+      final int pageNumb = _pageController.page!.floor() - 1;
+      _pageController.animateToPage(pageNumb, duration: Duration(milliseconds: 300), curve: Curves.easeInOutQuart);
+      _setButtonState(pageNumb);
+    } else {
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    const _referenceHeight = 820.5714285714286;
-    const _referenceWidth = 411.42857142857144;
-    final double contextHeight = MediaQuery.of(context).size.height;
-    final double contextWidth = MediaQuery.of(context).size.width;
-    final double contextAspectRatio = MediaQuery.of(context).devicePixelRatio;
-    var sameTypeVerticalPadding = 10.0 * contextHeight / _referenceHeight;
-    var generalVerticalPadding = 20.0 * contextHeight / _referenceHeight;
-    var heightRatio = contextHeight / _referenceHeight;
-    var widthRatio = contextWidth / _referenceWidth;
-
-    final countriesOptions = ['Canada', 'France'];
-    final int firstDate = DateTime.now().year - 80, lastDate = DateTime.now().year - 15;
-
-    return loading
+    final _pageWidthFactor = 1 / _pageController.viewportFraction;
+    return _loading
         ? Loading()
         : Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: AnimatedContainer(
-              duration: Duration(milliseconds: 400),
-              curve: Curves.easeOut,
-              alignment: childAlignement,
-              color: Theme.of(context).secondaryHeaderColor,
-              width: double.infinity,
-              height: double.infinity,
-              child: FormBuilder(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.always,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 40.0 * heightRatio, bottom: 30.0 * heightRatio, left: 20.0 * widthRatio, right: 20.0 * widthRatio),
-                      child: AspectRatio(
-                        aspectRatio: contextAspectRatio,
-                        child: Image(
-                          image: AssetImage(
-                            "assets/images/${Shared.lightThemeEnabled ? "Dark_" : ""}Follow_Up_logo-01.png",
-                          ),
-                        ),
-                      ),
+            backgroundColor: Get.theme.backgroundColor,
+            resizeToAvoidBottomInset: true,
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.yellow[700],
+                    radius: 30,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white),
+                      onPressed: () => _goBack(),
                     ),
-                    // email field
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.only(bottom: 40.0 * heightRatio),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(50.0),
-                            topRight: Radius.circular(50.0),
-                          ),
-                          color: Theme.of(context).backgroundColor,
-                        ),
-                        child: Column(
+                  ),
+                  ValueListenableBuilder<NextButtonState>(
+                    valueListenable: _nextButtState,
+                    builder: (context, state, child) => CircleAvatar(
+                      backgroundColor: Colors.yellow[900],
+                      radius: 30,
+                      child: IconButton(
+                        icon: Stack(
                           children: [
-                            Expanded(
-                              child: PageView(
-                                controller: _pageController,
-                                //physics: NeverScrollableScrollPhysics(),
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Get Started',
-                                          textScaleFactor: 2.5,
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        Text(
-                                          'Lets verify some information about you to help set up your account.',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        FormBuilderDropdown(
-                                          name: 'Country',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Country'),
-                                          allowClear: true,
-                                          validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                                          items: countriesOptions
-                                              .map((country) => DropdownMenuItem(
-                                                    value: country,
-                                                    child: Text('$country'),
-                                                  ))
-                                              .toList(),
-                                          onChanged: (String? val) {
-                                            setState(() => country = val as String);
-                                          },
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        FormBuilderDateTimePicker(
-                                          name: 'Date of Birth',
-                                          cursorColor: Theme.of(context).buttonColor,
-                                          firstDate: DateTime(firstDate),
-                                          lastDate: DateTime(lastDate),
-                                          initialDate: DateTime(lastDate),
-                                          inputType: InputType.date,
-                                          decoration: textInputDecoration.copyWith(hintText: 'Date of Birth'),
-                                          validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
-                                          onChanged: (val) {
-                                            setState(() => birthDate = Timestamp.fromDate(val as DateTime));
-                                          },
-                                        ),
-                                        SizedBox(height: 50.0 * heightRatio),
-                                        SizedBox(
-                                          width: contextWidth,
-                                          height: 40.0,
-                                          child: ElevatedButton(
-                                              child: Text('Continue', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-                                                  _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        Text('OR SIGN UP WITH'),
-                                        SizedBox(height: generalVerticalPadding),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            GoogleSignInButton(onPressed: () async {
-                                              await AuthService.signInWithGoogle(context);
-                                            }),
-                                            SizedBox(width: sameTypeVerticalPadding),
-                                            FacebookSignInButton(onPressed: () async {
-                                              await AuthService.signInWithFacebook(context);
-                                            }),
-                                            SizedBox(width: sameTypeVerticalPadding),
-                                            TwitterSignInButton(onPressed: () async {}),
-                                            SizedBox(width: sameTypeVerticalPadding),
-                                            AppleSignInButton(onPressed: () async {}, darkMode: Shared.lightThemeEnabled),
-                                          ],
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        TextButton(
-                                          child: Text('Already have an account ? Login'),
-                                          onPressed: () {
-                                            widget.toggleView();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          "What's Your Name ?",
-                                          textScaleFactor: 2.5,
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        Text(
-                                          'Your real name may be used later to verify your identity when contacting your driving school.',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        FormBuilderTextField(
-                                          name: 'First Name',
-                                          decoration: textInputDecoration.copyWith(hintText: 'First Name'),
-                                          keyboardType: TextInputType.text,
-                                          validator: FormBuilderValidators.compose([
-                                            FormBuilderValidators.required(context),
-                                            FormBuilderValidators.maxLength(context, 20),
-                                            FormBuilderValidators.minLength(context, 2),
-                                          ]),
-                                          onChanged: (val) {
-                                            setState(() => firstName = val as String);
-                                          },
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        FormBuilderTextField(
-                                          name: 'Last Name',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Last Name'),
-                                          keyboardType: TextInputType.text,
-                                          validator: FormBuilderValidators.compose([
-                                            FormBuilderValidators.required(context),
-                                            FormBuilderValidators.maxLength(context, 20),
-                                            FormBuilderValidators.minLength(context, 2),
-                                          ]),
-                                          onChanged: (val) {
-                                            setState(() => lastName = val as String);
-                                          },
-                                        ),
-                                        Spacer(),
-                                        SizedBox(
-                                          width: contextWidth,
-                                          height: 40.0,
-                                          child: ElevatedButton(
-                                              child: Text('Continue', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-                                                  _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        TextButton(
-                                          child: Text('Go Back'),
-                                          onPressed: () {
-                                            _pageController.animateToPage(0, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Identify Your Account',
-                                          textAlign: TextAlign.center,
-                                          textScaleFactor: 2.5,
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        Text(
-                                          'This is what you will use when you log in to Follow Up app.',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        FormBuilderTextField(
-                                          name: 'Account Email',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Account Email'),
-                                          keyboardType: TextInputType.text,
-                                          validator: FormBuilderValidators.compose([
-                                            FormBuilderValidators.required(context),
-                                            FormBuilderValidators.email(context),
-                                          ]),
-                                          onChanged: (val) {
-                                            setState(() => email = val as String);
-                                          },
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        FormBuilderTextField(
-                                          name: 'Phone Number',
-                                          decoration: textInputDecoration.copyWith(hintText: '(Optional) Phone Number'),
-                                          keyboardType: TextInputType.text,
-                                          validator: FormBuilderValidators.compose([
-                                            FormBuilderValidators.numeric(context),
-                                            FormBuilderValidators.maxLength(context, 10),
-                                          ]),
-                                          onChanged: (val) {
-                                            setState(() => phoneNumber = val as String);
-                                          },
-                                        ),
-                                        Spacer(),
-                                        SizedBox(
-                                          width: contextWidth,
-                                          height: 40.0,
-                                          child: ElevatedButton(
-                                              child: Text('Continue', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-                                                  _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        TextButton(
-                                          child: Text('Go Back'),
-                                          onPressed: () {
-                                            _pageController.animateToPage(1, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Review Terms',
-                                          textAlign: TextAlign.center,
-                                          textScaleFactor: 2.5,
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        Text(
-                                          'Please review the terms below.',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        FormBuilderCheckbox(
-                                          name: 'Terms and Conditions',
-                                          initialValue: false,
-                                          title: RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                TextSpan(text: 'I have read and agree to the ', style: TextStyle(color: Theme.of(context).accentColor)),
-                                                TextSpan(
-                                                    text: 'Terms and Conditions',
-                                                    style: TextStyle(color: Colors.blue),
-                                                    recognizer: TapGestureRecognizer()
-                                                      ..onTap = () async {
-                                                        final url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-                                                        if (await canLaunch(url)) {
-                                                          await launch(
-                                                            url,
-                                                            forceSafariVC: false,
-                                                          );
-                                                        }
-                                                      }),
-                                              ],
-                                            ),
-                                          ),
-                                          validator: FormBuilderValidators.equal(context, true, errorText: 'You must accept terms and conditions to continue'),
-                                        ),
-                                        Spacer(),
-                                        SizedBox(
-                                          width: contextWidth,
-                                          height: 40.0,
-                                          child: ElevatedButton(
-                                              child: Text('Continue', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-                                                  _pageController.animateToPage(4, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        TextButton(
-                                          child: Text('Go Back'),
-                                          onPressed: () {
-                                            _pageController.animateToPage(2, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.only(left: 40.0 * widthRatio, top: 40.0 * heightRatio, right: 40.0 * widthRatio),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          'Set Your Password',
-                                          textAlign: TextAlign.center,
-                                          textScaleFactor: 2.5,
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        Text(
-                                          'Secure your account and choose a strong password.',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        SizedBox(height: generalVerticalPadding),
-                                        FormBuilderTextField(
-                                          name: 'Password',
-                                          decoration: textInputDecoration.copyWith(hintText: 'Password'),
-                                          obscureText: true,
-                                          keyboardType: TextInputType.text,
-                                          validator: FormBuilderValidators.compose([
-                                            FormBuilderValidators.required(context),
-                                            FormBuilderValidators.maxLength(context, 20),
-                                            FormBuilderValidators.minLength(context, 5),
-                                          ]),
-                                          onChanged: (val) {
-                                            setState(() => password = val as String);
-                                          },
-                                        ),
-                                        Spacer(),
-                                        SizedBox(
-                                          width: contextWidth,
-                                          height: 40.0,
-                                          child: ElevatedButton(
-                                              child: Text('Register', style: TextStyle(color: Colors.white)),
-                                              onPressed: () async {
-                                                if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-                                                  setState(() => loading = true);
-
-                                                  await AuthService.registerWithEmailAndPassword(
-                                                    context,
-                                                    UserData(Uuid().v4(), UserType.STUDENT,
-                                                        firstName: firstName,
-                                                        lastName: lastName,
-                                                        email: email,
-                                                        country: country,
-                                                        phoneNumber: phoneNumber,
-                                                        birthDate: birthDate),
-                                                    password,
-                                                  );
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(height: sameTypeVerticalPadding),
-                                        TextButton(
-                                          child: Text('Go Back'),
-                                          onPressed: () {
-                                            _pageController.animateToPage(3, duration: Duration(milliseconds: 400), curve: Curves.ease);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: generalVerticalPadding),
-                            SmoothPageIndicator(
-                              controller: _pageController,
-                              count: 5,
-                              effect: ExpandingDotsEffect(
-                                activeDotColor: Theme.of(context).buttonColor,
-                                dotWidth: 10.0,
-                                dotHeight: 10.0,
-                              ),
-                            ),
+                            AnimatedScale(
+                                duration: const Duration(milliseconds: 100),
+                                scale: state == NextButtonState.DONE ? 1.0 : 0.0,
+                                child: Icon(Icons.check_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                            AnimatedScale(
+                              duration: const Duration(milliseconds: 100),
+                              scale: state == NextButtonState.DONE ? 0.0 : 1.0,
+                              child: Transform.rotate(angle: pi, child: Icon(Icons.arrow_back_rounded, color: Get.isDarkMode ? Colors.black : Colors.white)),
+                            )
                           ],
                         ),
+                        onPressed: () => _submitForm(),
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: SizedBox(
+                height: Get.height,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: H_PADDING),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Form(
+                          key: _formKey,
+                          child: PageView.custom(
+                            physics: NeverScrollableScrollPhysics(),
+                            controller: _pageController,
+                            childrenDelegate: SliverChildListDelegate.fixed(
+                              [
+                                _buildInfo(_pageWidthFactor),
+                                _buildPersonalForm(_pageWidthFactor),
+                                _buildCredentialsForm(_pageWidthFactor),
+                                //_buildSchoolForm(_pageWidthFactor),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20, bottom: INDICATOR_SPACE),
+                        child: SmoothPageIndicator(
+                          controller: _pageController,
+                          count: PAGE_COUNT,
+                          effect: WormEffect(
+                            activeDotColor: Colors.yellow[700]!,
+                            dotColor: Colors.grey[300]!,
+                            dotHeight: 10,
+                            dotWidth: 10,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           );
+  }
+
+  Widget _buildInfo(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('REGISTER', style: Get.textTheme.headline3),
+          SizedBox(height: INITIAL_H_SPACE / 2),
+          Text('Welcome!', style: Get.textTheme.headline4),
+          Spacer(),
+          FacebookSignInButton(
+            onPressed: () => _socialRegister(SignInType.FACEBOOK),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          GoogleSignInButton(
+            onPressed: () => _socialRegister(SignInType.GOOGLE),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('First things first...', style: Get.textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15), child: Text('First Name', style: Get.textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: firstName,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => firstName = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15), child: Text('Last Name', style: Get.textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: lastName,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => lastName = value);
+            },
+            onFieldSubmitted: (_) {
+              _submitForm();
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCredentialsForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('Some login info...', style: Theme.of(context).textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Email', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: email,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => email = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.email(context), FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Password', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            initialValue: password,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.done, //after this form is submitted, we're done!
+            onChanged: (value) {
+              setState(() => password = value);
+            },
+            onFieldSubmitted: (_) => _submitForm(),
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.minLength(context, 7)]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //this is currently not in use, as we ask for the codes afterwards
+  Widget _buildSchoolForm(double _pageWidthFactor) {
+    return FractionallySizedBox(
+      widthFactor: _pageWidthFactor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(height: INITIAL_H_SPACE),
+          Text('Your codes!', style: Theme.of(context).textTheme.headline4),
+          Spacer(),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('School Code', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: schoolCode,
+            autofocus: true,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.next,
+            onChanged: (value) {
+              setState(() => schoolCode = value);
+            },
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+          SizedBox(height: FIELD_SPACE),
+          Padding(padding: const EdgeInsets.only(right: 15, bottom: 5), child: Text('Activation Code', style: Theme.of(context).textTheme.headline5)),
+          TextFormField(
+            style: Get.textTheme.bodyText1,
+            cursorColor: Colors.yellow[900],
+            obscureText: false,
+            enableSuggestions: true,
+            autocorrect: true,
+            initialValue: activationCode,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            textInputAction: TextInputAction.done,
+            onChanged: (value) {
+              setState(() => activationCode = value);
+            },
+            onFieldSubmitted: (_) => _submitForm(),
+            decoration: textInputDecoration,
+            validator: FormBuilderValidators.compose([FormBuilderValidators.required(context)]),
+          ),
+        ],
+      ),
+    );
   }
 }

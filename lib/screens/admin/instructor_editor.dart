@@ -5,6 +5,7 @@ import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/snackbar.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,9 +41,9 @@ class _InstructorCreatorState extends State<InstructorCreator> {
 
   void _submitInstructor() async {
     UserData newInstructor = new UserData(Uuid().v4(), UserType.INSTRUCTOR,
-        activationCode: code, schoolId: Provider.of<SchoolData>(context, listen: false).displayId, firstName: firstName, lastName: lastName);
+        activationCode: code, schoolCode: Provider.of<SchoolData>(context, listen: false).displayCode, firstName: firstName, lastName: lastName);
 
-    await DatabaseService.addInactiveUser(Provider.of<SchoolData>(context, listen: false).uid, newInstructor);
+    await DatabaseService.updateUser(newInstructor);
 
     CustomSnackbar.showBar(context, newInstructor.firstName + ' ' + newInstructor.lastName + ' has been added to the database.');
 
@@ -80,7 +81,10 @@ class _InstructorCreatorState extends State<InstructorCreator> {
                         child: Text('Generate New Instructor Code'),
                         onPressed: () => _generateCode(),
                       ),
-                      Center(heightFactor: 3, child: Text(code, style: Theme.of(context).textTheme.headline1!)),
+                      Center(
+                        heightFactor: 3,
+                        child: SelectableText(code, style: Get.textTheme.headline1!),
+                      ),
                       Flexible(
                         fit: FlexFit.loose,
                         child: Form(

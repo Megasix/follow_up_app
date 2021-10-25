@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:follow_up_app/gen/assets.gen.dart';
-import 'package:follow_up_app/models/enums.dart';
+import 'package:follow_up_app/generated/assets.gen.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
 import 'package:follow_up_app/screens/admin/_modules/student_card.dart';
@@ -22,7 +21,7 @@ class _AdminHomeState extends State<AdminHome> {
   bool _isShowingStudents = true;
 
   void _showCreateInstructor() {
-    Navigator.push(context, Routes().instructorEditorPage);
+    Navigator.push(context, Routes.instructorEditorPage());
   }
 
   @override
@@ -57,15 +56,14 @@ class _AdminHomeState extends State<AdminHome> {
                 children: <Widget>[
                   //Drawer's Header
                   DrawerHeader(
-                      child: const SizedBox(width: 150),
-                      decoration:
-                          BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01))),
-
+                    child: const SizedBox(width: 150),
+                    decoration: BoxDecoration(image: DecorationImage(image: Get.isDarkMode ? Assets.images.followUpLogo01 : Assets.images.darkFollowUpLogo01)),
+                  ),
                   //Rest of Drawer's Info
                   const SizedBox(height: 5),
-                  Text('SCHOOL ID', style: Theme.of(context).textTheme.headline6),
+                  Text('SCHOOL CODE', style: Theme.of(context).textTheme.headline6),
                   const SizedBox(height: 3),
-                  Text(schoolData.displayId ?? 'None', style: Theme.of(context).textTheme.subtitle1),
+                  Text(schoolData.displayCode, style: Theme.of(context).textTheme.subtitle1),
                 ],
               ),
             ),
@@ -74,7 +72,7 @@ class _AdminHomeState extends State<AdminHome> {
               child: StreamBuilder<List<UserData>>(
                   key: UniqueKey(),
                   initialData: null,
-                  stream: _isShowingStudents ? _schoolStudents(schoolData.uid) : _schoolInstructors(schoolData.uid),
+                  stream: _isShowingStudents ? _schoolStudents(schoolData.displayCode) : _schoolInstructors(schoolData.displayCode),
                   builder: (context, asyncSnap) {
                     if (asyncSnap.connectionState != ConnectionState.active) {
                       return Loading();
