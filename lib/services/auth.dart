@@ -131,7 +131,7 @@ class AuthService {
 
     //if we're on the web, we're only dealing with schools
     if (user == null) {
-      userDataController.add(null);
+      kIsWeb ? schoolDataController.add(null) : userDataController.add(null);
       return;
     }
 
