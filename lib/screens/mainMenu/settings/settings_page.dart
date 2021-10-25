@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/display_settings_form.dart';
+import 'package:follow_up_app/screens/mainMenu/settings/profile_settings_form.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/unit_setting_form.dart';
 import 'package:follow_up_app/services/auth.dart';
 
@@ -28,71 +29,73 @@ class SettingsPage extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 25, horizontal: 10),
         child: Column(
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                      color: Theme.of(context).backgroundColor,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text(
-                          'Personal settings',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17.0,
+            SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        color: Theme.of(context).backgroundColor,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text(
+                            'Personal settings',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.0,
+                            ),
                           ),
-                        ),
-                        SettingButton(Icons.alternate_email, 'Account Informations', context, (){}),
-                        SettingButton(Icons.account_circle, 'Edit profile', context, (){}),
-                        SettingButton(Icons.school, 'School', context, (){}),
-                      ],
+                          SettingButton(Icons.alternate_email, 'Account Informations', context, (){}),
+                          SettingButton(Icons.account_circle, 'Edit profile', context, (){_showSettingsPanel(ProfileSettingForm());}),
+                          SettingButton(Icons.school, 'School', context, (){}),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 25,),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                      color: Theme.of(context).backgroundColor,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Text(
-                          'Application settings',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17.0,
+                  SizedBox(height: 25,),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        color: Theme.of(context).backgroundColor,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text(
+                            'Application settings',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.0,
+                            ),
                           ),
-                        ),
-                        SettingButton(Icons.settings_display, 'Display', context, (){_showSettingsPanel(DisplaySettingsForm());}),
-                        SettingButton(Icons.notifications, 'Notifications', context, (){}),
-                        SettingButton(Icons.poll, 'Unit system', context, (){_showSettingsPanel(UnitSettingForm());}),
+                          SettingButton(Icons.settings_display, 'Display', context, (){_showSettingsPanel(DisplaySettingsForm());}),
+                          SettingButton(Icons.notifications, 'Notifications', context, (){}),
+                          SettingButton(Icons.poll, 'Unit system', context, (){_showSettingsPanel(UnitSettingForm());}),
 
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Spacer(),
             SizedBox(
               width: MediaQuery.of(context).size.width,
               height: 20.0,
-              child: FlatButton(
+              child: TextButton(
                 onPressed: () {
                   AuthService.signOutAll();
                 },

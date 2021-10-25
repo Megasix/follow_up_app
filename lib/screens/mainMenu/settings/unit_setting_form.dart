@@ -15,7 +15,7 @@ class _UnitSettingFormState extends State<UnitSettingForm> {
     final double contextWidth = MediaQuery.of(context).size.width;
     final unitSystemOptions = ['Metric', 'Imperial'];
 
-    return StreamBuilder<UserDisplaySetting>(
+    return StreamBuilder<UserUnitSetting>(
       stream: null, //methode de database.dart qui permet de set cette valeur
       builder: (context, snapshot) {
         /* if (snapshot.hasData) {
