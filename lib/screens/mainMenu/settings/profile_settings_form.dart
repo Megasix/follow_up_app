@@ -17,7 +17,7 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
     final double contextWidth = MediaQuery.of(context).size.width;
     final countryOptions = ['Canada', 'France'];
     String firstName = user.firstName, lastName = user.lastName;
-    String? country = user.country;
+    //String? country = user.country;
     Timestamp? birthDate = user.birthDate;
 
     return Scaffold(
@@ -55,7 +55,7 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
                           },
                         )),
                     SizedBox(height: 10),
-                    SizedBox(
+                    /*SizedBox(
                         width: contextWidth,
                         child: FormBuilderDropdown(
                           name: 'Country',
@@ -70,7 +70,7 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
                           onChanged: (value) {
                             country = value as String?;
                           },
-                        )),
+                        )),*/
                     SizedBox(height: 10),
                     SizedBox(
                         width: contextWidth,
