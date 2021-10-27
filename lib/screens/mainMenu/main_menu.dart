@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/home.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
-import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/snackbar.dart';
 import 'package:provider/provider.dart';
 import 'messaging/messaging.dart';
 
@@ -15,8 +13,11 @@ class MainMenu extends StatefulWidget {
 }
 
 class _MainMenuState extends State<MainMenu> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
     Statistics(),
@@ -29,49 +30,41 @@ class _MainMenuState extends State<MainMenu> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        color: Theme.of(context).secondaryHeaderColor,
-        width: double.infinity,
-        height: double.infinity,
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      floatingActionButton: CircleAvatar(
-        radius: 30,
-        backgroundColor: Theme.of(context).accentColor,
-        child: IconButton(
-          iconSize: 30,
-          color: Colors.white,
-          alignment: Alignment.center,
-          icon: Icon(Icons.exit_to_app_rounded),
-          onPressed: () => AuthService.signOutAll(),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Statistics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message_outlined),
-            label: 'Messages',
-          )
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).buttonColor,
-        onTap: _onItemTapped,
-      ),
-      drawer: Drawer(
-        child: SettingsPage(),
-      ),
-    );
+    UserData? user = Provider.of<UserData?>(context);
+
+    return user == null
+        ? Loading()
+        : Scaffold(
+            key: _scaffoldKey,
+            resizeToAvoidBottomInset: false,
+            body: Container(
+              color: Theme.of(context).secondaryHeaderColor,
+              width: double.infinity,
+              height: double.infinity,
+              child: _widgetOptions.elementAt(_selectedIndex),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.show_chart),
+                  label: 'Statistics',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.message_outlined),
+                  label: 'Messages',
+                )
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: Theme.of(context).buttonColor,
+              onTap: _onItemTapped,
+            ),
+          );
   }
 }

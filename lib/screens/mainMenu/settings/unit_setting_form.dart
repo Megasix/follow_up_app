@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:follow_up_app/models/setting.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
-import 'package:follow_up_app/shared/shared.dart';
-import 'package:get/get.dart';
+import 'package:follow_up_app/shared/unit_system.dart';
 
-class DisplaySettingsForm extends StatefulWidget {
+class UnitSettingForm extends StatefulWidget {
   @override
-  _DisplaySettingsFormState createState() => _DisplaySettingsFormState();
+  _UnitSettingFormState createState() => _UnitSettingFormState();
 }
 
-class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
-  ThemeMode _themeMode = ThemeMode.system;
-
+class _UnitSettingFormState extends State<UnitSettingForm> {
   @override
   Widget build(BuildContext context) {
-    final themeOptions = [ThemeMode.light, ThemeMode.dark];
     final double contextWidth = MediaQuery.of(context).size.width;
+    final unitSystemOptions = ['Metric', 'Imperial'];
 
-    return StreamBuilder<UserDisplaySetting>(
+    return StreamBuilder<UserUnitSetting>(
       stream: null, //methode de database.dart qui permet de set cette valeur
       builder: (context, snapshot) {
         /* if (snapshot.hasData) {
@@ -31,7 +28,7 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
               child: Column(
                 children: <Widget>[
                   Text(
-                    'Update your Display Setting',
+                    'Update your Unit System',
                     textScaleFactor: 1.2,
                   ),
                   SizedBox(height: 20),
@@ -39,20 +36,18 @@ class _DisplaySettingsFormState extends State<DisplaySettingsForm> {
                     child: SizedBox(
                       width: contextWidth,
                       child: FormBuilderDropdown(
-                        name: 'Theme choice',
-                        decoration: textInputDecoration.copyWith(labelText: 'Theme'),
+                        name: 'Unit system',
+                        decoration: textInputDecoration.copyWith(
+                            labelText: 'Unit system'),
                         allowClear: true,
-                        items: themeOptions
-                            .map((theme) => DropdownMenuItem(
-                                  value: theme,
-                                  child: Text("${theme == ThemeMode.light ? "Light" : "Dark"}"),
+                        items: unitSystemOptions
+                            .map((unitSystem) => DropdownMenuItem(
+                                  value: unitSystem,
+                                  child: Text(unitSystem),
                                 ))
                             .toList(),
                         onChanged: (value) {
-                          setState(() {
-                            _themeMode = value as ThemeMode;
-                            Get.changeThemeMode(_themeMode);
-                          });
+                          setState(() {});
                         },
                       ),
                     ),
