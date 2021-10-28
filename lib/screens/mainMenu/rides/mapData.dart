@@ -101,6 +101,10 @@ class _MapData extends State<Map> {
   }
 
   Future<bool> _willPopCallback() async {
+    listeMarkers.add(MarkerData(
+        markerId: "test",
+        infoWindow: "acceleration",
+        position: GeoPoint(1, 1)));
     listePositionNum.removeAt(0);
     try {
       await DatabaseService.addRide(

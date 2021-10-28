@@ -492,8 +492,6 @@ PODS:
   - PromisesObjC (2.0.0)
   - sensors (0.0.1):
     - Flutter
-  - shared_preferences (0.0.1):
-    - Flutter
   - url_launcher (0.0.1):
     - Flutter
 
@@ -508,7 +506,6 @@ DEPENDENCIES:
   - google_maps_flutter (from `.symlinks/plugins/google_maps_flutter/ios`)
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
   - sensors (from `.symlinks/plugins/sensors/ios`)
-  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
 SPEC REPOS:
@@ -558,8 +555,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_sign_in/ios"
   sensors:
     :path: ".symlinks/plugins/sensors/ios"
-  shared_preferences:
-    :path: ".symlinks/plugins/shared_preferences/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
 
@@ -597,9 +592,8 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   sensors: 84eb7a30e47a649e4172b71d6e81be614c280336
-  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
 PODFILE CHECKSUM: 180e5844d675c1e5567e76ef7cca65be7b380538
 
-COCOAPODS: 1.10.2
+COCOAPODS: 1.11.2

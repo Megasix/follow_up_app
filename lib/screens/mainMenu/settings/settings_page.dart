@@ -21,7 +21,11 @@ class SettingsPage extends StatelessWidget {
           context: context,
           builder: (context) {
             return Container(
-              padding: EdgeInsets.only(left: 10.0 * widthRatio, top: 10.0 * heightRatio, right: 10.0 * widthRatio, bottom: 10.0 * heightRatio),
+              padding: EdgeInsets.only(
+                  left: 10.0 * widthRatio,
+                  top: 10.0 * heightRatio,
+                  right: 10.0 * widthRatio,
+                  bottom: 10.0 * heightRatio),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -31,14 +35,32 @@ class SettingsPage extends StatelessWidget {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+      ),
       body: Padding(
-        padding: EdgeInsets.only(top: 50.0 * heightRatio, left: 10.0 * widthRatio, right: 10.0 * widthRatio, bottom: 50.0 * heightRatio),
+        padding: EdgeInsets.only(
+            top: 50.0 * heightRatio,
+            left: 10.0 * widthRatio,
+            right: 10.0 * widthRatio,
+            bottom: 50.0 * heightRatio),
         child: Column(
           children: <Widget>[
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0 * heightRatio, left: 5.0 * widthRatio, right: 5.0 * widthRatio, bottom: 10.0 * heightRatio),
+                padding: EdgeInsets.only(
+                    top: 10.0 * heightRatio,
+                    left: 5.0 * widthRatio,
+                    right: 5.0 * widthRatio,
+                    bottom: 10.0 * heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
@@ -103,7 +125,11 @@ class SettingsPage extends StatelessWidget {
             SizedBox(
               width: contextWidth,
               child: Container(
-                padding: EdgeInsets.only(top: 10.0 * heightRatio, left: 5.0 * widthRatio, right: 5.0 * widthRatio, bottom: 10.0 * heightRatio),
+                padding: EdgeInsets.only(
+                    top: 10.0 * heightRatio,
+                    left: 5.0 * widthRatio,
+                    right: 5.0 * widthRatio,
+                    bottom: 10.0 * heightRatio),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30.0)),
                   color: Theme.of(context).backgroundColor,
