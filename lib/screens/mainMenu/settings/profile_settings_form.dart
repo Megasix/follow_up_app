@@ -15,9 +15,7 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
   Widget build(BuildContext context) {
     final UserData user = Provider.of<UserData?>(context)!;
     final double contextWidth = MediaQuery.of(context).size.width;
-    final countryOptions = ['Canada', 'France'];
     String firstName = user.firstName, lastName = user.lastName;
-    //String? country = user.country;
     Timestamp? birthDate = user.birthDate;
 
     return Scaffold(
@@ -55,23 +53,6 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
                           },
                         )),
                     SizedBox(height: 10),
-                    /*SizedBox(
-                        width: contextWidth,
-                        child: FormBuilderDropdown(
-                          name: 'Country',
-                          initialValue: country,
-                          allowClear: true,
-                          items: countryOptions
-                              .map((country) => DropdownMenuItem(
-                                    value: country,
-                                    child: Text(country),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            country = value as String?;
-                          },
-                        )),*/
-                    SizedBox(height: 10),
                     SizedBox(
                         width: contextWidth,
                         child: FormBuilderDateTimePicker(
@@ -102,8 +83,5 @@ class _ProfileSettingFormState extends State<ProfileSettingForm> {
         ),
       ),
     );
-    /* } else {
-          return Loading();
-        }*/
   }
 }
