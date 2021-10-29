@@ -77,7 +77,6 @@ class _MapData extends State<Map> {
             (_speedLimitApiServices.getSpeedLimitAtPlace(
                     _speedLimitApiServices.getPlaceInfosAtPos(_latLng!)))
                 .then((value) {
-              print(value);
               setState(() {
                 _speedLimit = value;
               });
@@ -107,7 +106,7 @@ class _MapData extends State<Map> {
             centerScreen(_latLng!);
           }
           var vitesse = position.speed.roundToDouble() * 3.6;
-          _vitesse = 120; //vitesse < 0 ? 0 : vitesse;      //120 is a test value;
+          _vitesse = vitesse < 0 ? 0 : vitesse; //120 is a test value;
           Localisation.geocodePosition(_latLng!).then((value) async {
             _address = value;
           });
@@ -189,7 +188,9 @@ class _MapData extends State<Map> {
                       ),
                       Text(
                         "Limite de vitesse: " + _speedLimit.toString(),
-                      )
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
                     ],
                   ),
                 )),
