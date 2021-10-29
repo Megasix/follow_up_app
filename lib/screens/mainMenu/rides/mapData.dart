@@ -9,6 +9,7 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
+import 'package:follow_up_app/services/speed_limit_api_call.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,6 +28,7 @@ double? x, y, z, _vitesse, _accelerationVecteur;
 String _address = "";
 late Stream<Position> positionStream;
 final Acceleration _acceleration = Acceleration();
+final SpeedLimitApiServices _speedLimitApiServices = SpeedLimitApiServices();
 DateTime now = DateTime.now();
 Timestamp myTimeStamp = Timestamp.fromDate(now);
 late StreamSubscription accelerometerSubscription;
@@ -35,6 +37,7 @@ late StreamSubscription<int> timerSubscription;
 String hoursStr = '00';
 String minutesStr = '00';
 String secondsStr = '00';
+double _speedLimit = 0;
 List<LatLng> listePosition = [];
 List<List<double>> listePositionNum = [[]];
 Position? _latLng;
@@ -69,6 +72,17 @@ class _MapData extends State<Map> {
               ((newTick / (60 * 60)) % 60).floor().toString().padLeft(2, '0');
           minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
           secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
+          if (double.parse(secondsStr) % 2 == 0) {
+            print(_latLng);
+            (_speedLimitApiServices.getSpeedLimitAtPlace(
+                    _speedLimitApiServices.getPlaceInfosAtPos(_latLng!)))
+                .then((value) {
+              print(value);
+              setState(() {
+                _speedLimit = value;
+              });
+            });
+          }
         });
     });
     _getUserLocation();
@@ -172,6 +186,9 @@ class _MapData extends State<Map> {
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
                       ),
+                      Text(
+                        "Limite de vitesse: " + _speedLimit.toString(),
+                      )
                     ],
                   ),
                 )),
@@ -195,17 +212,33 @@ class _MapData extends State<Map> {
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.red),
-                            child: Text("Exit"),
-                            onPressed: _willPopCallback,
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.red),
+                                child: Text("Exit"),
+                                onPressed: _willPopCallback,
+                              ),
+                            ),
                           ),
-                        ),
+                          FloatingActionButton(
+                            onPressed: () {
+                              (_speedLimitApiServices.getSpeedLimitAtPlace(
+                                      _speedLimitApiServices
+                                          .getPlaceInfosAtPos(_latLng!)))
+                                  .then((value) {
+                                print(value);
+                              });
+                            },
+                            backgroundColor: Colors.red,
+                            child: Icon(Icons.add),
+                          ),
+                        ],
                       ),
                     ],
                   ),
