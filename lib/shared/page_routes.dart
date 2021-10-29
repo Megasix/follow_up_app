@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/admin/instructor_editor.dart';
+import 'package:follow_up_app/screens/admin/user_info.dart';
 import 'package:follow_up_app/screens/authenticate/authenticate.dart';
 import 'package:follow_up_app/shared/dialogs/forgot_pass_dialog.dart';
 import 'package:follow_up_app/shared/dialogs/verify_codes_dialog.dart';
@@ -13,6 +14,19 @@ class Routes {
         opaque: false,
         transitionDuration: Duration(milliseconds: 100),
         pageBuilder: (context, animIn, animOut) => InstructorCreator(),
+        transitionsBuilder: (context, anim, secondAnim, child) {
+          final tweenFade = Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeInOutQuart));
+          final fadeAnimation = anim.drive(tweenFade);
+
+          return FadeTransition(opacity: fadeAnimation, child: child);
+        },
+      );
+
+  static PageRoute userInfoPage(UserData userData) => PageRouteBuilder(
+        fullscreenDialog: true,
+        opaque: false,
+        transitionDuration: Duration(milliseconds: 200),
+        pageBuilder: (context, animIn, animOut) => UserInfoPage(userData),
         transitionsBuilder: (context, anim, secondAnim, child) {
           final tweenFade = Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeInOutQuart));
           final fadeAnimation = anim.drive(tweenFade);

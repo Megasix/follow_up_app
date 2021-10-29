@@ -55,7 +55,6 @@ class _InstructorCreatorState extends State<InstructorCreator> {
     return GestureDetector(
       onTap: () => _closePopup(),
       child: Material(
-        key: UniqueKey(),
         color: Colors.black.withOpacity(0.7),
         child: Center(
           child: ClipRRect(
@@ -82,7 +81,7 @@ class _InstructorCreatorState extends State<InstructorCreator> {
                         onPressed: () => _generateCode(),
                       ),
                       Center(
-                        heightFactor: 3,
+                        heightFactor: 2,
                         child: SelectableText(code, style: Get.textTheme.headline1!),
                       ),
                       Flexible(
