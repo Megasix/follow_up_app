@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/display_settings_form.dart';
+import 'package:follow_up_app/screens/mainMenu/settings/profile_settings_form.dart';
+import 'package:follow_up_app/screens/mainMenu/settings/unit_setting_form.dart';
 import 'package:follow_up_app/services/auth.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -7,25 +9,12 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const _referenceHeight = 820.5714285714286;
-    const _referenceWidth = 411.42857142857144;
-    final double contextHeight = MediaQuery.of(context).size.height;
-    final double contextWidth = MediaQuery.of(context).size.width;
-    var sameTypeVerticalPadding = 10.0 * contextHeight / _referenceHeight;
-    var generalVerticalPadding = 30.0 * contextHeight / _referenceHeight;
-    var heightRatio = contextHeight / _referenceHeight;
-    var widthRatio = contextWidth / _referenceWidth;
-
     void _showSettingsPanel(Widget settingPanel) {
       showModalBottomSheet(
           context: context,
           builder: (context) {
             return Container(
-              padding: EdgeInsets.only(
-                  left: 10.0 * widthRatio,
-                  top: 10.0 * heightRatio,
-                  right: 10.0 * widthRatio,
-                  bottom: 10.0 * heightRatio),
+              padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
@@ -35,140 +24,92 @@ class SettingsPage extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Icon(Icons.arrow_back),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
       body: Padding(
-        padding: EdgeInsets.only(
-            top: 50.0 * heightRatio,
-            left: 10.0 * widthRatio,
-            right: 10.0 * widthRatio,
-            bottom: 50.0 * heightRatio),
+        padding: EdgeInsets.symmetric(vertical: 25, horizontal: 10),
         child: Column(
-          children: <Widget>[
-            SizedBox(
-              width: contextWidth,
-              child: Container(
-                padding: EdgeInsets.only(
-                    top: 10.0 * heightRatio,
-                    left: 5.0 * widthRatio,
-                    right: 5.0 * widthRatio,
-                    bottom: 10.0 * heightRatio),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                  color: Theme.of(context).backgroundColor,
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'Personal settings',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17.0,
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        color: Theme.of(context).backgroundColor,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text(
+                            'Personal settings',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.0,
+                            ),
+                          ),
+                          SettingButton(Icons.alternate_email,
+                              'Account Informations', context, () {}),
+                          SettingButton(
+                              Icons.account_circle, 'Edit profile', context,
+                              () {
+                            _showSettingsPanel(ProfileSettingForm());
+                          }),
+                          SettingButton(Icons.school, 'School', context, () {}),
+                        ],
                       ),
                     ),
-                    SizedBox(height: sameTypeVerticalPadding),
-                    FlatButton(
-                        onPressed: () {},
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.account_circle),
-                            SizedBox(width: 8.0 * widthRatio),
-                            Text('Edit profile'),
-                            Spacer(),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15.0,
+                  ),
+                  SizedBox(
+                    height: 25,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                        color: Theme.of(context).backgroundColor,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Text(
+                            'Application settings',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17.0,
                             ),
-                          ],
-                        )),
-                    FlatButton(
-                        onPressed: () {},
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.poll),
-                            SizedBox(width: 8.0 * widthRatio),
-                            Text('Unit type'),
-                            Spacer(),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15.0,
-                            ),
-                          ],
-                        )),
-                    FlatButton(
-                        onPressed: () {},
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.notifications),
-                            SizedBox(width: 8.0),
-                            Text('Notifications'),
-                            Spacer(),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15.0,
-                            ),
-                          ],
-                        )),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: generalVerticalPadding),
-            SizedBox(
-              width: contextWidth,
-              child: Container(
-                padding: EdgeInsets.only(
-                    top: 10.0 * heightRatio,
-                    left: 5.0 * widthRatio,
-                    right: 5.0 * widthRatio,
-                    bottom: 10.0 * heightRatio),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                  color: Theme.of(context).backgroundColor,
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'Application settings',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17.0,
+                          ),
+                          SettingButton(
+                              Icons.settings_display, 'Display', context, () {
+                            _showSettingsPanel(DisplaySettingsForm());
+                          }),
+                          SettingButton(Icons.notifications, 'Notifications',
+                              context, () {}),
+                          SettingButton(Icons.poll, 'Unit system', context, () {
+                            _showSettingsPanel(UnitSettingForm());
+                          }),
+                        ],
                       ),
                     ),
-                    SizedBox(height: sameTypeVerticalPadding),
-                    FlatButton(
-                        onPressed: () {
-                          _showSettingsPanel(DisplaySettingsForm());
-                        },
-                        child: Row(
-                          children: <Widget>[
-                            Icon(Icons.settings_display),
-                            SizedBox(width: 8.0 * widthRatio),
-                            Text('Display'),
-                            Spacer(),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 15.0,
-                            ),
-                          ],
-                        )),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             Spacer(),
             SizedBox(
-              width: contextWidth,
+              width: MediaQuery.of(context).size.width,
               height: 20.0,
-              child: FlatButton(
+              child: TextButton(
                 onPressed: () {
                   AuthService.signOutAll();
                 },
@@ -180,4 +121,23 @@ class SettingsPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget SettingButton(IconData icon, String title, BuildContext context,
+    void Function()? function) {
+  return TextButton(
+      style: TextButton.styleFrom(primary: Theme.of(context).accentColor),
+      onPressed: function,
+      child: Row(
+        children: <Widget>[
+          Icon(icon),
+          SizedBox(width: 8.0),
+          Text(title),
+          Spacer(),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 15.0,
+          ),
+        ],
+      ));
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -23,7 +23,7 @@ import 'package:uuid/uuid.dart';
 late StreamSubscription accelerometer;
 LatLng? currentPostion;
 final panelController = PanelController();
-double? x, y, z, _vitesse, _accelerationVecteur;
+late double x, y, z, _vitesse, _accelerationVecteur;
 String _address = "";
 late Stream<Position> positionStream;
 final Acceleration _acceleration = Acceleration();
@@ -32,6 +32,7 @@ Timestamp myTimeStamp = Timestamp.fromDate(now);
 late StreamSubscription accelerometerSubscription;
 late Stream<int> timerStream;
 late StreamSubscription<int> timerSubscription;
+Timer timer = new Timer(Duration(microseconds: 1), () {});
 String hoursStr = '00';
 String minutesStr = '00';
 String secondsStr = '00';
@@ -74,13 +75,44 @@ class _MapData extends State<Map> {
     _getUserLocation();
     accelerometerSubscription =
         userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      bool suddenAcc = false;
       if (this.mounted)
         setState(() {
           x = event.x;
           y = event.y;
           z = event.z;
-          _accelerationVecteur = _acceleration.verifyAcceleration(event);
+          _accelerationVecteur =
+              sqrt(pow(event.x, 2) + pow(event.y, 2) + pow(event.z, 2));
+          ;
         });
+
+
+      double mainEventAxis;
+      if(_accelerationVecteur - event.x.abs() < _accelerationVecteur - event.y.abs() && _accelerationVecteur - event.x.abs() < _accelerationVecteur - event.z.abs())
+        mainEventAxis = event.x;
+      else if (_accelerationVecteur - event.y.abs() < _accelerationVecteur - event.z.abs())
+        mainEventAxis = event.y;
+      else
+        mainEventAxis = event.z;
+
+
+      String infoWindow;
+      if (mainEventAxis < 0) {
+        infoWindow = "sudden braking";
+        suddenAcc = mainEventAxis.abs() > 3;
+      }else {
+        infoWindow = "sudden acceleration";
+        suddenAcc = mainEventAxis.abs() > 4.5;
+      }
+
+      if (!timer.isActive && suddenAcc){
+        listeMarkers.add(new MarkerData(
+            markerId: (listeMarkers.length).toString(),
+            infoWindow: infoWindow,
+            position: new GeoPoint(_latLng!.latitude, _latLng!.longitude)));
+        timer = Timer(Duration(seconds: 3), () { });
+      }
+
     });
     positionStream = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
@@ -107,6 +139,7 @@ class _MapData extends State<Map> {
         position: GeoPoint(1, 1)));
     listePositionNum.removeAt(0);
     try {
+      timer.cancel();
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
           RideData(Uuid().v4(),
@@ -166,7 +199,7 @@ class _MapData extends State<Map> {
                       ),
                       Text(
                         "Acceleration: " +
-                            _accelerationVecteur!.toStringAsPrecision(3) +
+                            _accelerationVecteur.toStringAsPrecision(3) +
                             " m/s²",
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
