@@ -92,7 +92,8 @@ class _MapData extends State<Map> {
             listePositionNum.add([_latLng!.latitude, _latLng!.longitude]);
             centerScreen(_latLng!);
           }
-          _vitesse = position.speed.roundToDouble() * 3.6;
+          var vitesse = position.speed.roundToDouble() * 3.6;
+          _vitesse = 120; //vitesse < 0 ? 0 : vitesse;      //120 is a test value;
           Localisation.geocodePosition(_latLng!).then((value) async {
             _address = value;
           });
