@@ -21,28 +21,10 @@ import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:uuid/uuid.dart';
 
-late StreamSubscription accelerometer;
-LatLng? currentPostion;
-final panelController = PanelController();
-double? x, y, z, _vitesse, _accelerationVecteur;
-String _address = "";
-late Stream<Position> positionStream;
-final Acceleration _acceleration = Acceleration();
-final SpeedLimitApiServices _speedLimitApiServices = SpeedLimitApiServices();
-DateTime now = DateTime.now();
-Timestamp myTimeStamp = Timestamp.fromDate(now);
-late StreamSubscription accelerometerSubscription;
-late Stream<int> timerStream;
-late StreamSubscription<int> timerSubscription;
-String hoursStr = '00';
-String minutesStr = '00';
-String secondsStr = '00';
-double _speedLimit = 0;
-List<LatLng> listePosition = [];
-List<List<double>> listePositionNum = [[]];
-Position? _latLng;
 Completer<GoogleMapController> _controllerCam = Completer();
-List<MarkerData> listeMarkers = [];
+LatLng? currentLatLng;
+List<LatLng> listLatLng = [];
+
 
 class Map extends StatefulWidget {
   @override
@@ -50,14 +32,40 @@ class Map extends StatefulWidget {
 }
 
 class _MapData extends State<Map> {
-  late StreamSubscription<Position> positionStream;
+  final Acceleration _acceleration = Acceleration();
+  final SpeedLimitApiServices _speedLimitApiServices = SpeedLimitApiServices();
+  final PanelController panelController = PanelController();
+
+
+  late Stream<int> timerStream;
+  late StreamSubscription accelerometerSubscription;
+  late StreamSubscription<Position> positionSubscription;
+  late StreamSubscription<int> timerSubscription;
+
+  
+  double? _accelerationVecteur;
+  double? _vitesse;
+  double? x;
+  double? y;
+  double? z;
+  double _speedLimit = 0;
+  List<MarkerData> listeMarkers = [];
+  List<List<double>> listePositionNum = [[]]; //to encode polylines
+  Position? currentPosition;
+  String _address = "";
+  String hoursStr = '00';
+  String minutesStr = '00';
+  String secondsStr = '00';
+  Timestamp startTimeStamp = Timestamp.now();
+
+
 
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -73,9 +81,8 @@ class _MapData extends State<Map> {
           minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
           secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
           if (double.parse(secondsStr) % 2 == 0) {
-            print(_latLng);
             (_speedLimitApiServices.getSpeedLimitAtPlace(
-                    _speedLimitApiServices.getPlaceInfosAtPos(_latLng!)))
+                    _speedLimitApiServices.getPlaceInfosAtPos(currentPosition!)))
                 .then((value) {
               setState(() {
                 _speedLimit = value;
@@ -95,19 +102,19 @@ class _MapData extends State<Map> {
           _accelerationVecteur = _acceleration.verifyAcceleration(event);
         });
     });
-    positionStream = Geolocator.getPositionStream().listen((Position position) {
+    positionSubscription = Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
         setState(() {
-          _latLng = position;
-          if (_latLng != null) {
-            LatLng point = LatLng(_latLng!.latitude, _latLng!.longitude);
-            listePosition.add(point);
-            listePositionNum.add([_latLng!.latitude, _latLng!.longitude]);
-            centerScreen(_latLng!);
+          currentPosition = position;
+          if (currentPosition != null) {
+            LatLng point = LatLng(currentPosition!.latitude, currentPosition!.longitude);
+            listLatLng.add(point);
+            listePositionNum.add([currentPosition!.latitude, currentPosition!.longitude]);
+            centerScreen(currentPosition!);
           }
           var vitesse = position.speed.roundToDouble() * 3.6;
           _vitesse = vitesse < 0 ? 0 : vitesse; //120 is a test value;
-          Localisation.geocodePosition(_latLng!).then((value) async {
+          Localisation.geocodePosition(currentPosition!).then((value) async {
             _address = value;
           });
         });
@@ -122,7 +129,7 @@ class _MapData extends State<Map> {
           RideData(Uuid().v4(),
               name: DateTime.now().toString(),
               duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
-              date: myTimeStamp,
+              date: startTimeStamp,
               polylines: encodePolyline(listePositionNum),
               markersData: listeMarkers));
     } on Exception catch (e) {
@@ -131,9 +138,9 @@ class _MapData extends State<Map> {
     ;
 
     accelerometerSubscription.cancel();
-    positionStream.cancel();
+    positionSubscription.cancel();
     timerSubscription.cancel();
-    listePosition = [];
+    listLatLng = [];
     listePositionNum = [];
     Navigator.of(context).pop(true);
     print("exit");
@@ -232,7 +239,7 @@ class _MapData extends State<Map> {
                             onPressed: () {
                               (_speedLimitApiServices.getSpeedLimitAtPlace(
                                       _speedLimitApiServices
-                                          .getPlaceInfosAtPos(_latLng!)))
+                                          .getPlaceInfosAtPos(currentPosition!)))
                                   .then((value) {
                                 print(value);
                               });
@@ -257,7 +264,10 @@ class _MapData extends State<Map> {
 
 class bottomWidget extends StatelessWidget {
   late GoogleMapController _controller;
+
+
   bool isMapCreated = false;
+
 
   changeMapMode() {
     if (!Get.isDarkMode)
@@ -282,12 +292,12 @@ class bottomWidget extends StatelessWidget {
 
     return Material(
       child: SizedBox(
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : Container(
                 child: GoogleMap(
                   initialCameraPosition:
-                      CameraPosition(target: currentPostion!, zoom: 15),
+                      CameraPosition(target: currentLatLng!, zoom: 15),
                   myLocationEnabled: true,
                   tiltGesturesEnabled: true,
                   compassEnabled: true,
@@ -295,12 +305,12 @@ class bottomWidget extends StatelessWidget {
                   zoomGesturesEnabled: true,
                   zoomControlsEnabled: false,
                   polylines: {
-                    if (listePosition != null)
+                    if (listLatLng != null)
                       Polyline(
                           polylineId: const PolylineId('trajet'),
                           color: Theme.of(context).buttonColor,
                           width: 4,
-                          points: listePosition),
+                          points: listLatLng),
                   },
                   onMapCreated: (GoogleMapController controller) {
                     _controllerCam.complete(controller);
