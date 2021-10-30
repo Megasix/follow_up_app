@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/generated/assets.gen.dart';
-import 'package:follow_up_app/models/enums.dart';
 import 'package:follow_up_app/models/user.dart';
-import 'package:follow_up_app/screens/admin/_widgets/user_card.dart';
-import 'package:follow_up_app/screens/admin/_widgets/student_card.dart';
+import 'package:follow_up_app/screens/admin/_modules/instructor_card.dart';
+import 'package:follow_up_app/screens/admin/_modules/student_card.dart';
 import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/shared/loading.dart';
@@ -21,8 +20,8 @@ class AdminHome extends StatefulWidget {
 class _AdminHomeState extends State<AdminHome> {
   bool _isShowingStudents = true;
 
-  void _showCreateUser() {
-    Navigator.push(context, Routes.userEditorPage(_isShowingStudents ? UserType.STUDENT : UserType.INSTRUCTOR));
+  void _showCreateInstructor() {
+    Navigator.push(context, Routes.instructorEditorPage());
   }
 
   @override
@@ -37,7 +36,7 @@ class _AdminHomeState extends State<AdminHome> {
             appBar: AppBar(
               title: Text('${schoolData.name} - ${_isShowingStudents ? 'Students' : 'Instructors'}'),
               actions: [
-                IconButton(onPressed: () => _showCreateUser(), icon: Icon(Icons.plus_one_rounded)), //to add a new instructor
+                if (!_isShowingStudents) IconButton(onPressed: () => _showCreateInstructor(), icon: Icon(Icons.plus_one_rounded)), //to add a new instructor
                 IconButton(onPressed: () => AuthService.signOutAll(), icon: Icon(Icons.logout_rounded)), //to sign out
               ],
             ),
@@ -87,7 +86,9 @@ class _AdminHomeState extends State<AdminHome> {
                             itemCount: matchingUsers.length,
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 400, mainAxisSpacing: 12, crossAxisSpacing: 12),
                             itemBuilder: (context, index) {
-                              return UserCard(key: ValueKey(index), userData: matchingUsers[index]);
+                              return _isShowingStudents
+                                  ? StudentCard(key: ValueKey(index), userData: matchingUsers[index])
+                                  : InstructorCard(key: ValueKey(index), userData: matchingUsers[index]);
                             });
                   }),
             ),
