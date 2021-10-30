@@ -5,8 +5,8 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/shared/page_routes.dart';
 import 'package:intl/intl.dart';
 
-class InstructorCard extends StatelessWidget {
-  InstructorCard({Key? key, required this.userData}) : super(key: key);
+class UserCard extends StatelessWidget {
+  UserCard({Key? key, required this.userData}) : super(key: key);
 
   final BorderRadius kBorderRadius = BorderRadius.circular(7);
 
@@ -33,9 +33,13 @@ class InstructorCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
-                    child: Text(
-                      userData.firstName + ' ' + userData.lastName,
-                      style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        userData.firstName + '\n' + userData.lastName,
+                        style: Theme.of(context).textTheme.headline3!.copyWith(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
@@ -62,7 +66,7 @@ class InstructorCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text('Has Registered?', style: Theme.of(context).textTheme.headline6!),
+                            Text('Has Activated?', style: Theme.of(context).textTheme.headline6!),
                             Checkbox(value: userData.isActive, onChanged: null),
                           ],
                         ),
