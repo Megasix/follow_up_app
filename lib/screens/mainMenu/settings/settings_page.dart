@@ -37,7 +37,8 @@ class SettingsPage extends StatelessWidget {
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30.0)),
                         color: Theme.of(context).backgroundColor,
@@ -53,18 +54,26 @@ class SettingsPage extends StatelessWidget {
                               fontSize: 17.0,
                             ),
                           ),
-                          SettingButton(Icons.alternate_email, 'Account Informations', context, (){}),
-                          SettingButton(Icons.account_circle, 'Edit profile', context, (){_showSettingsPanel(ProfileSettingForm());}),
-                          SettingButton(Icons.school, 'School', context, (){}),
+                          SettingButton(Icons.alternate_email,
+                              'Account Informations', context, () {}),
+                          SettingButton(
+                              Icons.account_circle, 'Edit profile', context,
+                              () {
+                            _showSettingsPanel(ProfileSettingForm());
+                          }),
+                          SettingButton(Icons.school, 'School', context, () {}),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 25,),
+                  SizedBox(
+                    height: 25,
+                  ),
                   SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30.0)),
                         color: Theme.of(context).backgroundColor,
@@ -80,10 +89,15 @@ class SettingsPage extends StatelessWidget {
                               fontSize: 17.0,
                             ),
                           ),
-                          SettingButton(Icons.settings_display, 'Display', context, (){_showSettingsPanel(DisplaySettingsForm());}),
-                          SettingButton(Icons.notifications, 'Notifications', context, (){}),
-                          SettingButton(Icons.poll, 'Unit system', context, (){_showSettingsPanel(UnitSettingForm());}),
-
+                          SettingButton(
+                              Icons.settings_display, 'Display', context, () {
+                            _showSettingsPanel(DisplaySettingsForm());
+                          }),
+                          SettingButton(Icons.notifications, 'Notifications',
+                              context, () {}),
+                          SettingButton(Icons.poll, 'Unit system', context, () {
+                            _showSettingsPanel(UnitSettingForm());
+                          }),
                         ],
                       ),
                     ),
@@ -109,9 +123,10 @@ class SettingsPage extends StatelessWidget {
   }
 }
 
-Widget SettingButton (IconData icon, String title, BuildContext context,void Function()? function ){
+Widget SettingButton(IconData icon, String title, BuildContext context,
+    void Function()? function) {
   return TextButton(
-    style: TextButton.styleFrom(primary: Theme.of(context).accentColor),
+      style: TextButton.styleFrom(primary: Theme.of(context).accentColor),
       onPressed: function,
       child: Row(
         children: <Widget>[

@@ -1,14 +1,17 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -85,7 +88,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         drawer: Drawer(
           child: SettingsPage(),
         ),
-        onDrawerChanged: (onDrawerChanged){
+        onDrawerChanged: (onDrawerChanged) {
           debugPrint('onDrawerChanged? $onDrawerChanged');
           // onDrawerChanged is called on changes in drawer direction
           // true - gesture that the Drawer is being opened
@@ -97,10 +100,42 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         body: Container(
           padding: EdgeInsets.only(top: 50.0),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(50.0),
+                topRight: Radius.circular(50.0)),
             color: Theme.of(context).backgroundColor,
           ),
-          child: MapWidget(),
+          child: Column(
+            children: [
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Welcome back \n" +
+                            Provider.of<UserData?>(context)!.firstName,
+                      ),
+                      FloatingActionButton(
+                        onPressed: () {
+                          Get.to(SettingsPage());
+                        },
+                        child: Container(
+                          height: 52,
+                          width: 52,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).secondaryHeaderColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              MapWidget(),
+            ],
+          ),
         ),
       ),
     );
@@ -135,6 +170,7 @@ class MapWidget extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: SizedBox(
+        width: MediaQuery.of(context).size.width,
         child: currentPostion == null
             ? Loading()
             : GestureDetector(
@@ -144,28 +180,23 @@ class MapWidget extends StatelessWidget {
                       MaterialPageRoute(
                           maintainState: false, builder: (context) => Map()));
                 },
-                child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(50.0),
-                    topRight: Radius.circular(50.0),
-                  ),
-                  child: AbsorbPointer(
-                    absorbing: true,
-                    child: GoogleMap(
-                      initialCameraPosition:
-                          CameraPosition(target: currentPostion!, zoom: 15),
-                      myLocationEnabled: false,
-                      tiltGesturesEnabled: false,
-                      compassEnabled: false,
-                      scrollGesturesEnabled: false,
-                      zoomGesturesEnabled: false,
-                      zoomControlsEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        isMapCreated = true;
-                        _controller = controller;
-                        changeMapMode();
-                      },
-                    ),
+                child: AbsorbPointer(
+                  absorbing: true,
+                  child: GoogleMap(
+                    initialCameraPosition:
+                        CameraPosition(target: currentPostion!, zoom: 15),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: false,
+                    tiltGesturesEnabled: false,
+                    compassEnabled: false,
+                    scrollGesturesEnabled: false,
+                    zoomGesturesEnabled: false,
+                    zoomControlsEnabled: false,
+                    onMapCreated: (GoogleMapController controller) {
+                      isMapCreated = true;
+                      _controller = controller;
+                      changeMapMode();
+                    },
                   ),
                 ),
               ),
