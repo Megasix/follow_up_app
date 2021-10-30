@@ -122,12 +122,19 @@ class _MapData extends State<Map> {
         suddenAcc = mainEventAxis.abs() > 4.5;
       }
 
-      if (!timer.isActive && suddenAcc) {
+
+      lastMarkerTime =
+      !listeMarkers.isEmpty ? listeMarkers.lastWhere((element) => element.type == "acceleration").time : lastMarkerTime;
+      if (DateTime.now().difference(lastMarkerTime.toDate()).inSeconds > 2 &&
+          suddenAcc) {
         listeMarkers.add(new MarkerData(
             markerId: (listeMarkers.length).toString(),
             infoWindow: infoWindow,
-            position: new GeoPoint(_latLng!.latitude, _latLng!.longitude)));
-        timer = Timer(Duration(seconds: 3), () {});
+            type: "acceleration",
+            position: new GeoPoint(
+                currentPosition!.latitude, currentPosition!.longitude),
+            time: Timestamp.now()));
+        print("acce");
       }
     });
     positionSubscription =
@@ -143,32 +150,34 @@ class _MapData extends State<Map> {
                 .add([currentPosition!.latitude, currentPosition!.longitude]);
             centerScreen(currentPosition!);
           }
-          var vitesse = position.speed.roundToDouble() * 3.6;
-          _currentSpeed = 120; //vitesse < 0 ? 0 : vitesse;
+          var speed = position.speed.roundToDouble() * 3.6;
+          _currentSpeed = speed < 0 ? 0 : speed;
           Localisation.geocodePosition(currentPosition!).then((value) async {
             _address = value;
           });
         });
       lastMarkerTime =
-          !listeMarkers.isEmpty ? listeMarkers.last.time : lastMarkerTime;
+      !listeMarkers.isEmpty ? listeMarkers.lastWhere((element) => element.type == "highSpeed").time : lastMarkerTime;
       if (DateTime.now().difference(lastMarkerTime.toDate()).inSeconds > 5 &&
-          _currentSpeed! > _speedLimit)
+          _currentSpeed! > _speedLimit) {
         listeMarkers.add(new MarkerData(
             markerId: (listeMarkers.length).toString(),
-            infoWindow: ("Speed to hign : " +
+            infoWindow: ("Speed to high : " +
                 _currentSpeed.toString() +
                 "\nSpeed Limit : " +
                 _speedLimit.toString()),
+            type: "highSpeed",
             position: new GeoPoint(
                 currentPosition!.latitude, currentPosition!.longitude),
             time: Timestamp.now()));
+        print("highSpeed");
+      }
     });
   }
 
   Future<bool> _willPopCallback() async {
     listePositionNum.removeAt(0);
     try {
-      timer.cancel();
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
           RideData(Uuid().v4(),
