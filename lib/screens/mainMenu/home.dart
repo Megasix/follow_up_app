@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 
 class Home extends StatefulWidget {
@@ -154,7 +156,7 @@ class MapWidget extends StatelessWidget {
     return Expanded(
       child: Container(
         width: MediaQuery.of(context).size.width,
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : GestureDetector(
                 onTap: () {
@@ -173,7 +175,7 @@ class MapWidget extends StatelessWidget {
                     child: GoogleMap(
                       initialCameraPosition:
 
-                          CameraPosition(target: currentPostion!, zoom: 15),
+                          CameraPosition(target: currentLatLng!, zoom: 15),
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
                       tiltGesturesEnabled: false,
