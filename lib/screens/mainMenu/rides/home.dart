@@ -31,7 +31,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -170,8 +170,7 @@ class MapWidget extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : GestureDetector(
                 onTap: () {
@@ -180,23 +179,28 @@ class MapWidget extends StatelessWidget {
                       MaterialPageRoute(
                           maintainState: false, builder: (context) => Map()));
                 },
-                child: AbsorbPointer(
-                  absorbing: true,
-                  child: GoogleMap(
-                    initialCameraPosition:
-                        CameraPosition(target: currentPostion!, zoom: 15),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: false,
-                    tiltGesturesEnabled: false,
-                    compassEnabled: false,
-                    scrollGesturesEnabled: false,
-                    zoomGesturesEnabled: false,
-                    zoomControlsEnabled: false,
-                    onMapCreated: (GoogleMapController controller) {
-                      isMapCreated = true;
-                      _controller = controller;
-                      changeMapMode();
-                    },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(50.0),
+                    topRight: Radius.circular(50.0),
+                  ),
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: GoogleMap(
+                      initialCameraPosition:
+                          CameraPosition(target: currentLatLng!, zoom: 15),
+                      myLocationEnabled: false,
+                      tiltGesturesEnabled: false,
+                      compassEnabled: false,
+                      scrollGesturesEnabled: false,
+                      zoomGesturesEnabled: false,
+                      zoomControlsEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        isMapCreated = true;
+                        _controller = controller;
+                        changeMapMode();
+                      },
+                    ),
                   ),
                 ),
               ),
