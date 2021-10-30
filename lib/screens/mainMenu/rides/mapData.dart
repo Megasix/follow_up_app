@@ -21,7 +21,7 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:uuid/uuid.dart';
 
 late StreamSubscription accelerometer;
-LatLng? currentPostion;
+LatLng? currentLatLng;
 final panelController = PanelController();
 late double x, y, z, _vitesse, _accelerationVecteur;
 String _address = "";
@@ -55,7 +55,7 @@ class _MapData extends State<Map> {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -284,12 +284,12 @@ class bottomWidget extends StatelessWidget {
 
     return Material(
       child: SizedBox(
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : Container(
                 child: GoogleMap(
                   initialCameraPosition:
-                      CameraPosition(target: currentPostion!, zoom: 15),
+                      CameraPosition(target: currentLatLng!, zoom: 15),
                   myLocationEnabled: true,
                   tiltGesturesEnabled: true,
                   compassEnabled: true,
