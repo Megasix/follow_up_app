@@ -10,6 +10,7 @@ import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/acceleration.dart';
 import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
+import 'package:follow_up_app/services/speed_limit_api_call.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -20,27 +21,9 @@ import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:uuid/uuid.dart';
 
-late StreamSubscription accelerometer;
-LatLng? currentPostion;
-final panelController = PanelController();
-late double x, y, z, _vitesse, _accelerationVecteur;
-String _address = "";
-late Stream<Position> positionStream;
-final Acceleration _acceleration = Acceleration();
-DateTime now = DateTime.now();
-Timestamp myTimeStamp = Timestamp.fromDate(now);
-late StreamSubscription accelerometerSubscription;
-late Stream<int> timerStream;
-late StreamSubscription<int> timerSubscription;
-Timer timer = new Timer(Duration(microseconds: 1), () {});
-String hoursStr = '00';
-String minutesStr = '00';
-String secondsStr = '00';
-List<LatLng> listePosition = [];
-List<List<double>> listePositionNum = [[]];
-Position? _latLng;
 Completer<GoogleMapController> _controllerCam = Completer();
-List<MarkerData> listeMarkers = [];
+LatLng? currentLatLng;
+List<LatLng> listLatLng = [];
 
 class Map extends StatefulWidget {
   @override
@@ -48,14 +31,37 @@ class Map extends StatefulWidget {
 }
 
 class _MapData extends State<Map> {
-  late StreamSubscription<Position> positionStream;
+  final Acceleration _acceleration = Acceleration();
+  final SpeedLimitApiServices _speedLimitApiServices = SpeedLimitApiServices();
+  final PanelController panelController = PanelController();
+
+  late Stream<int> timerStream;
+  late StreamSubscription accelerometerSubscription;
+  late StreamSubscription<Position> positionSubscription;
+  late StreamSubscription<int> timerSubscription;
+
+  double? _accelerationVector;
+  double? _currentSpeed;
+  double? x;
+  double? y;
+  double? z;
+  double _speedLimit = 0;
+  List<MarkerData> listeMarkers = [];
+  List<List<double>> listePositionNum = [[]]; //to encode polylines
+  Position? currentPosition;
+  String _address = "";
+  String hoursStr = '00';
+  String minutesStr = '00';
+  String secondsStr = '00';
+  Timestamp lastMarkerTime = Timestamp.now();
+  Timestamp startTimestamp = Timestamp.now();
 
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -70,6 +76,15 @@ class _MapData extends State<Map> {
               ((newTick / (60 * 60)) % 60).floor().toString().padLeft(2, '0');
           minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
           secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
+          if (double.parse(secondsStr) % 2 == 0) {
+            (_speedLimitApiServices.getSpeedLimitAtPlace(_speedLimitApiServices
+                    .getPlaceInfosAtPos(currentPosition!)))
+                .then((value) {
+              setState(() {
+                _speedLimit = value;
+              });
+            });
+          }
         });
     });
     _getUserLocation();
@@ -81,67 +96,94 @@ class _MapData extends State<Map> {
           x = event.x;
           y = event.y;
           z = event.z;
-          _accelerationVecteur =
+          _accelerationVector =
               sqrt(pow(event.x, 2) + pow(event.y, 2) + pow(event.z, 2));
           ;
         });
 
-
       double mainEventAxis;
-      if(_accelerationVecteur - event.x.abs() < _accelerationVecteur - event.y.abs() && _accelerationVecteur - event.x.abs() < _accelerationVecteur - event.z.abs())
+      if (_accelerationVector! - event.x.abs() <
+              _accelerationVector! - event.y.abs() &&
+          _accelerationVector! - event.x.abs() <
+              _accelerationVector! - event.z.abs())
         mainEventAxis = event.x;
-      else if (_accelerationVecteur - event.y.abs() < _accelerationVecteur - event.z.abs())
+      else if (_accelerationVector! - event.y.abs() <
+          _accelerationVector! - event.z.abs())
         mainEventAxis = event.y;
       else
         mainEventAxis = event.z;
-
 
       String infoWindow;
       if (mainEventAxis < 0) {
         infoWindow = "sudden braking";
         suddenAcc = mainEventAxis.abs() > 3;
-      }else {
+      } else {
         infoWindow = "sudden acceleration";
         suddenAcc = mainEventAxis.abs() > 4.5;
       }
 
-      if (!timer.isActive && suddenAcc){
+
+      lastMarkerTime =
+      !listeMarkers.isEmpty ? listeMarkers.lastWhere((element) => element.type == "acceleration").time : lastMarkerTime;
+      if (DateTime.now().difference(lastMarkerTime.toDate()).inSeconds > 2 &&
+          suddenAcc) {
         listeMarkers.add(new MarkerData(
             markerId: (listeMarkers.length).toString(),
             infoWindow: infoWindow,
-            position: new GeoPoint(_latLng!.latitude, _latLng!.longitude)));
-        timer = Timer(Duration(seconds: 3), () { });
+            type: "acceleration",
+            position: new GeoPoint(
+                currentPosition!.latitude, currentPosition!.longitude),
+            time: Timestamp.now()));
+        print("acce");
       }
-
     });
-    positionStream = Geolocator.getPositionStream().listen((Position position) {
+    positionSubscription =
+        Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
         setState(() {
-          _latLng = position;
-          if (_latLng != null) {
-            LatLng point = LatLng(_latLng!.latitude, _latLng!.longitude);
-            listePosition.add(point);
-            listePositionNum.add([_latLng!.latitude, _latLng!.longitude]);
-            centerScreen(_latLng!);
+          currentPosition = position;
+          if (currentPosition != null) {
+            LatLng point =
+                LatLng(currentPosition!.latitude, currentPosition!.longitude);
+            listLatLng.add(point);
+            listePositionNum
+                .add([currentPosition!.latitude, currentPosition!.longitude]);
+            centerScreen(currentPosition!);
           }
-          _vitesse = position.speed.roundToDouble() * 3.6;
-          Localisation.geocodePosition(_latLng!).then((value) async {
+          var speed = position.speed.roundToDouble() * 3.6;
+          _currentSpeed = speed < 0 ? 0 : speed;
+          Localisation.geocodePosition(currentPosition!).then((value) async {
             _address = value;
           });
         });
+      lastMarkerTime =
+      !listeMarkers.isEmpty ? listeMarkers.lastWhere((element) => element.type == "highSpeed").time : lastMarkerTime;
+      if (DateTime.now().difference(lastMarkerTime.toDate()).inSeconds > 5 &&
+          _currentSpeed! > _speedLimit) {
+        listeMarkers.add(new MarkerData(
+            markerId: (listeMarkers.length).toString(),
+            infoWindow: ("Speed to high : " +
+                _currentSpeed.toString() +
+                "\nSpeed Limit : " +
+                _speedLimit.toString()),
+            type: "highSpeed",
+            position: new GeoPoint(
+                currentPosition!.latitude, currentPosition!.longitude),
+            time: Timestamp.now()));
+        print("highSpeed");
+      }
     });
   }
 
   Future<bool> _willPopCallback() async {
     listePositionNum.removeAt(0);
     try {
-      timer.cancel();
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
           RideData(Uuid().v4(),
               name: DateTime.now().toString(),
               duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
-              date: myTimeStamp,
+              date: startTimestamp,
               polylines: encodePolyline(listePositionNum),
               markersData: listeMarkers));
     } on Exception catch (e) {
@@ -150,9 +192,9 @@ class _MapData extends State<Map> {
     ;
 
     accelerometerSubscription.cancel();
-    positionStream.cancel();
+    positionSubscription.cancel();
     timerSubscription.cancel();
-    listePosition = [];
+    listLatLng = [];
     listePositionNum = [];
     Navigator.of(context).pop(true);
     print("exit");
@@ -169,8 +211,8 @@ class _MapData extends State<Map> {
       onWillPop: _willPopCallback,
       child: Scaffold(
         body: _address == null ||
-                _vitesse == null ||
-                _accelerationVecteur == null
+                _currentSpeed == null ||
+                _accelerationVector == null
             ? Loading()
             : SlidingUpPanel(
                 color: Theme.of(context).secondaryHeaderColor,
@@ -189,19 +231,24 @@ class _MapData extends State<Map> {
                             color: Theme.of(context).textSelectionColor),
                       ),
                       Text(
-                        "Vitesse: " + _vitesse.toString() + " km/h",
+                        "Vitesse: " + _currentSpeed.toString() + " km/h",
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
                       ),
                       Text(
                         "Acceleration: " +
-                            _accelerationVecteur.toStringAsPrecision(3) +
+                            _accelerationVector!.toStringAsPrecision(3) +
                             " m/s²",
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
                       ),
                       Text(
                         "Temps écoulé: " + "$hoursStr:$minutesStr:$secondsStr",
+                        style: TextStyle(
+                            color: Theme.of(context).textSelectionColor),
+                      ),
+                      Text(
+                        "Limite de vitesse: " + _speedLimit.toString(),
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
                       ),
@@ -228,17 +275,33 @@ class _MapData extends State<Map> {
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: ElevatedButton(
-                            style:
-                                ElevatedButton.styleFrom(primary: Colors.red),
-                            child: Text("Exit"),
-                            onPressed: _willPopCallback,
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.red),
+                                child: Text("Exit"),
+                                onPressed: _willPopCallback,
+                              ),
+                            ),
                           ),
-                        ),
+                          FloatingActionButton(
+                            onPressed: () {
+                              (_speedLimitApiServices.getSpeedLimitAtPlace(
+                                      _speedLimitApiServices.getPlaceInfosAtPos(
+                                          currentPosition!)))
+                                  .then((value) {
+                                print(value);
+                              });
+                            },
+                            backgroundColor: Colors.red,
+                            child: Icon(Icons.add),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -255,6 +318,7 @@ class _MapData extends State<Map> {
 
 class bottomWidget extends StatelessWidget {
   late GoogleMapController _controller;
+
   bool isMapCreated = false;
 
   changeMapMode() {
@@ -280,12 +344,12 @@ class bottomWidget extends StatelessWidget {
 
     return Material(
       child: SizedBox(
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : Container(
                 child: GoogleMap(
                   initialCameraPosition:
-                      CameraPosition(target: currentPostion!, zoom: 15),
+                      CameraPosition(target: currentLatLng!, zoom: 15),
                   myLocationEnabled: true,
                   tiltGesturesEnabled: true,
                   compassEnabled: true,
@@ -293,12 +357,12 @@ class bottomWidget extends StatelessWidget {
                   zoomGesturesEnabled: true,
                   zoomControlsEnabled: false,
                   polylines: {
-                    if (listePosition != null)
+                    if (listLatLng != null)
                       Polyline(
                           polylineId: const PolylineId('trajet'),
                           color: Theme.of(context).buttonColor,
                           width: 4,
-                          points: listePosition),
+                          points: listLatLng),
                   },
                   onMapCreated: (GoogleMapController controller) {
                     _controllerCam.complete(controller);

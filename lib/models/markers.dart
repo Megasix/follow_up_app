@@ -4,21 +4,32 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class MarkerData {
   String markerId;
   String infoWindow;
+  String type;
   GeoPoint position;
+  Timestamp time;
 
   MarkerData(
       {required this.markerId,
       required this.infoWindow,
-      required this.position});
+      required this.type,
+      required this.position,
+      required this.time});
 
   MarkerData.fromMap(Map<String, dynamic>? map)
       : this(
             markerId: map?["markerId"],
             infoWindow: map?["infoWindow"],
-            position: map?["position"]);
+            type: map?["type"],
+            position: map?["position"],
+            time: map?["time"]);
 
-  Map<String, dynamic> toMap() =>
-      {"markerId": markerId, "infoWindow": infoWindow, "position": position};
+  Map<String, dynamic> toMap() => {
+        "markerId": markerId,
+        "infoWindow": infoWindow,
+        "type": type,
+        "position": position,
+        "time": time
+      };
 
   Marker toMarkerGoogle() {
     return Marker(

@@ -28,7 +28,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -135,7 +135,7 @@ class MapWidget extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: SizedBox(
-        child: currentPostion == null
+        child: currentLatLng == null
             ? Loading()
             : GestureDetector(
                 onTap: () {
@@ -153,7 +153,7 @@ class MapWidget extends StatelessWidget {
                     absorbing: true,
                     child: GoogleMap(
                       initialCameraPosition:
-                          CameraPosition(target: currentPostion!, zoom: 15),
+                          CameraPosition(target: currentLatLng!, zoom: 15),
                       myLocationEnabled: false,
                       tiltGesturesEnabled: false,
                       compassEnabled: false,
