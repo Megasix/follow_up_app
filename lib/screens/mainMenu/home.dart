@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -86,6 +87,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: SettingsPage(),
         ),
         onDrawerChanged: (onDrawerChanged){
+
           debugPrint('onDrawerChanged? $onDrawerChanged');
           // onDrawerChanged is called on changes in drawer direction
           // true - gesture that the Drawer is being opened
@@ -95,12 +97,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               : _animationController.reverse();
         },
         body: Container(
-          padding: EdgeInsets.only(top: 50.0),
+          padding: EdgeInsets.only(top: 20.0),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(50.0),
+                topRight: Radius.circular(50.0)),
             color: Theme.of(context).backgroundColor,
           ),
-          child: MapWidget(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 60,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(left: 25),
+                child: Text(
+                  "Welcome back \n" +
+                      Provider.of<UserData?>(context)!.firstName,
+                ),
+              ),
+              MapWidget(),
+            ],
+          ),
         ),
       ),
     );
@@ -132,10 +150,11 @@ class MapWidget extends StatelessWidget {
       changeMapMode();
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: SizedBox(
-        child: currentLatLng == null
+
+    return Expanded(
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: currentPostion == null
             ? Loading()
             : GestureDetector(
                 onTap: () {
@@ -153,8 +172,10 @@ class MapWidget extends StatelessWidget {
                     absorbing: true,
                     child: GoogleMap(
                       initialCameraPosition:
-                          CameraPosition(target: currentLatLng!, zoom: 15),
-                      myLocationEnabled: false,
+
+                          CameraPosition(target: currentPostion!, zoom: 15),
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
                       tiltGesturesEnabled: false,
                       compassEnabled: false,
                       scrollGesturesEnabled: false,
