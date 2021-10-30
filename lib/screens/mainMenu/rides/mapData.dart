@@ -25,7 +25,6 @@ Completer<GoogleMapController> _controllerCam = Completer();
 LatLng? currentLatLng;
 List<LatLng> listLatLng = [];
 
-
 class Map extends StatefulWidget {
   @override
   _MapData createState() => _MapData();
@@ -36,15 +35,13 @@ class _MapData extends State<Map> {
   final SpeedLimitApiServices _speedLimitApiServices = SpeedLimitApiServices();
   final PanelController panelController = PanelController();
 
-
   late Stream<int> timerStream;
   late StreamSubscription accelerometerSubscription;
   late StreamSubscription<Position> positionSubscription;
   late StreamSubscription<int> timerSubscription;
 
-  
-  double? _accelerationVecteur;
-  double? _vitesse;
+  double? _accelerationVector;
+  double? _currentSpeed;
   double? x;
   double? y;
   double? z;
@@ -56,9 +53,8 @@ class _MapData extends State<Map> {
   String hoursStr = '00';
   String minutesStr = '00';
   String secondsStr = '00';
-  Timestamp startTimeStamp = Timestamp.now();
-
-
+  Timestamp lastMarkerTime = Timestamp.now();
+  Timestamp startTimestamp = Timestamp.now();
 
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
@@ -81,8 +77,8 @@ class _MapData extends State<Map> {
           minutesStr = ((newTick / 60) % 60).floor().toString().padLeft(2, '0');
           secondsStr = (newTick % 60).floor().toString().padLeft(2, '0');
           if (double.parse(secondsStr) % 2 == 0) {
-            (_speedLimitApiServices.getSpeedLimitAtPlace(
-                    _speedLimitApiServices.getPlaceInfosAtPos(currentPosition!)))
+            (_speedLimitApiServices.getSpeedLimitAtPlace(_speedLimitApiServices
+                    .getPlaceInfosAtPos(currentPosition!)))
                 .then((value) {
               setState(() {
                 _speedLimit = value;
@@ -99,25 +95,41 @@ class _MapData extends State<Map> {
           x = event.x;
           y = event.y;
           z = event.z;
-          _accelerationVecteur = _acceleration.verifyAcceleration(event);
+          _accelerationVector = _acceleration.verifyAcceleration(event);
         });
     });
-    positionSubscription = Geolocator.getPositionStream().listen((Position position) {
+    positionSubscription =
+        Geolocator.getPositionStream().listen((Position position) {
       if (this.mounted)
         setState(() {
           currentPosition = position;
           if (currentPosition != null) {
-            LatLng point = LatLng(currentPosition!.latitude, currentPosition!.longitude);
+            LatLng point =
+                LatLng(currentPosition!.latitude, currentPosition!.longitude);
             listLatLng.add(point);
-            listePositionNum.add([currentPosition!.latitude, currentPosition!.longitude]);
+            listePositionNum
+                .add([currentPosition!.latitude, currentPosition!.longitude]);
             centerScreen(currentPosition!);
           }
           var vitesse = position.speed.roundToDouble() * 3.6;
-          _vitesse = vitesse < 0 ? 0 : vitesse; //120 is a test value;
+          _currentSpeed = 120; //vitesse < 0 ? 0 : vitesse;
           Localisation.geocodePosition(currentPosition!).then((value) async {
             _address = value;
           });
         });
+      lastMarkerTime =
+          !listeMarkers.isEmpty ? listeMarkers.last.time : lastMarkerTime;
+      if (DateTime.now().difference(lastMarkerTime.toDate()).inSeconds > 5 &&
+          _currentSpeed! > _speedLimit)
+        listeMarkers.add(new MarkerData(
+            markerId: (listeMarkers.length).toString(),
+            infoWindow: ("Speed to hign : " +
+                _currentSpeed.toString() +
+                "\nSpeed Limit : " +
+                _speedLimit.toString()),
+            position: new GeoPoint(
+                currentPosition!.latitude, currentPosition!.longitude),
+            time: Timestamp.now()));
     });
   }
 
@@ -129,7 +141,7 @@ class _MapData extends State<Map> {
           RideData(Uuid().v4(),
               name: DateTime.now().toString(),
               duration: hoursStr + ":" + minutesStr + ":" + secondsStr,
-              date: startTimeStamp,
+              date: startTimestamp,
               polylines: encodePolyline(listePositionNum),
               markersData: listeMarkers));
     } on Exception catch (e) {
@@ -157,8 +169,8 @@ class _MapData extends State<Map> {
       onWillPop: _willPopCallback,
       child: Scaffold(
         body: _address == null ||
-                _vitesse == null ||
-                _accelerationVecteur == null
+                _currentSpeed == null ||
+                _accelerationVector == null
             ? Loading()
             : SlidingUpPanel(
                 color: Theme.of(context).secondaryHeaderColor,
@@ -177,13 +189,13 @@ class _MapData extends State<Map> {
                             color: Theme.of(context).textSelectionColor),
                       ),
                       Text(
-                        "Vitesse: " + _vitesse.toString() + " km/h",
+                        "Vitesse: " + _currentSpeed.toString() + " km/h",
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
                       ),
                       Text(
                         "Acceleration: " +
-                            _accelerationVecteur!.toStringAsPrecision(3) +
+                            _accelerationVector!.toStringAsPrecision(3) +
                             " m/s²",
                         style: TextStyle(
                             color: Theme.of(context).textSelectionColor),
@@ -238,8 +250,8 @@ class _MapData extends State<Map> {
                           FloatingActionButton(
                             onPressed: () {
                               (_speedLimitApiServices.getSpeedLimitAtPlace(
-                                      _speedLimitApiServices
-                                          .getPlaceInfosAtPos(currentPosition!)))
+                                      _speedLimitApiServices.getPlaceInfosAtPos(
+                                          currentPosition!)))
                                   .then((value) {
                                 print(value);
                               });
@@ -265,9 +277,7 @@ class _MapData extends State<Map> {
 class bottomWidget extends StatelessWidget {
   late GoogleMapController _controller;
 
-
   bool isMapCreated = false;
-
 
   changeMapMode() {
     if (!Get.isDarkMode)
