@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:follow_up_app/models/user.dart';
-import 'package:follow_up_app/screens/mainMenu/rides/home.dart';
+import 'package:follow_up_app/screens/mainMenu/home.dart';
 import 'package:follow_up_app/screens/mainMenu/statistics/statistics.dart';
-import 'package:follow_up_app/services/auth.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:provider/provider.dart';
 import 'messaging/messaging.dart';

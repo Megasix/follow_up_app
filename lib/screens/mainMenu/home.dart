@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -98,7 +97,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               : _animationController.reverse();
         },
         body: Container(
-          padding: EdgeInsets.only(top: 50.0),
+          padding: EdgeInsets.only(top: 20.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(50.0),
@@ -106,31 +105,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             color: Theme.of(context).backgroundColor,
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Welcome back \n" +
-                            Provider.of<UserData?>(context)!.firstName,
-                      ),
-                      FloatingActionButton(
-                        onPressed: () {
-                          Get.to(SettingsPage());
-                        },
-                        child: Container(
-                          height: 52,
-                          width: 52,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(context).secondaryHeaderColor),
-                        ),
-                      ),
-                    ],
-                  ),
+              Container(
+                height: 60,
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(left: 25),
+                child: Text(
+                  "Welcome back \n" +
+                      Provider.of<UserData?>(context)!.firstName,
                 ),
               ),
               MapWidget(),
@@ -167,9 +150,8 @@ class MapWidget extends StatelessWidget {
       changeMapMode();
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: SizedBox(
+    return Expanded(
+      child: Container(
         width: MediaQuery.of(context).size.width,
         child: currentPostion == null
             ? Loading()
