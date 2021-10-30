@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:follow_up_app/models/markers.dart';
+import 'package:uuid/uuid.dart';
 
 class RideData {
   final String? rideId; //works as doc id and ride id

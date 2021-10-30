@@ -59,7 +59,11 @@ class MapWidget extends StatelessWidget {
       if (point.longitude < minLong) minLong = point.longitude;
       if (point.longitude > maxLong) maxLong = point.longitude;
     });
-    _controller.moveCamera(CameraUpdate.newLatLngBounds(LatLngBounds(southwest: LatLng(minLat, minLong), northeast: LatLng(maxLat, maxLong)), 20));
+    _controller.moveCamera(CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+            southwest: LatLng(minLat, minLong),
+            northeast: LatLng(maxLat, maxLong)),
+        20));
   }
 
   @override
@@ -71,35 +75,36 @@ class MapWidget extends StatelessWidget {
       _setMapFitToTour(polylines);
     }
 
-    return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.7),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      floatingActionButton: CircleAvatar(
-        radius: 30,
-        backgroundColor: Theme.of(context).buttonColor,
-        child: IconButton(
-          onPressed: () => Navigator.pop(context),
-          iconSize: 30,
-          icon: Icon(Icons.close_rounded),
-        ),
-      ),
-      body: SizedBox(
+    return Material(
+      color: Colors.transparent,
+      child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: GoogleMap(
-          markers: rideData.markersData?.map((mark) => mark.toMarkerGoogle()).toSet() ?? Set(),
-          initialCameraPosition: CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
+        height: 100.0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25.0),
+          child: GoogleMap(
+            markers: rideData.markersData
+                    ?.map((mark) => mark.toMarkerGoogle())
+                    .toSet() ??
+                Set(),
+            initialCameraPosition:
+                CameraPosition(target: LatLng(45.503995, -73.593681), zoom: 10),
 
-          polylines: {
-            Polyline(polylineId: const PolylineId('trajet'), color: Theme.of(context).buttonColor, width: 4, points: polylines),
-          },
-          //polylines
-          onMapCreated: (GoogleMapController controller) {
-            isMapCreated = true;
-            _controller = controller;
-            _setMapFitToTour(polylines);
-            changeMapMode();
-          },
+            polylines: {
+              Polyline(
+                  polylineId: const PolylineId('trajet'),
+                  color: Theme.of(context).buttonColor,
+                  width: 4,
+                  points: polylines),
+            },
+            //polylines
+            onMapCreated: (GoogleMapController controller) {
+              isMapCreated = true;
+              _controller = controller;
+              _setMapFitToTour(polylines);
+              changeMapMode();
+            },
+          ),
         ),
       ),
     );
@@ -111,7 +116,8 @@ List<LatLng> decodePolylines(String polyline) {
   List<List<num>> pointsNum = decodePolyline(polyline);
   if (pointsNum.length != null)
     for (int i = 0; i < pointsNum.length; i++) {
-      LatLng point = LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
+      LatLng point =
+          LatLng(pointsNum[i][0] as double, pointsNum[i][1] as double);
       points.add(point);
     }
   points.removeAt(0);

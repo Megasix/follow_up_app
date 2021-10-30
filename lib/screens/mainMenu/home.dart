@@ -30,7 +30,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentLatLng = LatLng(position.latitude, position.longitude);
+      currentPostion = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -150,10 +150,10 @@ class MapWidget extends StatelessWidget {
       changeMapMode();
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: SizedBox(
-        child: currentLatLng == null
+    return Expanded(
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: currentPostion == null
             ? Loading()
             : GestureDetector(
                 onTap: () {
@@ -171,7 +171,7 @@ class MapWidget extends StatelessWidget {
                     absorbing: true,
                     child: GoogleMap(
                       initialCameraPosition:
-                          CameraPosition(target: currentLatLng!, zoom: 15),
+                          CameraPosition(target: currentPostion!, zoom: 15),
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
                       tiltGesturesEnabled: false,
