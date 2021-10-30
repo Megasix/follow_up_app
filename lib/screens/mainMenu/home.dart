@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
 import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provider/provider.dart';
+
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -30,7 +29,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
-      currentPostion = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
     });
   }
 
@@ -87,7 +86,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         drawer: Drawer(
           child: SettingsPage(),
         ),
-        onDrawerChanged: (onDrawerChanged) {
+        onDrawerChanged: (onDrawerChanged){
+
           debugPrint('onDrawerChanged? $onDrawerChanged');
           // onDrawerChanged is called on changes in drawer direction
           // true - gesture that the Drawer is being opened
@@ -150,6 +150,7 @@ class MapWidget extends StatelessWidget {
       changeMapMode();
     }
 
+
     return Expanded(
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -171,6 +172,7 @@ class MapWidget extends StatelessWidget {
                     absorbing: true,
                     child: GoogleMap(
                       initialCameraPosition:
+
                           CameraPosition(target: currentPostion!, zoom: 15),
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
