@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:follow_up_app/main.dart';
 import 'package:follow_up_app/screens/mainMenu/rides/mapData.dart';
-import 'package:follow_up_app/shared/style_constants.dart';
+import 'package:follow_up_app/screens/mainMenu/settings/settings_page.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,7 +17,12 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with TickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late AnimationController _animationController;
+  bool _isDrawerOpen = false;
+  bool isPlaying = false;
+
   void _getUserLocation() async {
     var position = await GeolocatorPlatform.instance
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -29,26 +32,76 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
+  void _handleOnPressed() {
+    setState(() {
+      isPlaying = !isPlaying;
+      isPlaying
+          ? _animationController.forward()
+          : _animationController.reverse();
+    });
+  }
+
   @override
   void initState() {
     _getUserLocation();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 450));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: 75.0),
-      child: Container(
-        padding: EdgeInsets.only(top: 50.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(50.0),
-            topRight: Radius.circular(50.0),
-          ),
-          color: Theme.of(context).scaffoldBackgroundColor,
+    return Scaffold(
+      backgroundColor: Theme.of(context).secondaryHeaderColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
+        elevation: 0,
+        leading: TextButton.icon(
+            onPressed: () {
+              if (!_isDrawerOpen) {
+                _openDrawer();
+              } else {
+                Navigator.pop(context);
+              }
+              setState(() {
+                _isDrawerOpen = !_isDrawerOpen;
+              });
+              _handleOnPressed();
+            },
+            icon: AnimatedIcon(
+              icon: AnimatedIcons.menu_arrow,
+              color: Colors.white,
+              progress: _animationController,
+            ),
+            label: Text("")),
+      ),
+      body: Scaffold(
+        key: _scaffoldKey,
+        backgroundColor: Colors.transparent,
+        drawer: Drawer(
+          child: SettingsPage(),
         ),
-        child: MapWidget(),
+        onDrawerChanged: (onDrawerChanged){
+          debugPrint('onDrawerChanged? $onDrawerChanged');
+          // onDrawerChanged is called on changes in drawer direction
+          // true - gesture that the Drawer is being opened
+          // false - gesture that the Drawer is being closed
+          onDrawerChanged
+              ? _animationController.forward()
+              : _animationController.reverse();
+        },
+        body: Container(
+          padding: EdgeInsets.only(top: 50.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0), topRight: Radius.circular(50.0)),
+            color: Theme.of(context).backgroundColor,
+          ),
+          child: MapWidget(),
+        ),
       ),
     );
   }

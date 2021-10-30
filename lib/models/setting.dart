@@ -1,13 +1,13 @@
-class Setting {
-  final String? name;
-  final int? age;
-  final String? hobby;
-
-  Setting({this.name, this.age, this.hobby});
-}
+import 'package:follow_up_app/shared/unit_system.dart';
 
 class UserDisplaySetting {
   final bool theme;
 
   UserDisplaySetting(this.theme);
+}
+
+class UserUnitSetting {
+  final UnitSystem unitSystem;
+
+  UserUnitSetting(this.unitSystem);
 }

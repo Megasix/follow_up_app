@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ import 'package:follow_up_app/services/database.dart';
 import 'package:follow_up_app/services/localisation.dart';
 import 'package:follow_up_app/services/speed_limit_api_call.dart';
 import 'package:follow_up_app/shared/loading.dart';
-import 'package:follow_up_app/shared/shared.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -90,13 +90,45 @@ class _MapData extends State<Map> {
     _getUserLocation();
     accelerometerSubscription =
         userAccelerometerEvents.listen((UserAccelerometerEvent event) {
+      bool suddenAcc = false;
       if (this.mounted)
         setState(() {
           x = event.x;
           y = event.y;
           z = event.z;
-          _accelerationVector = _acceleration.verifyAcceleration(event);
+          _accelerationVector =
+              sqrt(pow(event.x, 2) + pow(event.y, 2) + pow(event.z, 2));
+          ;
         });
+
+      double mainEventAxis;
+      if (_accelerationVector! - event.x.abs() <
+              _accelerationVector! - event.y.abs() &&
+          _accelerationVector! - event.x.abs() <
+              _accelerationVector! - event.z.abs())
+        mainEventAxis = event.x;
+      else if (_accelerationVector! - event.y.abs() <
+          _accelerationVector! - event.z.abs())
+        mainEventAxis = event.y;
+      else
+        mainEventAxis = event.z;
+
+      String infoWindow;
+      if (mainEventAxis < 0) {
+        infoWindow = "sudden braking";
+        suddenAcc = mainEventAxis.abs() > 3;
+      } else {
+        infoWindow = "sudden acceleration";
+        suddenAcc = mainEventAxis.abs() > 4.5;
+      }
+
+      if (!timer.isActive && suddenAcc) {
+        listeMarkers.add(new MarkerData(
+            markerId: (listeMarkers.length).toString(),
+            infoWindow: infoWindow,
+            position: new GeoPoint(_latLng!.latitude, _latLng!.longitude)));
+        timer = Timer(Duration(seconds: 3), () {});
+      }
     });
     positionSubscription =
         Geolocator.getPositionStream().listen((Position position) {
@@ -136,6 +168,7 @@ class _MapData extends State<Map> {
   Future<bool> _willPopCallback() async {
     listePositionNum.removeAt(0);
     try {
+      timer.cancel();
       await DatabaseService.addRide(
           Provider.of<UserData?>(context, listen: false)!.uid,
           RideData(Uuid().v4(),
