@@ -31,3 +31,5 @@ ios/Runner/AppDelegate.swift
 
 # Sensitive data (API keys and the like)
 */**/keys.dart
+*/**/google-services.json
+*/**/GoogleService-Info.plist
