@@ -28,3 +28,6 @@ doc/api/
 
 # Protect the API Keys to be shown
 ios/Runner/AppDelegate.swift
+
+# Sensitive data (API keys and the like)
+*/**/keys.dart
