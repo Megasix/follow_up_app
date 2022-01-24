@@ -6,18 +6,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 import 'package:follow_up_app/models/enums.dart';
-import 'package:follow_up_app/models/user.dart';
 import 'package:follow_up_app/services/auth.dart';
-import 'package:follow_up_app/services/database.dart';
-import 'package:follow_up_app/shared/extensions.dart';
 import 'package:follow_up_app/shared/features/facebook.dart';
 import 'package:follow_up_app/shared/features/google.dart';
-import 'package:follow_up_app/shared/page_routes.dart';
 import 'package:follow_up_app/shared/style_constants.dart';
 import 'package:follow_up_app/shared/loading.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:uuid/uuid.dart';
 
 //TODO: refocus correct text fields when submitted
 //TODO: keep keyboard afloat when submitting through the keyboard

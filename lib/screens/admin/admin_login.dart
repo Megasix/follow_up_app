@@ -81,12 +81,11 @@ class _AdminLoginState extends State<AdminLogin> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: Theme.of(context) == darkThemeConstant
-                                        ? Assets.images.followUpLogo01
-                                        : Assets.images.darkFollowUpLogo01)),
+                          Image.asset(
+                            Get.isDarkMode
+                                ? 'assets/images/Follow_Up_logo-01.png'
+                                : 'assets/images/Dark_Follow_Up_logo-01.png',
+                            fit: BoxFit.cover,
                           ),
                           Container(
                             child: Form(
